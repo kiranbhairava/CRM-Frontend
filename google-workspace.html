@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Google Workspace Integration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                    <span class="material-symbols-outlined text-blue-600 text-4xl">cloud</span>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900">Google Workspace Integration</h2>
+                <p class="text-gray-600 mt-2">Connect your Google account to send emails and schedule meetings</p>
+            </div>
+
+            <!-- Connection Status -->
+            <div id="connectionStatus" class="mb-6">
+                <!-- Status will be inserted here -->
+            </div>
+
+            <!-- Benefits -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="flex items-start space-x-3 p-4 bg-red-50 rounded-lg">
+                    <span class="material-symbols-outlined text-red-600">mail</span>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Gmail Integration</h3>
+                        <p class="text-sm text-gray-600">Send emails directly from CRM</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3 p-4 bg-green-50 rounded-lg">
+                    <span class="material-symbols-outlined text-green-600">event</span>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Calendar Integration</h3>
+                        <p class="text-sm text-gray-600">Schedule meetings with Google Meet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div id="actionButton" class="text-center">
+                <!-- Button will be inserted here -->
+            </div>
+
+            <!-- Info -->
+            <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-start space-x-2">
+                    <span class="material-symbols-outlined text-blue-600 text-sm mt-0.5">info</span>
+                    <div class="text-sm text-blue-800">
+                        <p class="font-semibold mb-1">Secure & Private</p>
+                        <p>Your Google credentials are securely stored. You can disconnect at any time.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+        let authToken = localStorage.getItem('authToken');
+        let isConnected = false;
+
+        async function apiRequest(endpoint, options = {}) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+                },
+                ...options
+            };
+
+            const response = await fetch(url, config);
+            if (response.status === 401) {
+                localStorage.removeItem('authToken');
+                window.location.href = './login.html';
+                return;
+            }
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return await response.json();
+        }
+
+        async function checkConnectionStatus() {
+            try {
+                const status = await apiRequest('/google/status');
+                isConnected = status.connected;
+                renderStatus();
+            } catch (error) {
+                console.error('Failed to check status:', error);
+                renderStatus();
+            }
+        }
+
+        function renderStatus() {
+            const statusDiv = document.getElementById('connectionStatus');
+            const actionDiv = document.getElementById('actionButton');
+
+            if (isConnected) {
+                statusDiv.innerHTML = `
+                    <div class="flex items-center justify-center space-x-3 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
+                        <span class="material-symbols-outlined text-green-600 text-3xl">check_circle</span>
+                        <div>
+                            <p class="font-bold text-green-900">Connected to Google Workspace</p>
+                            <p class="text-sm text-green-700">You can now send emails and schedule meetings</p>
+                        </div>
+                    </div>
+                `;
+
+                actionDiv.innerHTML = `
+                    <button onclick="disconnectGoogle()" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors">
+                        <span class="flex items-center justify-center space-x-2">
+                            <span class="material-symbols-outlined">link_off</span>
+                            <span>Disconnect Google Account</span>
+                        </span>
+                    </button>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="flex items-center justify-center space-x-3 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
+                        <span class="material-symbols-outlined text-yellow-600 text-3xl">warning</span>
+                        <div>
+                            <p class="font-bold text-yellow-900">Not Connected</p>
+                            <p class="text-sm text-yellow-700">Connect your Google account to enable email and calendar features</p>
+                        </div>
+                    </div>
+                `;
+
+                actionDiv.innerHTML = `
+                    <button onclick="connectGoogle()" class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors shadow-lg hover:shadow-xl">
+                        <span class="flex items-center justify-center space-x-2">
+                            <span class="material-symbols-outlined">link</span>
+                            <span>Connect Google Workspace</span>
+                        </span>
+                    </button>
+                `;
+            }
+        }
+
+        async function connectGoogle() {
+            try {
+                const response = await apiRequest('/google/auth');
+                if (response.authorization_url) {
+                    // Redirect to Google OAuth
+                    window.location.href = response.authorization_url;
+                }
+            } catch (error) {
+                alert('Failed to initiate Google connection: ' + error.message);
+            }
+        }
+
+        async function disconnectGoogle() {
+            if (!confirm('Are you sure you want to disconnect your Google account?')) {
+                return;
+            }
+
+            try {
+                await apiRequest('/google/disconnect', { method: 'POST' });
+                alert('Google account disconnected successfully');
+                isConnected = false;
+                renderStatus();
+            } catch (error) {
+                alert('Failed to disconnect: ' + error.message);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!authToken) {
+                window.location.href = './login.html';
+                return;
+            }
+            checkConnectionStatus();
+        });
+    </script>
+</body>
+</html>

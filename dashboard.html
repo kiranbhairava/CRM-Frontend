@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Gigaversity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+        .page-transition { 
+            animation: fadeIn 0.5s ease-in; 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<!-- Header -->
+<header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+    <div class="container mx-auto px-6 lg:px-8 flex items-center justify-between h-16">
+        <div class="flex items-center space-x-3">
+            <span class="material-symbols-outlined text-primary text-3xl" style="color: #1173d4;">school</span>
+            <h1 class="text-xl font-bold text-gray-900">Gigaversity</h1>
+        </div>
+        <nav class="hidden md:flex items-center space-x-6">
+            <a href="leads.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Leads</a>
+            <a href="sales-managers.html" id="salesTeamLink" class="text-sm font-medium text-gray-500 hover:text-gray-700 hidden">Sales Team</a>
+            <a href="dashboard.html" class="text-sm font-medium text-primary border-b-2 border-primary pb-1" style="color: #1173d4;">Dashboard</a>
+        </nav>
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-600 text-sm">person</span>
+                </div>
+                <span id="userName" class="text-sm font-medium text-gray-700">Loading...</span>
+            </div>
+            <button onclick="logout()" class="text-sm font-medium text-gray-600 hover:text-gray-900">Logout</button>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="flex-grow container mx-auto px-6 lg:px-8 py-8 page-transition">
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+        <p class="text-gray-600 mt-4 font-medium">Loading dashboard...</p>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div id="dashboardContent" class="hidden">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <h2 id="welcomeMessage" class="text-3xl font-bold text-gray-900">Welcome back!</h2>
+            <p id="welcomeSubtext" class="text-gray-500 mt-1">Here's what's happening with your sales today.</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div id="statsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Stats will be inserted here -->
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+            <!-- Lead Status Chart -->
+            <div class="stat-card bg-white rounded-2xl shadow-sm p-4 flex flex-col justify-between h-64">
+                <h3 class="text-base font-semibold text-gray-800 mb-3 flex items-center">
+                    <span class="material-symbols-outlined mr-2 text-blue-600 text-xl">pie_chart</span>
+                    Lead Status Distribution
+                </h3>
+                <div class="flex-1 flex items-center justify-center">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Monthly Progress Chart -->
+            <div class="stat-card bg-white rounded-2xl shadow-sm p-4 flex flex-col justify-between h-64">
+                <h3 class="text-base font-semibold text-gray-800 mb-3 flex items-center">
+                    <span class="material-symbols-outlined mr-2 text-green-600 text-xl">trending_up</span>
+                    <span id="progressChartTitle">Monthly Progress</span>
+                </h3>
+                <div class="flex-1 flex items-center justify-center">
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Additional Sections -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Recent Activity / Top Performers -->
+            <div class="stat-card">
+                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <span class="material-symbols-outlined mr-2 text-purple-600">leaderboard</span>
+                    <span id="performersTitle">Recent Activity</span>
+                </h3>
+                <div id="activityContent" class="space-y-3">
+                    <!-- Activity items will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Lead Sources -->
+            <div class="stat-card">
+                <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                    <span class="material-symbols-outlined mr-2 text-orange-600">source</span>
+                    Lead Sources
+                </h3>
+                <div id="sourcesContent" class="space-y-3">
+                    <!-- Source items will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const API_BASE_URL = 'http://localhost:8000';
+    let authToken = localStorage.getItem('authToken');
+    let currentUser = null;
+    let statusChartInstance = null;
+    let progressChartInstance = null;
+
+    if (!authToken) {
+        window.location.href = './login.html';
+    }
+
+    async function initializeNavigation() {
+    try {
+        const user = await apiRequest('/me');
+        
+        // Show Sales Team link only for admins
+        if (user.role === 'ADMIN') {
+            const salesTeamLink = document.getElementById('salesTeamLink');
+            if (salesTeamLink) {
+                salesTeamLink.classList.remove('hidden');
+            }
+        }
+    } catch (error) {
+        console.error('Failed to check user role:', error);
+    }
+}
+
+    async function apiRequest(endpoint, options = {}) {
+        const url = `${API_BASE_URL}${endpoint}`;
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+            },
+            ...options
+        };
+
+        try {
+            const response = await fetch(url, config);
+            
+            if (response.status === 401) {
+                localStorage.removeItem('authToken');
+                window.location.href = './login.html';
+                return;
+            }
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('API Error:', error);
+            throw error;
+        }
+    }
+
+    async function loadDashboard() {
+        try {
+
+            await initializeNavigation();
+            showLoading(true);
+            
+            // Get enhanced dashboard data
+            const dashboardData = await apiRequest('/dashboard/enhanced');
+            
+            console.log('Dashboard data received:', dashboardData); // Debug log
+            
+            if (!dashboardData) {
+                throw new Error('No dashboard data received');
+            }
+            
+            document.getElementById('userName').textContent = dashboardData.user_name || 'User';
+
+            // Show Sales Team link for admins
+            if (dashboardData.role === 'admin') {
+                document.getElementById('salesTeamLink').classList.remove('hidden');
+            }
+
+            // Render dashboard based on role
+            if (dashboardData.role === 'admin') {
+                renderAdminDashboard(dashboardData);
+            } else {
+                renderSalesManagerDashboard(dashboardData);
+            }
+
+            // Hide loading, show content
+            showLoading(false);
+            document.getElementById('dashboardContent').classList.remove('hidden');
+
+        } catch (error) {
+            console.error('Dashboard error:', error);
+            showLoading(false);
+            alert('Failed to load dashboard: ' + error.message);
+        }
+    }
+    
+    function showLoading(show) {
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        if (loadingIndicator) {
+            loadingIndicator.classList.toggle('hidden', !show);
+        }
+    }
+
+
+    function renderAdminDashboard(data) {
+        const stats = data.stats;
+        const statusCounts = data.status_counts;
+        
+        // Welcome message
+        document.getElementById('welcomeMessage').textContent = `Welcome back, ${data.user_name}!`;
+        document.getElementById('welcomeSubtext').textContent = 'Here\'s an overview of your entire sales organization.';
+
+        // Render stats
+        document.getElementById('statsGrid').innerHTML = `
+            <div class="stat-card bg-gradient-to-br from-blue-50 to-blue-100">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold text-blue-600">Total Leads</span>
+                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-2xl">group</span>
+                    </div>
+                </div>
+                <p class="text-4xl font-bold text-blue-900">${stats.total_leads}</p>
+                <p class="text-sm text-blue-600 mt-2">Across all managers</p>
+            </div>
+
+            <div class="stat-card bg-gradient-to-br from-green-50 to-green-100">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold text-green-600">Active Managers</span>
+                    <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-2xl">badge</span>
+                    </div>
+                </div>
+                <p class="text-4xl font-bold text-green-900">${stats.active_managers}</p>
+                <p class="text-sm text-green-600 mt-2">Out of ${stats.total_managers} total</p>
+            </div>
+
+            <div class="stat-card bg-gradient-to-br from-purple-50 to-purple-100">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold text-purple-600">Converted</span>
+                    <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-2xl">check_circle</span>
+                    </div>
+                </div>
+                <p class="text-4xl font-bold text-purple-900">${stats.converted_leads}</p>
+                <p class="text-sm text-purple-600 mt-2">${stats.conversion_rate}% conversion rate</p>
+            </div>
+
+            <div class="stat-card bg-gradient-to-br from-orange-50 to-orange-100">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold text-orange-600">Monthly Target</span>
+                    <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-2xl">trending_up</span>
+                    </div>
+                </div>
+                <p class="text-4xl font-bold text-orange-900">${stats.total_target.toLocaleString()}</p>
+                <p class="text-sm text-orange-600 mt-2">Combined target</p>
+            </div>
+        `;
+
+        // Render charts
+        renderStatusChart(statusCounts);
+        renderProgressChart(stats.converted_leads, stats.total_target);
+
+        // Top performers
+        document.getElementById('performersTitle').textContent = 'Top Performers';
+        document.getElementById('activityContent').innerHTML = data.top_performers.map((m, i) => `
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        ${i + 1}
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-900">${m.name}</p>
+                        <p class="text-xs text-gray-500">${m.total_leads} leads • ${m.conversion_rate}% rate</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold text-green-600">${m.converted}</p>
+                    <p class="text-xs text-gray-500">converted</p>
+                </div>
+            </div>
+        `).join('') || '<p class="text-gray-500 text-center py-8">No data available</p>';
+
+        // Lead sources
+        renderLeadSources(data.lead_sources);
+    }
+
+    function renderSalesManagerDashboard(data) {
+        const stats = data.stats;
+        const statusCounts = data.status_counts;
+        
+        // Welcome message
+        document.getElementById('welcomeMessage').textContent = `Welcome back, ${data.user_name}!`;
+        document.getElementById('welcomeSubtext').textContent = 'Here\'s your performance summary.';
+
+        // Render stats
+        document.getElementById('statsGrid').innerHTML = `
+            <div class="stat-card bg-gradient-to-br from-blue-50 to-blue-100">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold text-blue-600">My Leads</span>
+                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-2xl">group</span>
+                    </div>
+                </div>
+                <p class="text-4xl font-bold text-blue-900">${stats.total_leads}</p>
+                <p class="text-sm text-blue-600 mt-2">Total assigned to you</p>
+            </div>
+
+            <div class="stat-card bg-gradient-to-br from-green-50 to-green-100">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold text-green-600">Converted</span>
+                    <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-2xl">check_circle</span>
+                    </div>
+                </div>
+                <p class="text-4xl font-bold text-green-900">${stats.converted_leads}</p>
+                <p class="text-sm text-green-600 mt-2">${stats.conversion_rate}% conversion rate</p>
+            </div>
+
+            <div class="stat-card bg-gradient-to-br from-orange-50 to-orange-100">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold text-orange-600">In Process</span>
+                    <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-2xl">schedule</span>
+                    </div>
+                </div>
+                <p class="text-4xl font-bold text-orange-900">${stats.in_process_leads}</p>
+                <p class="text-sm text-orange-600 mt-2">Active conversations</p>
+            </div>
+
+            <div class="stat-card bg-gradient-to-br from-purple-50 to-purple-100">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-semibold text-purple-600">Target Progress</span>
+                    <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-2xl">trending_up</span>
+                    </div>
+                </div>
+                <p class="text-4xl font-bold text-purple-900">${stats.target_progress}%</p>
+                <p class="text-sm text-purple-600 mt-2">${stats.converted_leads} of ${stats.monthly_target} target</p>
+            </div>
+        `;
+
+        // Render charts
+        renderStatusChart(statusCounts);
+        document.getElementById('progressChartTitle').textContent = 'Target Achievement';
+        renderTargetProgressChart(stats.converted_leads, stats.monthly_target);
+
+        // Recent activity
+        document.getElementById('performersTitle').textContent = 'Recent Leads';
+        document.getElementById('activityContent').innerHTML = data.recent_leads.map(lead => {
+            const statusColors = {
+                'New': 'bg-blue-100 text-blue-800',
+                'Assigned': 'bg-yellow-100 text-yellow-800',
+                'In Process': 'bg-orange-100 text-orange-800',
+                'Converted': 'bg-green-100 text-green-800'
+            };
+            return `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer" onclick="window.location.href='lead-detail.html?id=${lead.id}'">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                            ${lead.first_name?.charAt(0) || '?'}${lead.last_name?.charAt(0) || ''}
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-900">${lead.first_name} ${lead.last_name}</p>
+                            <p class="text-xs text-gray-500">${lead.email_address}</p>
+                        </div>
+                    </div>
+                    <span class="px-2 py-1 text-xs font-bold rounded-full ${statusColors[lead.status] || 'bg-gray-100 text-gray-800'}">
+                        ${lead.status || 'New'}
+                    </span>
+                </div>
+            `;
+        }).join('') || '<p class="text-gray-500 text-center py-8">No leads yet</p>';
+
+        // Lead sources
+        renderLeadSources(data.lead_sources);
+    }
+
+    function renderStatusChart(statusCounts) {
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        
+        if (statusChartInstance) {
+            statusChartInstance.destroy();
+        }
+
+        statusChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(statusCounts),
+                datasets: [{
+                    data: Object.values(statusCounts),
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(251, 191, 36, 0.8)',
+                        'rgba(249, 115, 22, 0.8)',
+                        'rgba(34, 197, 94, 0.8)'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    function renderProgressChart(converted, target) {
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        
+        if (progressChartInstance) {
+            progressChartInstance.destroy();
+        }
+
+        progressChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Progress'],
+                datasets: [
+                    {
+                        label: 'Converted',
+                        data: [converted],
+                        backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                        borderRadius: 8
+                    },
+                    {
+                        label: 'Target',
+                        data: [target],
+                        backgroundColor: 'rgba(203, 213, 225, 0.5)',
+                        borderRadius: 8
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    function renderTargetProgressChart(converted, target) {
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        
+        if (progressChartInstance) {
+            progressChartInstance.destroy();
+        }
+
+        const remaining = Math.max(0, target - converted);
+
+        progressChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Achieved', 'Remaining'],
+                datasets: [{
+                    data: [converted, remaining],
+                    backgroundColor: [
+                        'rgba(34, 197, 94, 0.8)',
+                        'rgba(203, 213, 225, 0.3)'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    function renderLeadSources(sources) {
+        const sortedSources = Object.entries(sources)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+
+        const maxCount = Math.max(...sortedSources.map(s => s[1]), 1);
+
+        document.getElementById('sourcesContent').innerHTML = sortedSources.map(([source, count]) => {
+            const percentage = (count / maxCount) * 100;
+            return `
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">${source}</span>
+                        <span class="text-sm font-bold text-gray-900">${count}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all" style="width: ${percentage}%"></div>
+                    </div>
+                </div>
+            `;
+        }).join('') || '<p class="text-gray-500 text-center py-8">No data available</p>';
+    }
+
+    function logout() {
+        localStorage.removeItem('authToken');
+        window.location.href = './login.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+</body>
+</html>

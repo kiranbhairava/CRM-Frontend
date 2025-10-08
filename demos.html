@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demos - Gigaversity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+        <div class="container mx-auto px-6 lg:px-8 flex items-center justify-between h-16">
+            <div class="flex items-center space-x-3">
+                <span class="material-symbols-outlined text-blue-600 text-3xl">school</span>
+                <h1 class="text-xl font-bold text-gray-900">Gigaversity</h1>
+            </div>
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="leads.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Leads</a>
+                <a href="sales-managers.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Sales Team</a>
+                <a href="demos.html" class="text-sm font-medium text-blue-600 border-b-2 border-blue-600 pb-1">Demos</a>
+                <a href="emails.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Emails</a>
+                <a href="dashboard.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Dashboard</a>
+            </nav>
+            <button onclick="logout()" class="text-sm font-medium text-gray-600 hover:text-gray-900">Logout</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 lg:px-8 py-8">
+        <!-- Page Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">Demo Meetings</h2>
+                <p class="text-gray-500 mt-1">Track all scheduled demos across your organization</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span id="totalDemos" class="px-4 py-2 bg-blue-100 text-blue-800 font-semibold rounded-lg">0 Demos</span>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-semibold">Total Scheduled</p>
+                        <p id="totalScheduled" class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                    </div>
+                    <span class="material-symbols-outlined text-blue-500 text-4xl">event</span>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-semibold">Completed</p>
+                        <p id="totalCompleted" class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                    </div>
+                    <span class="material-symbols-outlined text-green-500 text-4xl">check_circle</span>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-semibold">This Week</p>
+                        <p id="thisWeek" class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                    </div>
+                    <span class="material-symbols-outlined text-orange-500 text-4xl">calendar_today</span>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-semibold">Conversion Rate</p>
+                        <p id="conversionRate" class="text-3xl font-bold text-gray-900 mt-1">0%</p>
+                    </div>
+                    <span class="material-symbols-outlined text-purple-500 text-4xl">trending_up</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex flex-col md:flex-row gap-4">
+                <select id="managerFilter" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Sales Managers</option>
+                </select>
+                <select id="statusFilter" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Statuses</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <select id="dateFilter" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="all">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+                <button onclick="applyFilters()" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                    Apply Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+            <p class="text-gray-600 mt-4">Loading demos...</p>
+        </div>
+
+        <!-- Demos Table -->
+        <div id="demosContainer" class="hidden bg-white rounded-xl shadow-sm overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase">Lead</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase">Sales Manager</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase">Meeting Title</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase">Scheduled Date</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase">Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase">Meet Link</th>
+                    </tr>
+                </thead>
+                <tbody id="demosTableBody" class="divide-y divide-gray-200">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-12">
+            <span class="material-symbols-outlined text-gray-300 text-6xl">event_busy</span>
+            <p class="text-gray-500 font-medium mt-4">No demos scheduled yet</p>
+        </div>
+
+        <!-- Edit Meeting Modal -->
+        <div id="editMeetingModal" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl w-full max-w-2xl shadow-2xl">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-t-xl">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-xl font-bold text-white">Edit Meeting</h2>
+                            <p class="text-blue-100 text-sm mt-1">Update or manage this meeting</p>
+                        </div>
+                        <button onclick="closeEditModal()" class="text-white hover:bg-white/20 rounded-full p-2 transition-colors">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <form id="editMeetingForm" class="p-6 space-y-4">
+                    <!-- Title -->
+                    <div>
+                        <label class="text-sm font-semibold text-gray-700 mb-2 block">Meeting Title</label>
+                        <input 
+                            type="text" 
+                            id="editMeetingTitle" 
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-all" 
+                            required 
+                        />
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label class="text-sm font-semibold text-gray-700 mb-2 block">Description</label>
+                        <textarea 
+                            id="editMeetingDescription" 
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-all resize-none" 
+                            rows="3"
+                        ></textarea>
+                    </div>
+
+                    <!-- Date & Time -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm font-semibold text-gray-700 mb-2 block">Date</label>
+                            <input 
+                                type="date" 
+                                id="editMeetingDate" 
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-all" 
+                                required 
+                            />
+                        </div>
+                        <div>
+                            <label class="text-sm font-semibold text-gray-700 mb-2 block">Time</label>
+                            <input 
+                                type="time" 
+                                id="editMeetingTime" 
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition-all" 
+                                required 
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                        <button 
+                            type="button"
+                            onclick="cancelMeetingFromModal()"
+                            class="px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200"
+                        >
+                            Cancel Meeting
+                        </button>
+                        <div class="flex space-x-3">
+                            <button 
+                                type="button" 
+                                onclick="closeEditModal()" 
+                                class="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                            >
+                                Close
+                            </button>
+                            <button 
+                                type="button"
+                                onclick="completeMeetingFromModal()"
+                                class="px-6 py-2.5 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                            >
+                                Mark Complete
+                            </button>
+                            <button 
+                                type="submit" 
+                                class="px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg transition-all shadow-lg"
+                            >
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+<script>
+    // Replace the entire <script> section in demos.html with this:
+    const API_BASE_URL = 'http://localhost:8000';
+    let authToken = localStorage.getItem('authToken');
+    let allDemos = [];
+    let allLeads = [];
+    let allUsers = [];
+    let currentUser = null;
+    let editingMeetingId = null;
+
+    if (!authToken) {
+        window.location.href = './login.html';
+    }
+
+    async function apiRequest(endpoint, options = {}) {
+        const config = {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            },
+            ...options
+        };
+        
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+        
+        if (response.status === 401) {
+            localStorage.removeItem('authToken');
+            window.location.href = './login.html';
+            return;
+        }
+        
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error || 'Request failed');
+        }
+        
+        return await response.json();
+    }
+
+    async function initializeNavigation() {
+        try {
+            const user = await apiRequest('/me');
+            
+            if (user.role === 'ADMIN') {
+                const salesTeamLink = document.getElementById('salesTeamLink');
+                if (salesTeamLink) {
+                    salesTeamLink.classList.remove('hidden');
+                }
+            }
+        } catch (error) {
+            console.error('Failed to check user role:', error);
+        }
+    }
+
+    // ✅ FIXED: Open Edit Modal with proper IST conversion
+    async function openEditModal(meetingId) {
+        try {
+            editingMeetingId = meetingId;
+            
+            // Get meeting details
+            const meeting = await apiRequest(`/communications/${meetingId}`);
+            
+            // Fill form
+            document.getElementById('editMeetingTitle').value = meeting.subject || '';
+            document.getElementById('editMeetingDescription').value = meeting.content || '';
+            
+            if (meeting.scheduled_at) {
+                // CRITICAL FIX: Backend sends UTC, we need to display IST
+                // Example: Backend sends "2025-10-08T14:30:00Z" (2:30 PM UTC)
+                // We need to show "20:00" (8:00 PM IST)
+                
+                const utcDateStr = meeting.scheduled_at;
+                const utcDate = new Date(utcDateStr);
+                
+                // Add 5.5 hours to convert UTC to IST
+                const istDate = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
+                
+                // Format date as YYYY-MM-DD for input field
+                const year = istDate.getFullYear();
+                const month = String(istDate.getMonth() + 1).padStart(2, '0');
+                const day = String(istDate.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+                
+                // Format time as HH:MM for input field
+                const hours = String(istDate.getHours()).padStart(2, '0');
+                const minutes = String(istDate.getMinutes()).padStart(2, '0');
+                const timeStr = `${hours}:${minutes}`;
+                
+                document.getElementById('editMeetingDate').value = dateStr;
+                document.getElementById('editMeetingTime').value = timeStr;
+                
+                console.log('UTC from backend:', utcDateStr);
+                console.log('IST displayed:', dateStr, timeStr);
+            }
+            
+            document.getElementById('editMeetingModal').classList.remove('hidden');
+        } catch (error) {
+            alert('Failed to load meeting: ' + error.message);
+        }
+    }
+
+    function closeEditModal() {
+        document.getElementById('editMeetingModal').classList.add('hidden');
+        editingMeetingId = null;
+    }
+
+    // ✅ FIXED: Form submission with proper UTC conversion
+    document.getElementById('editMeetingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!editingMeetingId) return;
+        
+        const dateInput = document.getElementById('editMeetingDate').value;
+        const timeInput = document.getElementById('editMeetingTime').value;
+        
+        // CRITICAL FIX: User enters IST time, we need to send UTC to backend
+        // Example: User enters "2025-10-08 22:00" (10:00 PM IST)
+        // We need to send "2025-10-08T16:30:00Z" (4:30 PM UTC)
+        
+        // Parse date and time components manually
+        const [year, month, day] = dateInput.split('-').map(Number);
+        const [hours, minutes] = timeInput.split(':').map(Number);
+        
+        // Create date in IST by using UTC and adding 5.5 hours offset
+        // First create UTC date with the IST values
+        const istAsUTC = Date.UTC(year, month - 1, day, hours, minutes, 0);
+        
+        // Now subtract 5.5 hours to get actual UTC time
+        const utcMillis = istAsUTC - (5.5 * 60 * 60 * 1000);
+        const utcDate = new Date(utcMillis);
+        const utcEndDate = new Date(utcMillis + (60 * 60 * 1000)); // +1 hour for end time
+        
+        console.log('IST from user:', `${dateInput} ${timeInput}`);
+        console.log('UTC to send:', utcDate.toISOString());
+        console.log('Expected: If user enters 10:00 PM IST, backend should get 4:30 PM UTC');
+        
+        const payload = {
+            title: document.getElementById('editMeetingTitle').value,
+            description: document.getElementById('editMeetingDescription').value,
+            start_time: utcDate.toISOString(),
+            end_time: utcEndDate.toISOString()
+        };
+        
+        try {
+            await apiRequest(`/communications/${editingMeetingId}/reschedule`, {
+                method: 'PUT',
+                body: JSON.stringify(payload)
+            });
+            
+            alert('Meeting updated successfully!');
+            closeEditModal();
+            loadData();
+        } catch (error) {
+            alert('Failed to update meeting: ' + error.message);
+        }
+    });
+
+    async function cancelMeetingFromModal() {
+        if (!editingMeetingId) return;
+        
+        if (!confirm('Cancel this meeting?')) return;
+        
+        try {
+            await apiRequest(`/communications/${editingMeetingId}/cancel`, {
+                method: 'PUT'
+            });
+            
+            alert('Meeting cancelled');
+            closeEditModal();
+            loadData();
+        } catch (error) {
+            alert('Failed to cancel: ' + error.message);
+        }
+    }
+
+    async function completeMeetingFromModal() {
+        if (!editingMeetingId) return;
+        
+        if (!confirm('Mark this meeting as complete?')) return;
+        
+        try {
+            await apiRequest(`/communications/${editingMeetingId}/complete`, {
+                method: 'PUT'
+            });
+            
+            alert('Meeting completed');
+            closeEditModal();
+            loadData();
+        } catch (error) {
+            alert('Failed to complete: ' + error.message);
+        }
+    }
+
+    async function loadData() {
+        try {
+            await initializeNavigation();
+            currentUser = await apiRequest('/me');
+            
+            if (currentUser.role === 'ADMIN') {
+                const users = await apiRequest('/sales-managers');
+                allUsers = users || [];
+            } else {
+                allUsers = [currentUser];
+            }
+            
+            let leads;
+            if (currentUser.role === 'ADMIN') {
+                leads = await apiRequest('/leads');
+            } else {
+                const allLeadsData = await apiRequest('/leads');
+                leads = allLeadsData.filter(lead => lead.assigned_to === currentUser.id);
+            }
+            
+            allLeads = leads;
+            
+            allDemos = [];
+            for (const lead of leads) {
+                try {
+                    const comms = await apiRequest(`/leads/${lead.id}/communications`);
+                    const demos = comms.filter(c => c.type === 'meeting');
+                    demos.forEach(demo => {
+                        allDemos.push({
+                            ...demo,
+                            lead_id: lead.id,
+                            lead_name: `${lead.first_name} ${lead.last_name}`,
+                            lead_email: lead.email_address,
+                            manager_id: lead.assigned_to
+                        });
+                    });
+                } catch (err) {
+                    console.log(`No communications for lead ${lead.id}`);
+                }
+            }
+
+            const managerFilter = document.getElementById('managerFilter');
+            const managerFilterContainer = managerFilter.closest('.flex-1');
+            
+            if (currentUser.role === 'ADMIN') {
+                managerFilter.innerHTML = '<option value="">All Sales Managers</option>';
+                allUsers.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = user.name;
+                    managerFilter.appendChild(option);
+                });
+            } else {
+                if (managerFilterContainer) {
+                    managerFilterContainer.style.display = 'none';
+                }
+            }
+
+            updateStats();
+            renderDemos(allDemos);
+        } catch (error) {
+            console.error('Error loading data:', error);
+            alert('Failed to load data: ' + error.message);
+        } finally {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('demosContainer').classList.remove('hidden');
+        }
+    }
+
+    function updateStats() {
+        const scheduled = allDemos.filter(d => d.status === 'scheduled').length;
+        const completed = allDemos.filter(d => d.status === 'completed').length;
+        
+        const now = new Date();
+        const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
+        const thisWeek = allDemos.filter(d => {
+            const date = new Date(d.scheduled_at);
+            return date >= weekStart;
+        }).length;
+
+        const convertedLeads = allLeads.filter(l => l.status === 'Converted').length;
+        const conversionRate = allDemos.length > 0 ?
+            Math.round((convertedLeads / allDemos.length) * 100) : 0;
+
+        document.getElementById('totalScheduled').textContent = scheduled;
+        document.getElementById('totalCompleted').textContent = completed;
+        document.getElementById('thisWeek').textContent = thisWeek;
+        document.getElementById('conversionRate').textContent = `${conversionRate}%`;
+        document.getElementById('totalDemos').textContent = `${allDemos.length} Demos`;
+    }
+
+    function applyFilters() {
+        const managerId = document.getElementById('managerFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        const dateRange = document.getElementById('dateFilter').value;
+
+        let filtered = [...allDemos];
+
+        if (managerId && currentUser.role === 'ADMIN') {
+            filtered = filtered.filter(d => d.manager_id == managerId);
+        }
+
+        if (status) {
+            filtered = filtered.filter(d => d.status === status);
+        }
+
+        if (dateRange !== 'all') {
+            const now = new Date();
+            filtered = filtered.filter(d => {
+                const date = new Date(d.scheduled_at);
+                if (dateRange === 'today') {
+                    return date.toDateString() === now.toDateString();
+                } else if (dateRange === 'week') {
+                    const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
+                    return date >= weekStart;
+                } else if (dateRange === 'month') {
+                    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+                }
+                return true;
+            });
+        }
+
+        renderDemos(filtered);
+    }
+
+    function renderDemos(demos) {
+        const tbody = document.getElementById('demosTableBody');
+        const container = document.getElementById('demosContainer');
+        const emptyState = document.getElementById('emptyState');
+
+        if (demos.length === 0) {
+            container.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            return;
+        }
+
+        container.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+
+        const statusColors = {
+            'scheduled': 'bg-blue-100 text-blue-800',
+            'completed': 'bg-green-100 text-green-800',
+            'cancelled': 'bg-red-100 text-red-800',
+            'rescheduled': 'bg-yellow-100 text-yellow-800'
+        };
+
+        tbody.innerHTML = demos.map(demo => {
+            const manager = Array.isArray(allUsers) ? 
+                allUsers.find(u => u.id === demo.manager_id) : null;
+            
+            // Convert UTC to IST for display
+            const utcDate = new Date(demo.scheduled_at);
+            const istDate = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
+            
+            const dateStr = istDate.toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+            
+            const timeStr = istDate.toLocaleTimeString('en-IN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+            
+            let participants = [];
+            if (demo.content) {
+                const participantsMatch = demo.content.match(/Participants: (.+?)(?:\n|$)/);
+                if (participantsMatch) {
+                    participants = participantsMatch[1].split(',').map(p => p.trim());
+                }
+            }
+            
+            let actionButtons = '';
+            if (demo.status === 'scheduled' || demo.status === 'rescheduled') {
+                actionButtons = `
+                    <button 
+                        onclick="openEditModal(${demo.id})"
+                        class="ml-3 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200"
+                    >
+                        Edit
+                    </button>
+                `;
+            }
+            
+            const participantsDisplay = participants.length > 0 
+                ? `<div class="flex flex-wrap gap-1 mt-1">
+                    ${participants.slice(0, 2).map(p => 
+                        `<span class="inline-flex items-center px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-xs">
+                            <span class="material-symbols-outlined text-xs mr-1">person</span>
+                            ${p}
+                        </span>`
+                    ).join('')}
+                    ${participants.length > 2 ? 
+                        `<span class="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                            +${participants.length - 2} more
+                        </span>` 
+                    : ''}
+                </div>`
+                : '<span class="text-xs text-gray-400">No additional participants</span>';
+            
+            return `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4">
+                        <div class="font-semibold text-gray-900">${demo.lead_name}</div>
+                        <div class="text-sm text-gray-500">${demo.lead_email}</div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-700">${manager ? manager.name : 'N/A'}</td>
+                    <td class="px-6 py-4">
+                        <div class="text-gray-900 font-medium">${demo.subject}</div>
+                        ${participantsDisplay}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-gray-900">${dateStr}</div>
+                        <div class="text-sm text-gray-500">${timeStr} IST</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 text-xs font-bold rounded-full ${statusColors[demo.status] || 'bg-gray-100 text-gray-800'}">
+                            ${demo.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center">
+                            ${demo.meet_link ? `<a href="${demo.meet_link}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                                <span class="material-symbols-outlined text-sm mr-1">videocam</span>
+                                Join
+                            </a>` : '<span class="text-gray-400">No link</span>'}
+                            ${actionButtons}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function logout() {
+        localStorage.removeItem('authToken');
+        window.location.href = './login.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', loadData);
+
+</script>
+</body>
+</html>

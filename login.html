@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>EdTech CRM - Login</title>
+    <link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1173d4",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "info": {
+                            "light": "#e3f2fd",
+                            "DEFAULT": "#2196f3",
+                            "dark": "#0d47a1"
+                        },
+                        "warning": {
+                            "light": "#fff8e1",
+                            "DEFAULT": "#ffc107",
+                            "dark": "#f57f17"
+                        },
+                        "success": {
+                            "light": "#e8f5e9",
+                            "DEFAULT": "#4caf50",
+                            "dark": "#1b5e20"
+                        },
+                        "danger": {
+                            "light": "#ffebee",
+                            "DEFAULT": "#f44336",
+                            "dark": "#b71c1c"
+                        },
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md">
+        <!-- Logo and Title -->
+        <div class="text-center mb-8">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <span class="material-symbols-outlined text-primary text-4xl">school</span>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">EdTech CRM</h1>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300">Welcome Back</h2>
+            <p class="text-gray-500 dark:text-gray-400">Sign in to your account</p>
+        </div>
+
+        <!-- Login Form -->
+        <div class="bg-white dark:bg-background-dark rounded-lg shadow-lg p-8 border border-gray-200 dark:border-gray-700">
+            <!-- Error Message -->
+            <div id="errorMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined mr-2">error</span>
+                    <span id="errorText"></span>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div id="successMessage" class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined mr-2">check_circle</span>
+                    <span id="successText"></span>
+                </div>
+            </div>
+
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Email Address
+                    </label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">email</span>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email"
+                            required 
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                            placeholder="Enter your email"
+                        />
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Password
+                    </label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">lock</span>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password"
+                            required 
+                            class="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                            placeholder="Enter your password"
+                        />
+                        <button 
+                            type="button" 
+                            onclick="togglePassword()" 
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        >
+                            <span id="passwordToggleIcon" class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <input 
+                            type="checkbox" 
+                            id="remember" 
+                            name="remember"
+                            class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                        />
+                        <label for="remember" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                            Remember me
+                        </label>
+                    </div>
+                    <a href="#" class="text-sm text-primary hover:text-primary/80">
+                        Forgot password?
+                    </a>
+                </div>
+
+                <button 
+                    type="submit" 
+                    id="loginButton"
+                    class="w-full bg-primary text-white font-medium py-3 px-4 rounded-lg hover:bg-primary/90 focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <span id="loginButtonText">Sign In</span>
+                    <span id="loginSpinner" class="hidden inline-block ml-2">
+                        <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
+                </button>
+            </form>
+
+            <!-- Demo Credentials -->
+            <!-- <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Demo Credentials:</h3>
+                <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                    <div>
+                        <strong>Admin:</strong> admin@company.com / admin123
+                    </div>
+                    <div>
+                        <strong>Sales Manager:</strong> sales@company.com / sales123
+                    </div>
+                </div>
+            </div> -->
+
+            <!-- Register Link -->
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Need an admin account? 
+                    <a href="#" onclick="showRegisterForm()" class="text-primary hover:text-primary/80 font-medium">
+                        Register as Admin
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Register Form (Hidden by default) -->
+        <div id="registerForm" class="hidden bg-white dark:bg-background-dark rounded-lg shadow-lg p-8 border border-gray-200 dark:border-gray-700 mt-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Register Admin Account</h3>
+            
+            <form id="adminRegisterForm">
+                <div class="mb-4">
+                    <label for="regName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Full Name
+                    </label>
+                    <input 
+                        type="text" 
+                        id="regName" 
+                        name="name"
+                        required 
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                        placeholder="Enter your full name"
+                    />
+                </div>
+
+                <div class="mb-4">
+                    <label for="regEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Email Address
+                    </label>
+                    <input 
+                        type="email" 
+                        id="regEmail" 
+                        name="email"
+                        required 
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                        placeholder="Enter your email"
+                    />
+                </div>
+
+                <div class="mb-6">
+                    <label for="regPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Password
+                    </label>
+                    <input 
+                        type="password" 
+                        id="regPassword" 
+                        name="password"
+                        required 
+                        minlength="6"
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                        placeholder="Enter password (min 6 characters)"
+                    />
+                </div>
+
+                <div class="flex gap-3">
+                    <button 
+                        type="button" 
+                        onclick="hideRegisterForm()"
+                        class="flex-1 bg-gray-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-gray-600 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        type="submit" 
+                        id="registerButton"
+                        class="flex-1 bg-primary text-white font-medium py-3 px-4 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                    >
+                        <span id="registerButtonText">Register Admin</span>
+                        <span id="registerSpinner" class="hidden inline-block ml-2">
+                            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://localhost:8000'; // Update with your backend URL
+
+        // Check if already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                // Verify token is still valid
+                verifyToken(token);
+            }
+        });
+
+        // Verify token validity
+        async function verifyToken(token) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    // Token is valid, redirect to dashboard
+                    window.location.href = '/leads.html'; // or your main page
+                } else {
+                    // Token is invalid, remove it
+                    localStorage.removeItem('authToken');
+                }
+            } catch (error) {
+                console.error('Token verification failed:', error);
+                localStorage.removeItem('authToken');
+            }
+        }
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            await login(email, password);
+        });
+
+        // Login function
+        async function login(email, password) {
+            try {
+                setLoading(true);
+                hideMessages();
+                
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Login successful
+                    localStorage.setItem('authToken', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    showSuccess('Login successful! Redirecting...');
+                    
+                    // Redirect after short delay
+                    setTimeout(() => {
+                        window.location.href = '/leads.html'; // or your main page
+                    }, 1000);
+                } else {
+                    // Login failed
+                    showError(data.detail || 'Login failed. Please check your credentials.');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Register form submission
+        document.getElementById('adminRegisterForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            
+            await registerAdmin(name, email, password);
+        });
+
+        // Register admin function
+        async function registerAdmin(name, email, password) {
+            try {
+                setRegisterLoading(true);
+                hideMessages();
+                
+                const response = await fetch(`${API_BASE_URL}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Registration successful
+                    showSuccess('Admin account created successfully! You can now login.');
+                    hideRegisterForm();
+                    document.getElementById('email').value = email; // Pre-fill login email
+                } else {
+                    // Registration failed
+                    showError(data.detail || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                setRegisterLoading(false);
+            }
+        }
+
+        // UI Helper Functions
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('passwordToggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.textContent = 'visibility_off';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.textContent = 'visibility';
+            }
+        }
+
+        function showRegisterForm() {
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        function hideRegisterForm() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('adminRegisterForm').reset();
+        }
+
+        function setLoading(loading) {
+            const button = document.getElementById('loginButton');
+            const buttonText = document.getElementById('loginButtonText');
+            const spinner = document.getElementById('loginSpinner');
+            
+            if (loading) {
+                button.disabled = true;
+                buttonText.textContent = 'Signing In...';
+                spinner.classList.remove('hidden');
+            } else {
+                button.disabled = false;
+                buttonText.textContent = 'Sign In';
+                spinner.classList.add('hidden');
+            }
+        }
+
+        function setRegisterLoading(loading) {
+            const button = document.getElementById('registerButton');
+            const buttonText = document.getElementById('registerButtonText');
+            const spinner = document.getElementById('registerSpinner');
+            
+            if (loading) {
+                button.disabled = true;
+                buttonText.textContent = 'Registering...';
+                spinner.classList.remove('hidden');
+            } else {
+                button.disabled = false;
+                buttonText.textContent = 'Register Admin';
+                spinner.classList.add('hidden');
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+            successText.textContent = message;
+            successDiv.classList.remove('hidden');
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').classList.add('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

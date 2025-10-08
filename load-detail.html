@@ -1,0 +1,7 @@
+
+// On lead_detail.html
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const leadId = parseInt(urlParams.get('leadId'));
+    if (leadId) loadLeadDetail(leadId);
+});
