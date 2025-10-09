@@ -201,6 +201,118 @@
         </div>
     </div>
 
+    <!-- Edit Call Modal -->
+    <div id="editCallModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-fadeIn">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white">edit</span>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Edit Call</h2>
+                        <p class="text-yellow-100 text-sm">Update call status and details</p>
+                    </div>
+                </div>
+                <button onclick="closeEditModal()" class="text-white hover:bg-white/20 rounded-full p-2 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <form id="editCallForm" onsubmit="saveCallChanges(event)" class="p-6 space-y-5">
+                <!-- Subject -->
+                <div>
+                    <label for="editCallSubject" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <span class="material-symbols-outlined text-sm align-middle mr-1">subject</span>
+                        Subject <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="editCallSubject" 
+                        required
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        placeholder="Call subject"
+                    >
+                </div>
+
+                <!-- Call Status -->
+                <div>
+                    <label for="editCallStatus" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <span class="material-symbols-outlined text-sm align-middle mr-1">check_circle</span>
+                        Call Status <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        id="editCallStatus" 
+                        required
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent appearance-none bg-white"
+                    >
+                        <option value="">Select Status</option>
+                        <option value="scheduled">Scheduled</option>
+                        <option value="held">Held</option>
+                        <option value="completed">Completed</option>
+                        <option value="missed">Missed</option>
+                        <option value="no answer">No Answer</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Select 'Held' or 'Completed' for successful calls</p>
+                </div>
+
+                <!-- Notes/Description -->
+                <div>
+                    <label for="editCallNotes" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <span class="material-symbols-outlined text-sm align-middle mr-1">description</span>
+                        Notes
+                    </label>
+                    <textarea 
+                        id="editCallNotes" 
+                        rows="4"
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
+                        placeholder="Update call notes..."
+                    ></textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button 
+                        type="button" 
+                        onclick="closeEditModal()" 
+                        class="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg hover:from-yellow-600 hover:to-yellow-700 transition-all shadow-sm"
+                    >
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base">save</span>
+                            Save Changes
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+    /* Add fade-in animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .animate-fadeIn {
+        animation: fadeIn 0.2s ease-out;
+    }
+    </style>
+
 <script>
     const API_BASE_URL = 'http://127.0.0.1:8000';
     let authToken = localStorage.getItem('authToken');
@@ -330,6 +442,7 @@
             
             const statusColors = {
                 'held': 'bg-green-100 text-green-800',
+                'completed': 'bg-green-100 text-green-800',
                 'scheduled': 'bg-orange-100 text-orange-800',
                 'missed': 'bg-red-100 text-red-800',
                 'no answer': 'bg-gray-100 text-gray-800'
@@ -352,15 +465,84 @@
                         ${call.status}
                     </span>
                 </td>
-                <td class="px-6 py-4">
-                    <button onclick="viewCall(${call.id})" class="text-purple-600 hover:text-purple-800 font-semibold">
-                        View Details
+                <td class="px-6 py-4 flex gap-2">
+                    <button onclick="viewCall(${call.id})" class="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors" title="View Details">
+                        <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                    <button onclick="openEditModal(${call.id})" class="p-2 text-yellow-500 hover:bg-yellow-100 rounded-lg transition-colors" title="Edit Status">
+                        <span class="material-symbols-outlined">edit</span>
                     </button>
                 </td>
             `;
             
             tbody.appendChild(row);
         });
+    }
+
+    let editingCallId = null;
+
+    function openEditModal(callId) {
+        const call = allCalls.find(c => c.id === callId);
+        if (!call) return;
+
+        editingCallId = callId;
+        
+        // Populate the edit form
+        document.getElementById('editCallSubject').value = call.subject;
+        document.getElementById('editCallStatus').value = call.status;
+        document.getElementById('editCallNotes').value = call.content || '';
+        
+        // Show modal
+        document.getElementById('editCallModal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editCallModal').classList.add('hidden');
+        document.getElementById('editCallForm').reset();
+        editingCallId = null;
+    }
+
+    async function saveCallChanges(event) {
+        event.preventDefault();
+        
+        if (!editingCallId) return;
+        
+        const subject = document.getElementById('editCallSubject').value;
+        const status = document.getElementById('editCallStatus').value;
+        const notes = document.getElementById('editCallNotes').value;
+        
+        try {
+            // Update the communication
+            const response = await fetch(`${API_BASE_URL}/communications/${editingCallId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    subject: subject,
+                    status: status,
+                    content: notes
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to update call');
+            }
+            
+            // Show success message
+            alert('Call updated successfully!');
+            
+            // Close modal
+            closeEditModal();
+            
+            // Reload data
+            await loadData();
+            
+        } catch (error) {
+            console.error('Error updating call:', error);
+            alert('Failed to update call. Please try again.');
+        }
     }
 
     function updateStats(calls) {
