@@ -196,7 +196,7 @@
 
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -241,6 +241,12 @@
             font-weight: 700;
             color: #1a202c;
             margin-bottom: 0.5rem;
+        }
+
+        .metric-subtext {
+            font-size: 0.75rem;
+            color: #718096;
+            margin-top: 0.25rem;
         }
 
         .metric-change {
@@ -363,6 +369,8 @@
         .bg-gradient-green { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
         .bg-gradient-orange { background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); }
         .bg-gradient-red { background: linear-gradient(135deg, #fc8181 0%, #f56565 100%); }
+        .bg-gradient-purple { background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%); }
+        .bg-gradient-teal { background: linear-gradient(135deg, #38b2ac 0%, #319795 100%); }
     </style>
 </head>
 <body>
@@ -419,48 +427,87 @@
         <div id="mainContent" style="display: none;">
             <!-- Key Metrics -->
             <div class="metrics-grid">
+                <!-- Total Calls -->
                 <div class="metric-card">
                     <div class="metric-header">
-                        <span class="metric-label">Calls Made</span>
+                        <span class="metric-label">Total Calls Dialed</span>
                         <div class="metric-icon bg-gradient-blue">
                             <span class="material-symbols-outlined" style="color: white; font-size: 1.5rem;">call</span>
                         </div>
                     </div>
-                    <div class="metric-value" id="totalCalls">0</div>
-                    <div class="metric-change positive" id="callsChange">
+                    <div class="metric-value" id="totalCallsDialed">0</div>
+                    <div class="metric-subtext">All outgoing calls made</div>
+                    <div class="metric-change positive" id="callsDialedChange">
                         <span class="material-symbols-outlined" style="font-size: 1rem;">arrow_upward</span>
                         <span>0%</span>
                     </div>
                 </div>
 
+                <!-- Calls Answered -->
                 <div class="metric-card">
                     <div class="metric-header">
-                        <span class="metric-label">Demos Conducted</span>
+                        <span class="metric-label">Calls Answered</span>
                         <div class="metric-icon bg-gradient-green">
+                            <span class="material-symbols-outlined" style="color: white; font-size: 1.5rem;">check_circle</span>
+                        </div>
+                    </div>
+                    <div class="metric-value" id="totalCallsAnswered">0</div>
+                    <div class="metric-subtext" id="answeredPercentage">0% success rate</div>
+                    <div class="metric-change positive" id="callsAnsweredChange">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">arrow_upward</span>
+                        <span>0%</span>
+                    </div>
+                </div>
+
+                <!-- Total Demos -->
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Total Demos Scheduled</span>
+                        <div class="metric-icon bg-gradient-orange">
                             <span class="material-symbols-outlined" style="color: white; font-size: 1.5rem;">event</span>
                         </div>
                     </div>
                     <div class="metric-value" id="totalDemos">0</div>
+                    <div class="metric-subtext">All demo meetings scheduled</div>
                     <div class="metric-change positive" id="demosChange">
                         <span class="material-symbols-outlined" style="font-size: 1rem;">arrow_upward</span>
                         <span>0%</span>
                     </div>
                 </div>
 
+                <!-- Demos Completed -->
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Demos Completed</span>
+                        <div class="metric-icon bg-gradient-purple">
+                            <span class="material-symbols-outlined" style="color: white; font-size: 1.5rem;">task_alt</span>
+                        </div>
+                    </div>
+                    <div class="metric-value" id="totalDemosCompleted">0</div>
+                    <div class="metric-subtext" id="completedPercentage">0% completion rate</div>
+                    <div class="metric-change positive" id="demosCompletedChange">
+                        <span class="material-symbols-outlined" style="font-size: 1rem;">arrow_upward</span>
+                        <span>0%</span>
+                    </div>
+                </div>
+
+                <!-- Revenue -->
                 <div class="metric-card">
                     <div class="metric-header">
                         <span class="metric-label">Revenue Generated</span>
-                        <div class="metric-icon bg-gradient-orange">
+                        <div class="metric-icon bg-gradient-teal">
                             <span class="material-symbols-outlined" style="color: white; font-size: 1.5rem;">payments</span>
                         </div>
                     </div>
                     <div class="metric-value" id="totalRevenue">$0</div>
+                    <div class="metric-subtext">From converted leads</div>
                     <div class="metric-change positive" id="revenueChange">
                         <span class="material-symbols-outlined" style="font-size: 1rem;">arrow_upward</span>
                         <span>0%</span>
                     </div>
                 </div>
 
+                <!-- Total Activities -->
                 <div class="metric-card">
                     <div class="metric-header">
                         <span class="metric-label">Sales Activities</span>
@@ -469,6 +516,7 @@
                         </div>
                     </div>
                     <div class="metric-value" id="totalActivities">0</div>
+                    <div class="metric-subtext">Total interactions</div>
                     <div class="metric-change positive" id="activitiesChange">
                         <span class="material-symbols-outlined" style="font-size: 1rem;">arrow_upward</span>
                         <span>0%</span>
@@ -485,10 +533,12 @@
                     <thead>
                         <tr>
                             <th>Sales Rep</th>
-                            <th>Calls Made</th>
-                            <th>Demos Conducted</th>
-                            <th>Revenue Generated</th>
-                            <th>Activities</th>
+                            <th>Calls Dialed</th>
+                            <th>Calls Answered</th>
+                            <th>Demos Scheduled</th>
+                            <th>Demos Completed</th>
+                            <th>Revenue</th>
+                            <th>Total Activities</th>
                         </tr>
                     </thead>
                     <tbody id="performanceTableBody">
@@ -621,14 +671,29 @@
 
         function renderReports(data) {
             // Update key metrics
-            document.getElementById('totalCalls').textContent = data.summary.total_calls;
-            document.getElementById('totalDemos').textContent = data.summary.total_demos;
+            document.getElementById('totalCallsDialed').textContent = data.summary.total_calls_dialed;
+            document.getElementById('totalCallsAnswered').textContent = data.summary.total_calls_answered;
+            document.getElementById('totalDemos').textContent = data.summary.total_demos_scheduled;
+            document.getElementById('totalDemosCompleted').textContent = data.summary.total_demos_completed;
             document.getElementById('totalRevenue').textContent = `$${formatNumber(data.summary.total_revenue)}`;
             document.getElementById('totalActivities').textContent = data.summary.total_activities;
             
+            // Calculate and show success rates
+            const answeredRate = data.summary.total_calls_dialed > 0 
+                ? Math.round((data.summary.total_calls_answered / data.summary.total_calls_dialed) * 100)
+                : 0;
+            document.getElementById('answeredPercentage').textContent = `${answeredRate}% success rate`;
+            
+            const completedRate = data.summary.total_demos_scheduled > 0
+                ? Math.round((data.summary.total_demos_completed / data.summary.total_demos_scheduled) * 100)
+                : 0;
+            document.getElementById('completedPercentage').textContent = `${completedRate}% completion rate`;
+            
             // Update change percentages
-            updateChangeIndicator('callsChange', data.summary.calls_change);
-            updateChangeIndicator('demosChange', data.summary.demos_change);
+            updateChangeIndicator('callsDialedChange', data.summary.calls_dialed_change);
+            updateChangeIndicator('callsAnsweredChange', data.summary.calls_answered_change);
+            updateChangeIndicator('demosChange', data.summary.demos_scheduled_change);
+            updateChangeIndicator('demosCompletedChange', data.summary.demos_completed_change);
             updateChangeIndicator('revenueChange', data.summary.revenue_change);
             updateChangeIndicator('activitiesChange', data.summary.activities_change);
             
@@ -637,6 +702,13 @@
             tbody.innerHTML = '';
             
             data.team_performance.forEach((member, index) => {
+                const memberAnsweredRate = member.calls_dialed > 0
+                    ? Math.round((member.calls_answered / member.calls_dialed) * 100)
+                    : 0;
+                const memberCompletedRate = member.demos_scheduled > 0
+                    ? Math.round((member.demos_completed / member.demos_scheduled) * 100)
+                    : 0;
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>
@@ -647,8 +719,20 @@
                             <span style="font-weight: 600;">${member.name}</span>
                         </div>
                     </td>
-                    <td>${member.calls_made}</td>
-                    <td>${member.demos_conducted}</td>
+                    <td>${member.calls_dialed}</td>
+                    <td>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-weight: 600;">${member.calls_answered}</span>
+                            <span style="font-size: 0.75rem; color: #718096;">${memberAnsweredRate}% rate</span>
+                        </div>
+                    </td>
+                    <td>${member.demos_scheduled}</td>
+                    <td>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-weight: 600;">${member.demos_completed}</span>
+                            <span style="font-size: 0.75rem; color: #718096;">${memberCompletedRate}% rate</span>
+                        </div>
+                    </td>
                     <td style="font-weight: 600; color: #48bb78;">$${formatNumber(member.revenue_generated)}</td>
                     <td>${member.activities}</td>
                 `;
@@ -700,28 +784,47 @@
             }
             
             try {
-                // Create CSV content
-                let csv = 'Sales Rep,Calls Made,Demos Conducted,Revenue Generated,Activities\n';
+                // Create CSV content with new columns
+                let csv = 'Sales Rep,Calls Dialed,Calls Answered,Answer Rate,Demos Scheduled,Demos Completed,Completion Rate,Revenue Generated,Activities\n';
                 
                 reportData.team_performance.forEach(member => {
-                    csv += `${member.name},${member.calls_made},${member.demos_conducted},${member.revenue_generated},${member.activities}\n`;
+                    const answerRate = member.calls_dialed > 0
+                        ? Math.round((member.calls_answered / member.calls_dialed) * 100)
+                        : 0;
+                    const completionRate = member.demos_scheduled > 0
+                        ? Math.round((member.demos_completed / member.demos_scheduled) * 100)
+                        : 0;
+                    
+                    csv += `${member.name},${member.calls_dialed},${member.calls_answered},${answerRate}%,${member.demos_scheduled},${member.demos_completed},${completionRate}%,${member.revenue_generated},${member.activities}\n`;
                 });
                 
-                // Create download link
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
+                // Add summary row
+                const totalAnswerRate = reportData.summary.total_calls_dialed > 0
+                    ? Math.round((reportData.summary.total_calls_answered / reportData.summary.total_calls_dialed) * 100)
+                    : 0;
+                const totalCompletionRate = reportData.summary.total_demos_scheduled > 0
+                    ? Math.round((reportData.summary.total_demos_completed / reportData.summary.total_demos_scheduled) * 100)
+                    : 0;
+                
+                csv += `Total,${reportData.summary.total_calls_dialed},${reportData.summary.total_calls_answered},${totalAnswerRate}%,${reportData.summary.total_demos_scheduled},${reportData.summary.total_demos_completed},${totalCompletionRate}%,${reportData.summary.total_revenue},${reportData.summary.total_activities}\n`;
+                
+                // Trigger CSV download
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `sales-report-${currentPeriod}-${new Date().toISOString().split('T')[0]}.csv`;
+                a.download = 'sales_report.csv';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
+                URL.revokeObjectURL(url);
             } catch (error) {
                 console.error('Error exporting reports:', error);
-                alert('Failed to export reports. Please try again.');
             }
         }
+
+        // Event listeners
+        document.getElementById('exportButton').addEventListener('click', exportReports);
     </script>
 </body>
 </html>
