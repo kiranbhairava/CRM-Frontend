@@ -675,7 +675,7 @@
             document.getElementById('totalCallsAnswered').textContent = data.summary.total_calls_answered;
             document.getElementById('totalDemos').textContent = data.summary.total_demos_scheduled;
             document.getElementById('totalDemosCompleted').textContent = data.summary.total_demos_completed;
-            document.getElementById('totalRevenue').textContent = `$${formatNumber(data.summary.total_revenue)}`;
+            document.getElementById('totalRevenue').textContent = `${formatNumber(data.summary.total_revenue)}`;
             document.getElementById('totalActivities').textContent = data.summary.total_activities;
             
             // Calculate and show success rates
@@ -733,7 +733,7 @@
                             <span style="font-size: 0.75rem; color: #718096;">${memberCompletedRate}% rate</span>
                         </div>
                     </td>
-                    <td style="font-weight: 600; color: #48bb78;">$${formatNumber(member.revenue_generated)}</td>
+                    <td style="font-weight: 600; color: #48bb78;">${formatNumber(member.revenue_generated)}</td>
                     <td>${member.activities}</td>
                 `;
                 tbody.appendChild(row);
