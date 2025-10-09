@@ -398,112 +398,108 @@
         </div>
     </div>
 
-    <!-- Calendar Event Modal -->
+    <!-- Calendar Event Modal (Compact Version) -->
     <div id="eventModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-fadeIn">
+        <div class="bg-white rounded-xl w-full max-w-xl shadow-2xl overflow-hidden animate-fadeIn">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                        <span class="material-symbols-outlined text-white">event</span>
+            <div class="bg-gradient-to-r from-green-500 to-green-600 px-5 py-3 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-lg">event</span>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold text-white">Schedule Meeting</h2>
-                        <p class="text-green-100 text-sm">Create a new calendar event</p>
+                        <h2 class="text-lg font-bold text-white">Schedule Meeting</h2>
+                        <p class="text-green-100 text-xs">Create a new calendar event</p>
                     </div>
                 </div>
-                <button onclick="closeEventModal()" class="text-white hover:bg-white/20 rounded-full p-2 transition-colors">
-                    <span class="material-symbols-outlined">close</span>
+                <button onclick="closeEventModal()" class="text-white hover:bg-white/20 rounded-full p-1.5 transition-colors">
+                    <span class="material-symbols-outlined text-sm">close</span>
                 </button>
             </div>
 
             <!-- Form -->
-            <form id="eventForm" class="p-6 space-y-4">
-                <!-- Title Field -->
+            <form id="eventForm" class="p-3 space-y-1 text-sm">
+                <!-- Title -->
                 <div>
-                    <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                        <span class="material-symbols-outlined text-base mr-2">title</span>
+                    <label class="flex items-center font-semibold text-gray-700 mb-1.5">
+                        <span class="material-symbols-outlined text-sm mr-1.5">title</span>
                         Meeting Title
                     </label>
                     <input 
                         type="text" 
                         id="eventTitle" 
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 transition-all" 
+                        class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 transition-all" 
                         placeholder="Enter meeting title..." 
                         required 
                     />
                 </div>
 
-                <!-- Description Field -->
+                <!-- Description -->
                 <div>
-                    <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                        <span class="material-symbols-outlined text-base mr-2">notes</span>
+                    <label class="flex items-center font-semibold text-gray-700 mb-1.5">
+                        <span class="material-symbols-outlined text-sm mr-1.5">notes</span>
                         Description
                     </label>
                     <textarea 
                         id="eventDescription" 
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 transition-all resize-none" 
-                        rows="4" 
+                        class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 transition-all resize-none" 
+                        rows="3" 
                         placeholder="Add meeting agenda, notes, or details..."
                     ></textarea>
                 </div>
 
-                <!-- Participants Field -->
+                <!-- Participants -->
                 <div>
-                    <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                        <span class="material-symbols-outlined text-base mr-2">group</span>
-                        Participants (Additional Attendees)
+                    <label class="flex items-center font-semibold text-gray-700 mb-1.5">
+                        <span class="material-symbols-outlined text-sm mr-1.5">group</span>
+                        Participants
                     </label>
-                    <div id="participantsList" class="space-y-2 mb-3">
-                        <!-- Participant email inputs will be added here -->
-                    </div>
+                    <div id="participantsList" class="space-y-1 mb-2"></div>
                     <div class="flex gap-2">
                         <input 
                             type="email" 
                             id="participantEmailInput" 
-                            class="flex-1 px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 transition-all text-sm" 
-                            placeholder="Enter email address (e.g., john@example.com)"
+                            class="flex-1 px-3 py-1.5 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 transition-all text-sm" 
+                            placeholder="Enter email address"
                         />
                         <button 
                             type="button" 
                             onclick="addParticipant()" 
-                            class="px-4 py-2 bg-green-50 text-green-600 font-medium rounded-xl hover:bg-green-100 transition-colors flex items-center"
+                            class="px-3 py-1.5 bg-green-50 text-green-600 font-medium rounded-lg hover:bg-green-100 transition-colors flex items-center"
                         >
-                            <span class="material-symbols-outlined text-base mr-1">add</span>
+                            <span class="material-symbols-outlined text-sm mr-1">add</span>
                             Add
                         </button>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">
-                        💡 Lead's email will be automatically included. Add team members or additional participants here.
+                    <p class="text-xs text-gray-500 mt-1">
+                        💡 Lead's email will be automatically included.
                     </p>
                 </div>
 
-                <!-- Enhanced Date & Time Fields -->
-                <div class="space-y-4">
-                    <!-- Date Selection -->
+                <!-- Date & Time -->
+                <div class="space-y-3">
                     <div>
-                        <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                            <span class="material-symbols-outlined text-base mr-2">calendar_today</span>
+                        <label class="flex items-center font-semibold text-gray-700 mb-1.5">
+                            <span class="material-symbols-outlined text-sm mr-1.5">calendar_today</span>
                             Meeting Date
                         </label>
                         <input 
                             type="date" 
                             id="eventDate" 
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 transition-all text-base" 
+                            class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 transition-all" 
                             required 
                         />
                     </div>
 
-                    <!-- Time Selection -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                                <span class="material-symbols-outlined text-base mr-2">schedule</span>
+                            <label class="flex items-center font-semibold text-gray-700 mb-1.5">
+                                <span class="material-symbols-outlined text-sm mr-1.5">schedule</span>
                                 Start Time
                             </label>
                             <select 
                                 id="eventStartTime" 
-                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 transition-all text-base"
+                                class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 transition-all"
                                 required
                             >
                                 <option value="">Select time</option>
@@ -511,13 +507,13 @@
                         </div>
 
                         <div>
-                            <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                                <span class="material-symbols-outlined text-base mr-2">schedule</span>
+                            <label class="flex items-center font-semibold text-gray-700 mb-1.5">
+                                <span class="material-symbols-outlined text-sm mr-1.5">schedule</span>
                                 End Time
                             </label>
                             <select 
                                 id="eventEndTime" 
-                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 transition-all text-base"
+                                class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 transition-all"
                                 required
                             >
                                 <option value="">Select time</option>
@@ -525,55 +521,53 @@
                         </div>
                     </div>
 
-                    <!-- Duration Helper -->
-                    <div id="durationHelper" class="hidden bg-green-50 border border-green-200 rounded-lg p-3">
-                        <div class="flex items-center text-sm text-green-800">
-                            <span class="material-symbols-outlined text-base mr-2">info</span>
+                    <div id="durationHelper" class="hidden bg-green-50 border border-green-200 rounded-lg p-2 text-sm">
+                        <div class="flex items-center text-green-800">
+                            <span class="material-symbols-outlined text-sm mr-1">info</span>
                             <span id="durationText"></span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Meeting Options -->
-                <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-                    <div class="flex items-start space-x-3">
-                        <span class="material-symbols-outlined text-green-600 mt-0.5">videocam</span>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-green-900">Google Meet Integration</p>
-                            <p class="text-xs text-green-700 mt-1">A video conference link will be automatically generated for this meeting</p>
-                        </div>
+                <!-- Google Meet -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-sm flex items-start space-x-2">
+                    <span class="material-symbols-outlined text-green-600 text-sm mt-0.5">videocam</span>
+                    <div>
+                        <p class="font-semibold text-green-900">Google Meet Integration</p>
+                        <p class="text-green-700 text-xs">A video link will be automatically generated.</p>
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                <!-- Buttons -->
+                <div class="flex items-center justify-between pt-3 border-t border-gray-200">
                     <button 
                         type="button" 
                         onclick="closeEventModal()" 
-                        class="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                        class="px-4 py-1.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                     >
                         Cancel
                     </button>
-                    <div class="flex items-center space-x-3">
+                    <div class="flex items-center space-x-2">
                         <button 
                             type="button"
-                            class="px-4 py-2.5 text-sm font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors flex items-center"
+                            class="px-3 py-1.5 text-sm font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors flex items-center"
                         >
-                            <span class="material-symbols-outlined text-base mr-1">notifications</span>
+                            <span class="material-symbols-outlined text-sm mr-1">notifications</span>
                             Reminders
                         </button>
                         <button 
                             type="submit" 
-                            class="px-8 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center"
+                            class="px-6 py-1.5 text-sm font-bold text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-lg shadow-md hover:shadow-lg flex items-center"
                         >
-                            <span class="material-symbols-outlined text-base mr-2">check</span>
-                            Create Event
+                            <span class="material-symbols-outlined text-sm mr-1">check</span>
+                            Create
                         </button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+
     <!-- Status Change Modal -->
     <div id="statusModal" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl w-full max-w-sm p-6 relative shadow-lg">
