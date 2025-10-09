@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Gigaversity EdTech - Lead Management</title>
+    <title>Gigaversity - Leads Management</title>
     <link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -33,50 +32,41 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
-        .create-lead-page { display: none; }
-        .create-lead-page.active { display: block; }
-        .section-card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 24px;
+        .btn-primary { 
+            background: linear-gradient(135deg,#1173d4 0%,#0d5bb5 100%); 
+            box-shadow: 0 4px 12px rgba(17,115,212,0.3); 
         }
-        .section-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
-        .form-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; display: block; }
-        .form-input { width: 100%; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; font-size: 14px; }
-        .form-input:focus { outline: none; border-color: #1173d4; box-shadow: 0 0 0 3px rgba(17,115,212,0.1); }
-        .btn-primary { background: linear-gradient(135deg,#1173d4 0%,#0d5bb5 100%); box-shadow: 0 4px 12px rgba(17,115,212,0.3); }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(17,115,212,0.4); }
-        .page-transition { animation: fadeIn 0.3s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Success message animations */
-        #successMessage {
-            transition: all 0.3s ease-in-out;
-            transform: translateX(100%);
-            opacity: 0;
+        .btn-primary:hover { 
+            transform: translateY(-1px); 
+            box-shadow: 0 6px 16px rgba(17,115,212,0.4); 
         }
-
-        #successMessage.show {
-            transform: translateX(0);
-            opacity: 1;
+        .page-transition { 
+            animation: fadeIn 0.5s ease-in; 
         }
-
-        /* Custom alert styles */
-        .alert-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            border: none;
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
         }
-
-        .alert-error {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-            border: none;
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
         }
-
-        /* Pagination styles */
+        .form-input {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #1173d4;
+            box-shadow: 0 0 0 3px rgba(17, 115, 212, 0.1);
+        }
         .pagination-btn {
             min-width: 2.5rem;
             height: 2.5rem;
@@ -98,139 +88,74 @@
         .pagination-btn:not(.active):not(:disabled):hover {
             background: #f1f5f9;
         }
-        
-        /* Style for the active nav link */
-        .nav-link.active {
-            color: #1173d4;
-            border-bottom-width: 2px;
-            border-color: #1173d4;
-            font-weight: 600;
+        .create-lead-page {
+            display: none;
         }
-
-        /* Enhanced styles for file attachments */
-        .file-item {
-            transition: all 0.2s ease-in-out;
+        .create-lead-page.active {
+            display: block;
         }
-
-        .file-item:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        /* Custom scrollbar for file list */
-        #emailFileList::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        #emailFileList::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 3px;
-        }
-
-        #emailFileList::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        #emailFileList::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* Animation for file upload */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .file-item {
-            animation: slideIn 0.3s ease-out;
-        }
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95) translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-}
-
-.animate-fadeIn {
-    animation: fadeIn 0.3s ease-out;
-}
     </style>
 </head>
-<body class="font-display bg-background-light">
+<body class="font-display bg-background-light min-h-screen">
 
-    <header class="sticky top-0 z-20 bg-white/95 border-b border-gray-200 shadow-sm backdrop-blur-lg">
-        <div class="container mx-auto px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-8">
+    <!-- LEADS LIST PAGE -->
+    <div id="leadsPage">
+        <!-- Header -->
+        <header class="bg-white/80 border-b border-gray-200 shadow-sm sticky top-0 z-10 backdrop-blur-lg">
+            <div class="container mx-auto px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
                     <div class="flex items-center space-x-3">
                         <span class="material-symbols-outlined text-primary text-3xl">school</span>
                         <h1 class="text-xl font-bold text-gray-900">Gigaversity</h1>
                     </div>
                     <nav class="hidden md:flex items-center space-x-6">
-                        <a href="leads.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Leads</a>
-                        <!-- Sales Team link - hidden by default, shown only for admins -->
-                        <a href="sales-managers.html" id="salesTeamLink" class="hidden text-sm font-medium text-gray-500 hover:text-gray-700">Sales Team</a>
+                        <a href="leads.html" class="text-sm font-medium text-primary border-b-2 border-primary pb-1">Leads</a>
+                        <a href="sales-managers.html" id="salesTeamLink" class="text-sm font-medium text-gray-500 hover:text-gray-700">Sales Team</a>
                         <a href="demos.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Demos</a>
-                        <a href="emails.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Emails</a>
-                        <a href="calls.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Calls</a>
                         <a href="dashboard.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Dashboard</a>
                     </nav>
+                    <button onclick="logout()" class="text-sm font-medium text-gray-600 hover:text-gray-900">Logout</button>
                 </div>
-                <div class="flex items-center space-x-4">
-                <!-- Google Workspace Status -->
-                <div id="googleStatusIndicator" class="hidden flex items-center space-x-2 px-3 py-1.5 bg-gray-100 rounded-lg">
-                    <span class="material-symbols-outlined text-gray-400 text-sm" id="googleStatusIcon">cloud_off</span>
-                    <span class="text-xs font-medium text-gray-600" id="googleStatusText">Not Connected</span>
-                </div>
-                <button onclick="openGoogleSettings()" id="googleConnectBtn" class="hidden text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center space-x-1">
-                    <span class="material-symbols-outlined text-base">settings</span>
-                    <span>Google</span>
-                </button>
-                <button onclick="logout()" class="text-sm font-medium text-gray-600 hover:text-gray-900">Logout</button>
             </div>
-            </div>
-        </div>
-    </header>
+        </header>
 
-    <div id="leadsPage" class="page-content page-transition">
-        <main class="flex-grow container mx-auto px-6 lg:px-8 py-8">
-            <div class="flex items-center justify-between mb-8">
+        <!-- Main Content -->
+        <main class="container mx-auto px-6 lg:px-8 py-8 page-transition">
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
                 <div>
-                    <h2 class="text-3xl font-bold text-gray-900">Lead Management</h2>
-                    <p class="text-gray-500 mt-1">Manage and track all your educational leads</p>
+                    <h2 class="text-3xl font-bold text-gray-900">Leads Management</h2>
+                    <p class="text-gray-500 mt-1">Manage and track all your leads</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button type="button" onclick="window.location.href='import-leads.html'" class="flex items-center gap-2 bg-white border-2 border-primary text-primary font-semibold px-6 py-3 rounded-lg transition-all hover:bg-primary hover:text-white">
-                        <span class="material-symbols-outlined">upload_file</span>
-                        <span>Import Leads</span>
+                    <button onclick="window.location.href='import-leads.html'" class="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <span class="material-symbols-outlined text-base">upload</span>
+                        <span>Import</span>
                     </button>
-                    <button type="button" onclick="openCreateLeadPage()" class="flex items-center gap-2 btn-primary text-white font-semibold px-6 py-3 rounded-lg transition-all">
-                        <span class="material-symbols-outlined">add_circle</span>
-                        <span>Create New Lead</span>
+                    <button onclick="openCreateLeadPage()" class="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold btn-primary text-white rounded-lg transition-all">
+                        <span class="material-symbols-outlined text-base">add</span>
+                        <span>New Lead</span>
                     </button>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-sm mb-6">
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <div class="relative flex-grow">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input id="searchInput" oninput="filterLeads()" class="w-full bg-gray-50 border border-gray-200 rounded-lg pl-12 pr-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Search by name, email, or phone..." type="text"/>
+            <!-- Search & Filter Bar -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <div class="flex flex-col lg:flex-row gap-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                            <input 
+                                type="text" 
+                                id="searchInput"
+                                placeholder="Search by name, email, or phone..." 
+                                class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                oninput="filterLeads()"
+                            />
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <button onclick="filterByStatus('all')" class="filter-btn active px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white shadow-sm">All Leads</button>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="filterByStatus('all')" class="filter-btn px-5 py-2.5 text-sm font-semibold rounded-lg active bg-primary text-white shadow-sm">All Leads</button>
                         <button onclick="filterByStatus('New')" class="filter-btn px-5 py-2.5 text-sm font-semibold rounded-lg bg-white text-gray-700 border border-gray-200 hover:bg-gray-50">New</button>
                         <button onclick="filterByStatus('Assigned')" class="filter-btn px-5 py-2.5 text-sm font-semibold rounded-lg bg-white text-gray-700 border border-gray-200 hover:bg-gray-50">Assigned</button>
                         <button onclick="filterByStatus('In Process')" class="filter-btn px-5 py-2.5 text-sm font-semibold rounded-lg bg-white text-gray-700 border border-gray-200 hover:bg-gray-50">In Process</button>
@@ -239,11 +164,13 @@
                 </div>
             </div>
 
+            <!-- Loading Indicator -->
             <div id="loadingIndicator" class="hidden text-center py-12">
                 <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
                 <p class="text-gray-600 mt-4 font-medium">Loading leads...</p>
             </div>
 
+            <!-- Error Message -->
             <div id="errorMessage" class="hidden bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-lg mb-6 shadow-sm">
                 <div class="flex items-center">
                     <span class="material-symbols-outlined mr-3">error</span>
@@ -251,6 +178,7 @@
                 </div>
             </div>
 
+            <!-- Leads Table -->
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
@@ -265,68 +193,47 @@
                             </tr>
                         </thead>
                         <tbody id="leadsTableBody" class="divide-y divide-gray-200">
-                            <tr>
-                                <td class="px-6 py-4">John Doe</td>
-                                <td class="px-6 py-4">New</td>
-                                <td class="px-6 py-4 hidden md:table-cell">Web Development</td>
-                                <td class="px-6 py-4 hidden lg:table-cell">Website</td>
-                                <td class="px-6 py-4 hidden sm:table-cell">john.doe@email.com</td>
-                                <td class="px-6 py-4">-</td>
-                            </tr>
+                            <!-- Leads will be populated here -->
                         </tbody>
                     </table>
                 </div>
-            </div>
 
-            <!-- Pagination Controls -->
-            <div id="paginationContainer" class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-                <div class="text-sm text-gray-600">
-                    Showing <span id="showingStart" class="font-semibold">0</span> to <span id="showingEnd" class="font-semibold">0</span> of <span id="totalLeads" class="font-semibold">0</span> leads
-                </div>
-                
-                <div class="flex items-center gap-2">
-                    <button onclick="goToPage(currentPage - 1)" id="prevBtn" class="pagination-btn px-3 text-gray-700 border border-gray-300">
-                        <span class="material-symbols-outlined text-base">chevron_left</span>
-                    </button>
-                    
-                    <div id="pageNumbers" class="flex items-center gap-1">
-                        <!-- Page numbers will be inserted here -->
+                <!-- Pagination -->
+                <div id="paginationContainer" class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                    <div class="text-sm text-gray-600">
+                        Showing <span id="showingStart" class="font-semibold">0</span> to <span id="showingEnd" class="font-semibold">0</span> of <span id="totalLeads" class="font-semibold">0</span> leads
                     </div>
                     
-                    <button onclick="goToPage(currentPage + 1)" id="nextBtn" class="pagination-btn px-3 text-gray-700 border border-gray-300">
-                        <span class="material-symbols-outlined text-base">chevron_right</span>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="goToPage(currentPage - 1)" id="prevBtn" class="pagination-btn px-3 text-gray-700 border border-gray-300">
+                            <span class="material-symbols-outlined text-base">chevron_left</span>
+                        </button>
+                        
+                        <div id="pageNumbers" class="flex items-center gap-1">
+                            <!-- Page numbers will be inserted here -->
+                        </div>
+                        
+                        <button onclick="goToPage(currentPage + 1)" id="nextBtn" class="pagination-btn px-3 text-gray-700 border border-gray-300">
+                            <span class="material-symbols-outlined text-base">chevron_right</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <div id="dashboardPage" class="page-content hidden page-transition">
-        <div class="container mx-auto px-6 lg:px-8 py-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-6">Dashboard Overview</h2>
-            <div id="dashboardContent" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            </div>
-        </div>
-    </div>
-    
-    <div id="reportsPage" class="page-content hidden page-transition">
-        <div class="container mx-auto px-6 lg:px-8 py-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Reports</h2>
-            <p class="text-gray-600">Reports functionality is not yet implemented.</p>
-        </div>
-    </div>
-    
+    <!-- CREATE/EDIT LEAD PAGE -->
     <div id="createLeadPage" class="create-lead-page min-h-screen bg-gray-100">
         <header class="bg-white/80 border-b border-gray-200 shadow-sm sticky top-0 z-10 backdrop-blur-lg">
             <div class="container mx-auto px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
-                    <div class="flex items-center space-x-4">
-                        <button onclick="closeCreateLeadPage()" class="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors" aria-label="Go back">
+                    <div class="flex items-center gap-4">
+                        <button onclick="closeCreateLeadPage()" class="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
                             <span class="material-symbols-outlined">arrow_back</span>
                         </button>
                         <div>
-                            <h1 class="text-xl font-bold text-gray-900">Create New Lead</h1>
-                            <p class="text-xs text-gray-500">Fill in the details below to add a new lead</p>
+                            <h1 class="text-xl font-bold text-gray-900" id="createPageTitle">Create New Lead</h1>
+                            <p class="text-xs text-gray-500">Fill in the details below</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
@@ -335,7 +242,7 @@
                         </button>
                         <button type="submit" form="addLeadForm" class="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold btn-primary text-white rounded-lg transition-all">
                             <span class="material-symbols-outlined text-base">save</span>
-                            <span>Save Lead</span>
+                            <span id="saveButtonText">Save Lead</span>
                         </button>
                     </div>
                 </div>
@@ -345,203 +252,168 @@
         <main class="container mx-auto max-w-5xl px-6 lg:px-8 py-8">
             <form id="addLeadForm" class="page-transition">
                 <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
-                    <!-- Form content remains the same -->
-                    <div>
-                        <div class="flex items-center gap-3">
+                    <!-- Core Information -->
+                    <div class="mb-8">
+                        <div class="flex items-center gap-3 mb-6">
                             <span class="material-symbols-outlined text-primary text-2xl">person</span>
                             <div>
                                 <h3 class="text-lg font-bold text-gray-800">Core Information</h3>
-                                <p class="text-sm text-gray-500">The lead's primary contact details.</p>
+                                <p class="text-sm text-gray-500">Primary contact details</p>
                             </div>
                         </div>
-                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                            <div class="md:col-span-2">
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-6">
-                                    <div>
-                                        <label for="salutation" class="form-label">Salutation</label>
-                                        <select id="salutation" class="form-input">
-                                            <option value="">Select</option>
-                                            <option value="Mr.">Mr.</option>
-                                            <option value="Ms.">Ms.</option>
-                                            <option value="Mrs.">Mrs.</option>
-                                            <option value="Dr.">Dr.</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="firstName" class="form-label">First Name</label>
-                                        <input type="text" id="firstName" class="form-input" placeholder="John">
-                                    </div>
-                                    <div>
-                                        <label for="lastName" class="form-label">Last Name <span class="text-red-500">*</span></label>
-                                        <input type="text" id="lastName" required class="form-input" placeholder="Doe">
-                                    </div>
-                                </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label for="salutation" class="form-label">Salutation</label>
+                                <select id="salutation" class="form-input">
+                                    <option value="">Select</option>
+                                    <option value="Mr.">Mr.</option>
+                                    <option value="Ms.">Ms.</option>
+                                    <option value="Mrs.">Mrs.</option>
+                                    <option value="Dr.">Dr.</option>
+                                </select>
                             </div>
-                            
+                            <div>
+                                <label for="firstName" class="form-label">First Name <span class="text-red-500">*</span></label>
+                                <input type="text" id="firstName" class="form-input" placeholder="John" required>
+                            </div>
+                            <div>
+                                <label for="lastName" class="form-label">Last Name <span class="text-red-500">*</span></label>
+                                <input type="text" id="lastName" class="form-input" placeholder="Doe" required>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                            <div>
+                                <label for="email" class="form-label">Email Address <span class="text-red-500">*</span></label>
+                                <input type="email" id="email" class="form-input" placeholder="john.doe@example.com" required>
+                            </div>
                             <div>
                                 <label for="mobileNumber" class="form-label">Mobile Number <span class="text-red-500">*</span></label>
-                                <input type="tel" id="mobileNumber" required class="form-input" placeholder="+1 (555) 123-4567">
+                                <input type="tel" id="mobileNumber" class="form-input" placeholder="+91 98765 43210" required>
                             </div>
                             <div>
-                                <label for="alternateMobile" class="form-label">Alternate Number</label>
-                                <input type="tel" id="alternateMobile" class="form-input" placeholder="+1 (555) 987-6543">
+                                <label for="alternateMobile" class="form-label">Alternate Mobile</label>
+                                <input type="tel" id="alternateMobile" class="form-input" placeholder="+91 98765 43211">
                             </div>
-                            <div class="md:col-span-2">
-                                <label for="email" class="form-label">Email Address <span class="text-red-500">*</span></label>
-                                <input type="email" id="email" required class="form-input" placeholder="john.doe@example.com">
+                            <div>
+                                <label for="workingStatus" class="form-label">Working Status</label>
+                                <select id="workingStatus" class="form-input">
+                                    <option value="">Select</option>
+                                    <option value="Student">Student</option>
+                                    <option value="Working Professional">Working Professional</option>
+                                    <option value="Unemployed">Unemployed</option>
+                                </select>
                             </div>
                         </div>
                     </div>
 
-                    <hr class="my-8 border-gray-200">
-
-                    <div>
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-primary text-2xl">insights</span>
+                    <!-- Address Information -->
+                    <div class="mb-8 pt-8 border-t border-gray-200">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="material-symbols-outlined text-primary text-2xl">location_on</span>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800">Lead & Opportunity</h3>
-                                <p class="text-sm text-gray-500">Details about the lead's status and potential value.</p>
+                                <h3 class="text-lg font-bold text-gray-800">Address Information</h3>
+                                <p class="text-sm text-gray-500">Location details</p>
                             </div>
                         </div>
-                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="md:col-span-2">
+                                <label for="street" class="form-label">Street</label>
+                                <input type="text" id="street" class="form-input" placeholder="123 Main Street">
+                            </div>
                             <div>
-                                <label for="status" class="form-label">Status</label>
-                                <select id="status" class="form-input">
-                                    <option value="New">New Lead</option>
-                                    <option value="Assigned">Assigned</option>
-                                    <option value="In Process">In Process</option>
-                                    <option value="Converted">Converted</option>
-                                </select>
+                                <label for="city" class="form-label">City</label>
+                                <input type="text" id="city" class="form-input" placeholder="Mumbai">
+                            </div>
+                            <div>
+                                <label for="state" class="form-label">State</label>
+                                <input type="text" id="state" class="form-input" placeholder="Maharashtra">
+                            </div>
+                            <div>
+                                <label for="postalCode" class="form-label">Postal Code</label>
+                                <input type="text" id="postalCode" class="form-input" placeholder="400001">
+                            </div>
+                            <div>
+                                <label for="country" class="form-label">Country</label>
+                                <input type="text" id="country" class="form-input" placeholder="India" value="India">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Education & Lead Information -->
+                    <div class="mb-8 pt-8 border-t border-gray-200">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="material-symbols-outlined text-primary text-2xl">school</span>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800">Education & Lead Details</h3>
+                                <p class="text-sm text-gray-500">Academic background and lead information</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="instituteName" class="form-label">Institute Name</label>
+                                <input type="text" id="instituteName" class="form-input" placeholder="University Name">
+                            </div>
+                            <div>
+                                <label for="qualification" class="form-label">Qualification</label>
+                                <input type="text" id="qualification" class="form-input" placeholder="B.Tech, MBA, etc.">
+                            </div>
+                            <div>
+                                <label for="courseInterest" class="form-label">Course Interested In</label>
+                                <input type="text" id="courseInterest" class="form-input" placeholder="Data Science, Web Development, etc.">
+                            </div>
+                            <div>
+                                <label for="opportunityAmount" class="form-label">Opportunity Amount</label>
+                                <input type="number" id="opportunityAmount" class="form-input" placeholder="50000">
                             </div>
                             <div>
                                 <label for="leadSource" class="form-label">Lead Source</label>
                                 <select id="leadSource" class="form-input">
-                                    <option value="">Select Source</option>
-                                    <option value="Website">Website</option>
-                                    <option value="Social Media">Social Media</option>
-                                    <option value="Referral">Referral</option>
+                                    <option value="">Select</option>
                                     <option value="Cold Call">Cold Call</option>
-                                    <option value="Email">Email Campaign</option>
-                                    <option value="Campaign">Marketing Campaign</option>
+                                    <option value="Existing Customer">Existing Customer</option>
+                                    <option value="Self Generated">Self Generated</option>
+                                    <option value="Employee">Employee</option>
+                                    <option value="Partner">Partner</option>
+                                    <option value="Public Relations">Public Relations</option>
+                                    <option value="Direct Mail">Direct Mail</option>
+                                    <option value="Conference">Conference</option>
+                                    <option value="Trade Show">Trade Show</option>
+                                    <option value="Website">Website</option>
                                     <option value="Word of Mouth">Word of Mouth</option>
+                                    <option value="Email">Email</option>
+                                    <option value="Campaign">Campaign</option>
                                     <option value="Other">Other</option>
                                 </select>
                             </div>
-                            <div class="md:col-span-2">
-                                <label for="statusDescription" class="form-label">Status Description</label>
-                                <textarea id="statusDescription" rows="3" class="form-input" placeholder="Current status and next steps..."></textarea>
+                            <div>
+                                <label for="referredBy" class="form-label">Referred By</label>
+                                <input type="text" id="referredBy" class="form-input" placeholder="Name of referrer">
                             </div>
                             <div>
-                                <label for="courseInterest" class="form-label">Course Interested In</label>
-                                <input type="text" id="courseInterest" class="form-input" placeholder="e.g., Web Development Bootcamp">
-                            </div>
-                            <div>
-                                <label for="opportunityAmount" class="form-label">Opportunity Amount</label>
-                                <div class="relative">
-                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">$</span>
-                                    <input type="number" id="opportunityAmount" class="form-input pl-8" placeholder="5000.00" min="0" step="0.01">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <hr class="my-8 border-gray-200">
-                    
-                    <div>
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-primary text-2xl">work</span>
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-800">Background Information</h3>
-                                <p class="text-sm text-gray-500">Educational and professional details of the lead.</p>
-                            </div>
-                        </div>
-                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                            <div>
-                                <label for="instituteName" class="form-label">Institute Name</label>
-                                <input type="text" id="instituteName" class="form-input" placeholder="University of Technology">
-                            </div>
-                            <div>
-                                <label for="qualification" class="form-label">Qualification</label>
-                                <input type="text" id="qualification" class="form-input" placeholder="Bachelor's in Computer Science">
-                            </div>
-                            <div>
-                                <label for="workingStatus" class="form-label">Working/Student Status</label>
-                                <select id="workingStatus" class="form-input">
-                                    <option value="">Select Status</option>
-                                    <option value="Working">Working Professional</option>
-                                    <option value="Student">Student</option>
-                                    <option value="Unemployed">Unemployed</option>
-                                    <option value="Self-Employed">Self-Employed</option>
+                                <label for="status" class="form-label">Status</label>
+                                <select id="status" class="form-input">
+                                    <option value="New">New</option>
+                                    <option value="Assigned">Assigned</option>
+                                    <option value="In Process">In Process</option>
+                                    <option value="Converted">Converted</option>
+                                    <option value="Recycled">Recycled</option>
+                                    <option value="Dead">Dead</option>
                                 </select>
                             </div>
-                        </div>
-                    </div>
-
-                    <hr class="my-8 border-gray-200">
-
-                    <div>
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-primary text-2xl">location_on</span>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800">Address Information</h3>
-                                <p class="text-sm text-gray-500">The primary address of the lead.</p>
+                                <label for="statusDescription" class="form-label">Status Description</label>
+                                <input type="text" id="statusDescription" class="form-input" placeholder="Additional status notes">
                             </div>
-                        </div>
-                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                            <div class="md:col-span-2">
-                                 <label for="street" class="form-label">Street Address</label>
-                                 <textarea id="street" rows="2" class="form-input" placeholder="123 Main Street, Apt 4B"></textarea>
-                            </div>
-                            <div>
-                                 <label for="city" class="form-label">City</label>
-                                 <input type="text" id="city" class="form-input" placeholder="San Francisco">
-                            </div>
-                            <div>
-                                 <label for="state" class="form-label">State/Province</label>
-                                 <input type="text" id="state" class="form-input" placeholder="California">
-                            </div>
-                            <div>
-                                 <label for="postalCode" class="form-label">Postal Code</label>
-                                 <input type="text" id="postalCode" class="form-input" placeholder="94102">
-                            </div>
-                            <div>
-                                 <label for="country" class="form-label">Country</label>
-                                 <select id="country" class="form-input">
-                                     <option value="">Select Country</option>
-                                     <option value="USA">United States</option>
-                                     <option value="India">India</option>
-                                     <option value="UK">United Kingdom</option>
-                                     <option value="Canada">Canada</option>
-                                 </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <hr class="my-8 border-gray-200">
-                    
-                    <div>
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-primary text-2xl">assignment_ind</span>
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-800">Assignment & Notes</h3>
-                                <p class="text-sm text-gray-500">Assign the lead and add any relevant notes.</p>
-                            </div>
-                        </div>
-                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                             <div>
                                 <label for="assignedTo" class="form-label">Assigned To</label>
                                 <select id="assignedTo" class="form-input">
                                     <option value="">Select User</option>
                                 </select>
                             </div>
-                            <div>
-                                 <label for="referredBy" class="form-label">Referred By</label>
-                                 <input type="text" id="referredBy" class="form-input" placeholder="Name of referrer">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label for="description" class="form-label">Description / Notes</label>
-                                <textarea id="description" rows="4" class="form-input" placeholder="e.g., Spoke to the lead on Monday, interested in the evening batch..."></textarea>
-                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <label for="description" class="form-label">Description / Notes</label>
+                            <textarea id="description" rows="4" class="form-input" placeholder="Additional notes about the lead..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -549,434 +421,164 @@
         </main>
     </div>
 
-    <!-- Lead Modal -->
-    <div id="leadModal" class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-      <div class="bg-white rounded-xl w-full max-w-4xl p-6 relative shadow-lg">
-        <button onclick="closeLeadModal()" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
-          <span class="material-symbols-outlined text-2xl">close</span>
-        </button>
-        <h2 class="text-xl font-bold mb-4 text-gray-900">Lead Details</h2>
-        <div class="flex gap-6">
-          <div class="w-2/3 bg-white rounded-lg p-4">
-            <h2 id="leadName" class="text-xl font-bold mb-2"></h2>
-            <p><strong>Email:</strong> <span id="leadEmail"></span></p>
-            <p><strong>Phone:</strong> <span id="leadPhone"></span></p>
-            <p><strong>Status:</strong> <span id="leadStatus"></span></p>
-            <p><strong>Course:</strong> <span id="leadCourse"></span></p>
-          </div>
-         
-          <div class="w-1/3 bg-gray-50 rounded-lg p-4 shadow">
-            <h3 class="font-bold mb-4">Communications Timeline</h3>
-            <div id="communicationsTimeline" class="flex flex-col gap-4">
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-600">delete</span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Delete Lead</h3>
+                    <p class="text-sm text-gray-500">This action cannot be undone</p>
+                </div>
             </div>
-          </div>
-        </div>
-
-        <div id="googleActions" class="mt-6 flex flex-col gap-2">
-            <button id="connectGoogleBtn" class="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors hidden">
-                Connect Google Workspace
-            </button>
-            <div class="flex gap-2">
-                <button id="composeEmailBtn" class="px-4 py-2 text-sm font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors" disabled>
-                    Compose Email
+            <p class="text-gray-600 mb-6">Are you sure you want to delete this lead? All associated data will be permanently removed.</p>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                    Cancel
                 </button>
-                <button id="createEventBtn" class="px-4 py-2 text-sm font-semibold bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors" disabled>
-                    Create Calendar Event
+                <button onclick="confirmDelete()" class="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+                    Delete Lead
                 </button>
             </div>
-        </div>
-
-        <div class="mt-4 text-right">
-          <button onclick="closeLeadModal()" class="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">Close</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Enhanced Email Modal with File Attachments -->
-    <div id="emailModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden animate-fadeIn max-h-[90vh] flex flex-col">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                        <span class="material-symbols-outlined text-white">mail</span>
-                    </div>
-                    <div>
-                        <h2 class="text-xl font-bold text-white">Compose Email</h2>
-                        <p class="text-red-100 text-sm">Send email to lead</p>
-                    </div>
-                </div>
-                <button onclick="closeEmailModal()" class="text-white hover:bg-white/20 rounded-full p-2 transition-colors">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-
-            <!-- Form -->
-            <form id="emailForm" class="flex-1 overflow-hidden flex flex-col">
-                <div class="p-6 space-y-4 flex-1 overflow-y-auto">
-                    <!-- To Field -->
-                    <div>
-                        <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                            <span class="material-symbols-outlined text-base mr-2">person</span>
-                            Recipient
-                        </label>
-                        <div class="relative">
-                            <input 
-                                type="text" 
-                                id="emailTo" 
-                                class="w-full pl-4 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 focus:bg-white transition-all text-gray-700 font-medium" 
-                                readonly 
-                            />
-                            <span class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400 text-sm">lock</span>
-                        </div>
-                    </div>
-
-                    <!-- Subject Field -->
-                    <div>
-                        <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                            <span class="material-symbols-outlined text-base mr-2">subject</span>
-                            Subject
-                        </label>
-                        <input 
-                            type="text" 
-                            id="emailSubject" 
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 transition-all" 
-                            placeholder="Enter email subject..." 
-                            required 
-                        />
-                    </div>
-
-                    <!-- File Attachments Section -->
-                    <div>
-                        <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                            <span class="material-symbols-outlined text-base mr-2">attach_file</span>
-                            Attachments
-                            <span id="attachmentCount" class="ml-2 text-xs text-gray-500">(0 files)</span>
-                        </label>
-                        
-                        <!-- File Upload Area -->
-                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-gray-400 transition-colors">
-                            <input 
-                                type="file" 
-                                id="emailAttachments" 
-                                multiple 
-                                class="hidden" 
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xlsx,.xls,.ppt,.pptx"
-                            />
-                            <div class="text-center">
-                                <button 
-                                    type="button"
-                                    onclick="document.getElementById('emailAttachments').click()" 
-                                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                                >
-                                    <span class="material-symbols-outlined text-base">add</span>
-                                    Add Files
-                                </button>
-                                <p class="text-xs text-gray-500 mt-2">Max 10MB per file. Supported: PDF, Word, Images, Excel, PowerPoint, Text</p>
-                            </div>
-                        </div>
-
-                        <!-- Selected Files List -->
-                        <div id="emailFileList" class="mt-3 space-y-2 max-h-32 overflow-y-auto">
-                            <!-- Files will be listed here -->
-                        </div>
-
-                        <!-- Upload Progress -->
-                        <div id="uploadProgress" class="mt-3 hidden">
-                            <div class="flex items-center space-x-2 text-sm text-blue-600">
-                                <span class="material-symbols-outlined text-base animate-spin">refresh</span>
-                                <span>Uploading files...</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Message Field -->
-                    <div class="flex-1 min-h-[200px]">
-                        <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                            <span class="material-symbols-outlined text-base mr-2">description</span>
-                            Message
-                        </label>
-                        <textarea 
-                            id="emailBody" 
-                            class="w-full h-full min-h-[200px] px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-red-500 transition-all resize-none" 
-                            placeholder="Type your message here..." 
-                            required
-                        ></textarea>
-                        <div class="flex items-center justify-between mt-2 text-xs text-gray-500">
-                            <span class="flex items-center">
-                                <span class="material-symbols-outlined text-sm mr-1">info</span>
-                                Professional email signature will be added automatically
-                            </span>
-                            <span id="charCount">0 characters</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
-                    <button 
-                        type="button" 
-                        onclick="closeEmailModal()" 
-                        class="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <div class="flex items-center space-x-3">
-                        <button 
-                            type="button"
-                            onclick="saveAsDraft()"
-                            class="px-4 py-2.5 text-sm font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors flex items-center"
-                        >
-                            <span class="material-symbols-outlined text-base mr-1">save</span>
-                            Save Draft
-                        </button>
-                        <button 
-                            type="submit" 
-                            id="sendEmailBtn"
-                            class="px-8 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <span class="material-symbols-outlined text-base mr-2">send</span>
-                            Send Email
-                        </button>
-                    </div>
-                </div>
-            </form>
         </div>
     </div>
-
-    <!-- Enhanced Calendar Event Modal -->
-    <div id="eventModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-fadeIn">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                        <span class="material-symbols-outlined text-white">event</span>
-                    </div>
-                    <div>
-                        <h2 class="text-xl font-bold text-white">Schedule Meeting</h2>
-                        <p class="text-green-100 text-sm">Create a new calendar event</p>
-                    </div>
+    <!-- Admin Warning Modal -->
+    <div id="adminWarningModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-yellow-600">warning</span>
                 </div>
-                <button onclick="closeEventModal()" class="text-white hover:bg-white/20 rounded-full p-2 transition-colors">
-                    <span class="material-symbols-outlined">close</span>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Admin Permission Required</h3>
+                    <p class="text-sm text-gray-500">Restricted Action</p>
+                </div>
+            </div>
+            <p class="text-gray-600 mb-6">Only administrators can delete leads. Please contact your admin if you need to remove this lead.</p>
+            <div class="flex justify-end">
+                <button onclick="closeAdminWarning()" class="px-6 py-2.5 text-sm font-semibold text-white bg-primary hover:bg-primary-dark rounded-lg transition-colors">
+                    Got it
                 </button>
             </div>
-
-            <!-- Form -->
-            <form id="eventForm" class="p-6 space-y-4">
-                <!-- Title Field -->
-                <div>
-                    <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                        <span class="material-symbols-outlined text-base mr-2">title</span>
-                        Meeting Title
-                    </label>
-                    <input 
-                        type="text" 
-                        id="eventTitle" 
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 transition-all" 
-                        placeholder="Enter meeting title..." 
-                        required 
-                    />
-                </div>
-
-                <!-- Description Field -->
-                <div>
-                    <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                        <span class="material-symbols-outlined text-base mr-2">notes</span>
-                        Description
-                    </label>
-                    <textarea 
-                        id="eventDescription" 
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 transition-all resize-none" 
-                        rows="4" 
-                        placeholder="Add meeting agenda, notes, or details..."
-                    ></textarea>
-                </div>
-
-                <!-- Enhanced Date & Time Fields -->
-                <div class="space-y-4">
-                    <!-- Date Selection -->
-                    <div>
-                        <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                            <span class="material-symbols-outlined text-base mr-2">calendar_today</span>
-                            Meeting Date
-                        </label>
-                        <input 
-                            type="date" 
-                            id="eventDate" 
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 transition-all text-base" 
-                            required 
-                        />
-                    </div>
-
-                    <!-- Time Selection -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                                <span class="material-symbols-outlined text-base mr-2">schedule</span>
-                                Start Time
-                            </label>
-                            <select 
-                                id="eventStartTime" 
-                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 transition-all text-base"
-                                required
-                            >
-                                <option value="">Select time</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="flex items-center text-sm font-semibold text-gray-700 mb-2">
-                                <span class="material-symbols-outlined text-base mr-2">schedule</span>
-                                End Time
-                            </label>
-                            <select 
-                                id="eventEndTime" 
-                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 transition-all text-base"
-                                required
-                            >
-                                <option value="">Select time</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Duration Helper -->
-                    <div id="durationHelper" class="hidden bg-green-50 border border-green-200 rounded-lg p-3">
-                        <div class="flex items-center text-sm text-green-800">
-                            <span class="material-symbols-outlined text-base mr-2">info</span>
-                            <span id="durationText"></span>
-                        </div>
-                    </div>
-                </div>
-                <!-- Meeting Options -->
-                <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-                    <div class="flex items-start space-x-3">
-                        <span class="material-symbols-outlined text-green-600 mt-0.5">videocam</span>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-green-900">Google Meet Integration</p>
-                            <p class="text-xs text-green-700 mt-1">A video conference link will be automatically generated for this meeting</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                    <button 
-                        type="button" 
-                        onclick="closeEventModal()" 
-                        class="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <div class="flex items-center space-x-3">
-                        <button 
-                            type="button"
-                            class="px-4 py-2.5 text-sm font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors flex items-center"
-                        >
-                            <span class="material-symbols-outlined text-base mr-1">notifications</span>
-                            Reminders
-                        </button>
-                        <button 
-                            type="submit" 
-                            class="px-8 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center"
-                        >
-                            <span class="material-symbols-outlined text-base mr-2">check</span>
-                            Create Event
-                        </button>
-                    </div>
-                </div>
-            </form>
         </div>
     </div>
 
 <script>
-    const API_BASE_URL = 'https://crm-1-ss55.onrender.com';
-    let allLeads = [];
-    let filteredLeads = []; // Added missing variable declaration
-    let currentFilter = 'all';
-    let authToken = localStorage.getItem('authToken');
-    let editingLeadId = null;
-    let googleConnected = false;
-    let currentLeadId = null;
+        const API_BASE_URL = 'https://crm-frontend-eta-drab.vercel.app';
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = null;
+        let allLeads = [];
+        let filteredLeads = [];
+        let currentPage = 1;
+        const leadsPerPage = 10;
+        let currentFilter = 'all';
+        let editingLeadId = null;
+        let deletingLeadId = null;
 
-    // Pagination variables
-    let currentPage = 1;
-    const leadsPerPage = 10;
-
-    // File attachment variables - ADD THESE
-    let emailAttachments = [];
-    let isUploading = false;
-
-    function openCreateLeadPage() {
-        document.getElementById('leadsPage').style.display = 'none';
-        document.getElementById('createLeadPage').classList.add('active');
-        document.getElementById('addLeadForm').reset();
-        editingLeadId = null;
-        loadSalesManagers();
-    }
-
-    function closeCreateLeadPage() {
-        document.getElementById('createLeadPage').classList.remove('active');
-        document.getElementById('leadsPage').style.display = 'block';
-    }
-
-    async function apiRequest(endpoint, options = {}) {
-        const url = `${API_BASE_URL}${endpoint}`;
-        const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                ...(authToken && { 'Authorization': `Bearer ${authToken}` })
-            },
-            ...options
-        };
-
-        try {
-            const response = await fetch(url, config);
-            
-            if (response.status === 401) {
-                localStorage.removeItem('authToken');
-                window.location.href = './login.html';
-                return;
-            }
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
-            }
-            
-            return await response.json();
-        } catch (error) {
-            console.error('API Error:', error);
-            throw error;
+        if (!authToken) {
+            window.location.href = './login.html';
         }
-    }
 
-    async function loadLeads() {
-        try {
-            showLoading(true);
-            hideError();
-            const leads = await apiRequest('/leads');
-            allLeads = leads || [];
-            filteredLeads = [...allLeads];
-            renderLeads(allLeads);
-        } catch (error) {
-            showError('Failed to load leads: ' + error.message);
-        } finally {
-            showLoading(false);
+        async function apiRequest(endpoint, options = {}) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+                },
+                ...options
+            };
+
+            try {
+                const response = await fetch(url, config);
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('authToken');
+                    window.location.href = './login.html';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || `HTTP ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
         }
-    }
 
-    function renderLeads(leads) {
-        filteredLeads = leads; // Store filtered results
+        async function init() {
+            try {
+                currentUser = await apiRequest('/me');
+                
+                if (currentUser.role !== 'ADMIN') {
+                    const salesTeamLink = document.getElementById('salesTeamLink');
+                    if (salesTeamLink) salesTeamLink.style.display = 'none';
+                }
+
+                await loadLeads();
+                await loadSalesManagers();
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('edit') === 'true') {
+                    const editData = sessionStorage.getItem('editLeadData');
+                    if (editData) {
+                        const lead = JSON.parse(editData);
+                        openEditLeadPage(lead.id);
+                        sessionStorage.removeItem('editLeadData');
+                    }
+                }
+            } catch (error) {
+                showError('Failed to initialize: ' + error.message);
+            }
+        }
+
+        async function loadLeads() {
+            try {
+                showLoading(true);
+                hideError();
+                const leads = await apiRequest('/leads');
+                allLeads = leads || [];
+                filteredLeads = [...allLeads];
+                renderLeads(allLeads);
+            } catch (error) {
+                showError('Failed to load leads: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function loadSalesManagers() {
+            try {
+                if (currentUser.role === 'ADMIN') {
+                    const users = await apiRequest('/sales-managers');
+                    const assignedToSelect = document.getElementById('assignedTo');
+                    assignedToSelect.innerHTML = '<option value="">Select User</option>';
+                    users.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = user.name;
+                        assignedToSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to load sales managers:', error);
+            }
+        }
+
+        function renderLeads(leads) {
+        filteredLeads = leads;
         const totalPages = Math.ceil(filteredLeads.length / leadsPerPage);
         
-        // Reset to page 1 if current page is out of bounds
         if (currentPage > totalPages && totalPages > 0) {
             currentPage = 1;
         }
         
-        // Calculate start and end indices
         const startIndex = (currentPage - 1) * leadsPerPage;
         const endIndex = Math.min(startIndex + leadsPerPage, filteredLeads.length);
         const paginatedLeads = filteredLeads.slice(startIndex, endIndex);
@@ -992,7 +594,7 @@
                         <p class="text-gray-400 text-sm mt-1">Create your first lead to get started</p>
                     </td>
                 </tr>`;
-            updatePaginationUI(0, 0);
+            updatePaginationUI(0, 0, 0);
             return;
         }
 
@@ -1000,1127 +602,352 @@
             'New': 'bg-blue-100 text-blue-800',
             'Assigned': 'bg-yellow-100 text-yellow-800',
             'In Process': 'bg-orange-100 text-orange-800',
-            'Converted': 'bg-green-100 text-green-800'
+            'Converted': 'bg-green-100 text-green-800',
+            'Recycled': 'bg-purple-100 text-purple-800',
+            'Dead': 'bg-red-100 text-red-800'
         };
+
+        // Check if current user is admin
+        const isAdmin = currentUser && currentUser.role === 'ADMIN';
 
         tbody.innerHTML = paginatedLeads.map(lead => `
             <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 font-semibold text-gray-900">${lead.first_name || ''} ${lead.last_name || ''}</td>
+                <td class="px-6 py-4 font-semibold text-gray-900">
+                    ${lead.first_name || ''} ${lead.last_name || ''}
+                </td>
                 <td class="px-6 py-4">
-                    <span class="px-3 py-1 text-xs font-bold rounded-full ${statusColors[lead.status] || 'bg-blue-100 text-blue-800'}">
+                    <span class="px-3 py-1 text-xs font-bold rounded-full ${statusColors[lead.status] || 'bg-gray-100 text-gray-800'}">
                         ${lead.status || 'New'}
                     </span>
                 </td>
-                <td class="px-6 py-4 hidden md:table-cell text-gray-700 font-medium">${lead.course_interested_in || '-'}</td>
-                <td class="px-6 py-4 hidden lg:table-cell text-gray-600">${lead.lead_source || '-'}</td>
+                <td class="px-6 py-4 hidden md:table-cell text-gray-700 font-medium">
+                    ${lead.course_interested_in || '-'}
+                </td>
+                <td class="px-6 py-4 hidden lg:table-cell text-gray-600">
+                    ${lead.lead_source || '-'}
+                </td>
                 <td class="px-6 py-4 hidden sm:table-cell">
                     <div class="text-gray-700 font-medium">${lead.email_address || ''}</div>
                     <div class="text-xs text-gray-500 mt-1">${lead.mobile_number || ''}</div>
                 </td>
                 <td class="px-6 py-4 flex gap-2">
-                    <button onclick="viewLeadDetail(${lead.id})" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors">
-                            <span class="material-symbols-outlined">visibility</span>
-                        </button>
-                    <button onclick="openEditLeadPage(${lead.id})" class="p-2 text-yellow-500 hover:bg-yellow-100 rounded-lg transition-colors">
+                    <button onclick="viewLeadDetail(${lead.id})" class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors" title="View">
+                        <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                    <button onclick="openEditLeadPage(${lead.id})" class="p-2 text-yellow-500 hover:bg-yellow-100 rounded-lg transition-colors" title="Edit">
                         <span class="material-symbols-outlined">edit</span>
                     </button>
-                    <button onclick="openGmail('${lead.email_address}', ${lead.id})" class="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors" title="Send Email">
-                        <span class="material-symbols-outlined">email</span>
-                    </button>
-                    <button onclick="openGoogleCalendar('${lead.first_name} ${lead.last_name}', '${lead.email_address}', ${lead.id})" class="p-2 text-green-500 hover:bg-green-100 rounded-lg transition-colors" title="Schedule Meeting">
-                        <span class="material-symbols-outlined">event</span>
-                    </button>
+                    ${isAdmin ? `
+                        <button onclick="showDeleteModal(${lead.id})" class="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors" title="Delete">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    ` : `
+                        <button onclick="showAdminWarning()" class="p-2 text-gray-400 cursor-not-allowed rounded-lg" title="Admin permission required" disabled>
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    `}
                 </td>
-            </tr>`).join('');
-        
+            </tr>
+        `).join('');
+
         updatePaginationUI(startIndex, endIndex, filteredLeads.length);
+    }
+
+    // Add this new function to show warning
+    function showAdminWarning() {
+        document.getElementById('adminWarningModal').classList.remove('hidden');
+    }
+    
+    function closeAdminWarning() {
+        document.getElementById('adminWarningModal').classList.add('hidden');
     }
 
     function updatePaginationUI(startIndex, endIndex, totalLeads) {
         const totalPages = Math.ceil(totalLeads / leadsPerPage);
-        
-        // Update showing text
-        document.getElementById('showingStart').textContent = totalLeads > 0 ? startIndex + 1 : 0;
-        document.getElementById('showingEnd').textContent = endIndex;
-        document.getElementById('totalLeads').textContent = totalLeads;
-        
-        // Update prev/next buttons
-        document.getElementById('prevBtn').disabled = currentPage === 1;
-        document.getElementById('nextBtn').disabled = currentPage === totalPages || totalPages === 0;
-        
-        // Generate page numbers
-        const pageNumbersContainer = document.getElementById('pageNumbers');
-        pageNumbersContainer.innerHTML = '';
-        
-        if (totalPages <= 7) {
-            // Show all pages if 7 or fewer
-            for (let i = 1; i <= totalPages; i++) {
-                pageNumbersContainer.appendChild(createPageButton(i));
-            }
-        } else {
-            // Show smart pagination with ellipsis
-            pageNumbersContainer.appendChild(createPageButton(1));
             
-            if (currentPage > 3) {
-                pageNumbersContainer.appendChild(createEllipsis());
-            }
+            document.getElementById('showingStart').textContent = totalLeads > 0 ? startIndex + 1 : 0;
+            document.getElementById('showingEnd').textContent = endIndex;
+            document.getElementById('totalLeads').textContent = totalLeads;
             
-            let start = Math.max(2, currentPage - 1);
-            let end = Math.min(totalPages - 1, currentPage + 1);
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages || totalPages === 0;
             
-            for (let i = start; i <= end; i++) {
-                pageNumbersContainer.appendChild(createPageButton(i));
-            }
+            const pageNumbersContainer = document.getElementById('pageNumbers');
+            pageNumbersContainer.innerHTML = '';
             
-            if (currentPage < totalPages - 2) {
-                pageNumbersContainer.appendChild(createEllipsis());
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) {
+                    pageNumbersContainer.appendChild(createPageButton(i));
+                }
+            } else {
+                pageNumbersContainer.appendChild(createPageButton(1));
+                
+                if (currentPage > 3) {
+                    pageNumbersContainer.appendChild(createEllipsis());
+                }
+                
+                let start = Math.max(2, currentPage - 1);
+                let end = Math.min(totalPages - 1, currentPage + 1);
+                
+                for (let i = start; i <= end; i++) {
+                    pageNumbersContainer.appendChild(createPageButton(i));
+                }
+                
+                if (currentPage < totalPages - 2) {
+                    pageNumbersContainer.appendChild(createEllipsis());
+                }
+                
+                pageNumbersContainer.appendChild(createPageButton(totalPages));
             }
-            
-            pageNumbersContainer.appendChild(createPageButton(totalPages));
-        }
-    }
-
-    function createPageButton(pageNum) {
-        const button = document.createElement('button');
-        button.className = `pagination-btn ${pageNum === currentPage ? 'active' : 'text-gray-700 border border-gray-300'}`;
-        button.textContent = pageNum;
-        button.onclick = () => goToPage(pageNum);
-        return button;
-    }
-
-    function createEllipsis() {
-        const span = document.createElement('span');
-        span.className = 'px-2 text-gray-500';
-        span.textContent = '...';
-        return span;
-    }
-
-    function goToPage(page) {
-        const totalPages = Math.ceil(filteredLeads.length / leadsPerPage);
-        if (page < 1 || page > totalPages) return;
-        
-        currentPage = page;
-        renderLeads(filteredLeads);
-        
-        // Scroll to top of table
-        document.getElementById('leadsTableBody').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    function filterByStatus(status) {
-        currentFilter = status;
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.remove('active', 'bg-primary', 'text-white', 'shadow-sm');
-            btn.classList.add('bg-white', 'text-gray-700', 'border', 'border-gray-200');
-        });
-        
-        // Find and activate the clicked button
-        const buttons = document.querySelectorAll('.filter-btn');
-        buttons.forEach(btn => {
-            if (btn.textContent.trim() === status || (status === 'all' && btn.textContent.trim() === 'All Leads')) {
-                btn.classList.remove('bg-white', 'text-gray-700', 'border', 'border-gray-200');
-                btn.classList.add('active', 'bg-primary', 'text-white', 'shadow-sm');
-            }
-        });
-        
-        applyFilters();
-    }
-
-    function filterLeads() {
-        applyFilters();
-    }
-
-    function applyFilters() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        let filtered = allLeads;
-
-        if (currentFilter !== 'all') {
-            filtered = filtered.filter(lead => lead.status === currentFilter);
         }
 
-        if (searchTerm) {
-            filtered = filtered.filter(lead => 
-                (lead.first_name && lead.first_name.toLowerCase().includes(searchTerm)) ||
-                (lead.last_name && lead.last_name.toLowerCase().includes(searchTerm)) ||
-                (lead.email_address && lead.email_address.toLowerCase().includes(searchTerm)) ||
-                (lead.mobile_number && lead.mobile_number.includes(searchTerm))
-            );
+        function createPageButton(pageNum) {
+            const button = document.createElement('button');
+            button.className = `pagination-btn ${pageNum === currentPage ? 'active' : 'text-gray-700 border border-gray-300'}`;
+            button.textContent = pageNum;
+            button.onclick = () => goToPage(pageNum);
+            return button;
         }
 
-        currentPage = 1; // Reset to first page when filtering
-        renderLeads(filtered);
-    }
+        function createEllipsis() {
+            const span = document.createElement('span');
+            span.className = 'px-2 text-gray-500';
+            span.textContent = '...';
+            return span;
+        }
 
-    // Consolidated viewLead function
-    function viewLeadDetail(leadId) {
-        window.location.href = `lead-detail.html?id=${leadId}`;
-    }
+        function goToPage(page) {
+            const totalPages = Math.ceil(filteredLeads.length / leadsPerPage);
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            renderLeads(filteredLeads);
+            
+            document.getElementById('leadsTableBody').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
 
-    function closeLeadModal() {
-        document.getElementById('leadModal').classList.add('hidden');
-    }
+        function filterByStatus(status) {
+            currentFilter = status;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-primary', 'text-white', 'shadow-sm');
+                btn.classList.add('bg-white', 'text-gray-700', 'border', 'border-gray-200');
+            });
+            
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                if (btn.textContent.trim() === status || (status === 'all' && btn.textContent.trim() === 'All Leads')) {
+                    btn.classList.remove('bg-white', 'text-gray-700', 'border', 'border-gray-200');
+                    btn.classList.add('active', 'bg-primary', 'text-white', 'shadow-sm');
+                }
+            });
+            
+            applyFilters();
+        }
 
-    async function loadLeadDetail(leadId) {
-        currentLeadId = leadId;
+        function filterLeads() {
+            applyFilters();
+        }
 
-        try {
-            // 1. Fetch lead info
-            const lead = await apiRequest(`/leads/${leadId}`);
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = allLeads;
+
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(lead => lead.status === currentFilter);
+            }
+
+            if (searchTerm) {
+                filtered = filtered.filter(lead => 
+                    (lead.first_name && lead.first_name.toLowerCase().includes(searchTerm)) ||
+                    (lead.last_name && lead.last_name.toLowerCase().includes(searchTerm)) ||
+                    (lead.email_address && lead.email_address.toLowerCase().includes(searchTerm)) ||
+                    (lead.mobile_number && lead.mobile_number.includes(searchTerm))
+                );
+            }
+
+            currentPage = 1;
+            renderLeads(filtered);
+        }
+
+        function viewLeadDetail(leadId) {
+            window.location.href = `lead-detail.html?id=${leadId}`;
+        }
+
+        function openCreateLeadPage() {
+            editingLeadId = null;
+            document.getElementById('createPageTitle').textContent = 'Create New Lead';
+            document.getElementById('saveButtonText').textContent = 'Save Lead';
+            document.getElementById('addLeadForm').reset();
+            document.getElementById('status').value = 'New';
+            document.getElementById('leadsPage').style.display = 'none';
+            document.getElementById('createLeadPage').classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function closeCreateLeadPage() {
+            document.getElementById('createLeadPage').classList.remove('active');
+            document.getElementById('leadsPage').style.display = 'block';
+            document.getElementById('addLeadForm').reset();
+            editingLeadId = null;
+            window.scrollTo(0, 0);
+        }
+
+        function openEditLeadPage(leadId) {
+            const lead = allLeads.find(l => l.id === leadId);
             if (!lead) {
                 showError('Lead not found');
                 return;
             }
 
-            document.getElementById('leadName').textContent = `${lead.first_name} ${lead.last_name}`;
-            document.getElementById('leadEmail').textContent = lead.email_address || '-';
-            document.getElementById('leadPhone').textContent = lead.mobile_number || '-';
-            document.getElementById('leadStatus').textContent = lead.status || '-';
-            document.getElementById('leadCourse').textContent = lead.course_interested_in || '-';
+            editingLeadId = leadId;
+            document.getElementById('createPageTitle').textContent = 'Edit Lead';
+            document.getElementById('saveButtonText').textContent = 'Update Lead';
 
-            // 2. Fetch communications timeline
-            const communications = await apiRequest(`/leads/${leadId}/communications`);
-            renderTimeline(communications);
-
-            // 3. Check Google Workspace connection
-            checkGoogleStatus();
-        } catch (err) {
-            console.error(err);
-            showError('Failed to load lead details.');
-        }
-    }
-
-    function renderTimeline(comms) {
-        const container = document.getElementById('communicationsTimeline');
-        container.innerHTML = '';
-
-        if (!comms || comms.length === 0) {
-            container.innerHTML = '<p class="text-gray-400">No communications yet.</p>';
-            return;
-        }
-
-        comms.forEach(c => {
-            const item = document.createElement('div');
-            item.className = 'p-3 bg-white rounded-lg shadow-sm border-l-4';
-
-            // Color based on type
-            if (c.type === 'email') item.classList.add('border-blue-500');
-            else if (c.type === 'meeting') item.classList.add('border-green-500');
-
-            item.innerHTML = `
-                <p class="font-semibold">${c.subject}</p>
-                <p class="text-sm text-gray-500">${c.type === 'email' ? 'Email sent' : 'Meeting scheduled'}</p>
-                ${c.scheduled_at ? `<p class="text-xs text-gray-400">Scheduled: ${new Date(c.scheduled_at).toLocaleString()}</p>` : ''}
-                ${c.completed_at ? `<p class="text-xs text-gray-400">Completed: ${new Date(c.completed_at).toLocaleString()}</p>` : ''}
-                ${c.meet_link ? `<p><a href="${c.meet_link}" target="_blank" class="text-green-600 underline">Join Meeting</a></p>` : ''}
-            `;
-            container.appendChild(item);
-        });
-    }
-
-    function switchPage(pageId, clickedElement) {
-        // 1. Hide all page content sections
-        document.querySelectorAll('.page-content').forEach(page => {
-            page.classList.add('hidden');
-        });
-
-        // 2. Show the selected page
-        const pageToShow = document.getElementById(pageId + 'Page');
-        if (pageToShow) {
-            pageToShow.classList.remove('hidden');
-        }
-
-        // 3. Update the active state in the navigation
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-        });
-        clickedElement.classList.add('active');
-        
-        // 4. (Optional) Load data for the specific page
-        if (pageId === 'dashboard') {
-            loadDashboardData();
-        }
-    }
-
-    async function loadDashboardData() {
-        const container = document.getElementById('dashboardContent');
-        container.innerHTML = ''; // Clear previous data
-
-        try {
-            const data = await apiRequest('/dashboard');
-
-            if (data.role === 'admin') {
-                container.innerHTML = `
-                    <div class="section-card text-center bg-blue-100">
-                        <h3 class="font-bold">Total Users</h3>
-                        <p class="text-2xl">${data.total_users}</p>
-                    </div>
-                    <div class="section-card text-center bg-green-100">
-                        <h3 class="font-bold">Sales Managers</h3>
-                        <p class="text-2xl">${data.sales_managers}</p>
-                    </div>
-                    <div class="section-card text-center bg-yellow-100">
-                        <h3 class="font-bold">Leads</h3>
-                        <p class="text-2xl">${data.leads}</p>
-                    </div>
-                    <div class="section-card text-center bg-white font-semibold">
-                        ${data.message || ''}
-                    </div>
-                `;
-            } else {
-                container.innerHTML = `
-                    <div class="section-card text-center bg-blue-100">
-                        <h3 class="font-bold">Monthly Target</h3>
-                        <p class="text-2xl">${data.monthly_target || 0}</p>
-                    </div>
-                    <div class="section-card text-center bg-white font-semibold">
-                        ${data.message || 'Welcome!'}
-                    </div>
-                `;
-            }
-        } catch (error) {
-            showError('Failed to load dashboard: ' + error.message);
-        }
-    }
-
-    async function loadSalesManagers() {
-        try {
-            // Check if user is admin before calling API
-            const user = await apiRequest('/me');
-            if (user.role !== 'ADMIN') {
-                console.log('Skipping sales managers load for non-admin user');
-                // Just populate with empty or current user only
-                const assignedToSelect = document.getElementById('assignedTo');
-                if (assignedToSelect) {
-                    assignedToSelect.innerHTML = `<option value="${user.id}">${user.name}</option>`;
-                }
-                return;
-            }
-            
-            // Admin can proceed
-            const users = await apiRequest('/sales-managers');
-            const assignedToSelect = document.getElementById('assignedTo');
-
-            assignedToSelect.innerHTML = '<option value="">Select User</option>' + 
-                (users || []).map(user => {
-                    const displayName = user.name + (user.email ? ` (${user.email})` : '');
-                    return `<option value="${user.id}">${displayName}</option>`;
-                }).join('');
-        } catch (err) {
-            console.error('Failed to load sales managers:', err);
-        }
-    }
-    function showLoading(show) {
-        document.getElementById('loadingIndicator').classList.toggle('hidden', !show);
-    }
-
-    function showError(message) {
-        const errorDiv = document.getElementById('errorMessage');
-        document.getElementById('errorText').textContent = message;
-        errorDiv.classList.remove('hidden');
-        setTimeout(() => errorDiv.classList.add('hidden'), 5000);
-    }
-
-    function hideError() {
-        document.getElementById('errorMessage').classList.add('hidden');
-    }
-
-    function showSuccess(message) {
-        // Create or get success message element
-        let successDiv = document.getElementById('successMessage');
-        
-        if (!successDiv) {
-            // Create success message element if it doesn't exist
-            successDiv = document.createElement('div');
-            successDiv.id = 'successMessage';
-            successDiv.className = 'fixed top-4 right-4 z-50 bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out';
-            successDiv.innerHTML = `
-                <div class="flex items-center">
-                    <span class="material-symbols-outlined mr-3 text-green-600">check_circle</span>
-                    <span id="successText" class="font-medium"></span>
-                </div>
-            `;
-            document.body.appendChild(successDiv);
-        }
-        
-        // Set message and show
-        document.getElementById('successText').textContent = message;
-        successDiv.classList.remove('hidden', 'opacity-0', 'translate-x-full');
-        successDiv.classList.add('flex', 'opacity-100', 'translate-x-0');
-        
-        // Auto hide after 5 seconds
-        setTimeout(() => {
-            successDiv.classList.remove('opacity-100', 'translate-x-0');
-            successDiv.classList.add('opacity-0', 'translate-x-full');
-            setTimeout(() => {
-                successDiv.classList.add('hidden');
-            }, 300);
-        }, 5000);
-        
-        // Also log to console for debugging
-        console.log('Success:', message);
-    }
-
-    function logout() {
-        localStorage.removeItem('authToken');
-        window.location.href = './login.html';
-    }
-
-    function openEditLeadPage(leadId) {
-        const lead = allLeads.find(l => l.id === leadId);
-        if (!lead) {
-            showError('Lead not found');
-            return;
-        }
-
-        editingLeadId = leadId;
-        document.getElementById('leadsPage').style.display = 'none';
-        document.getElementById('createLeadPage').classList.add('active');
-        document.getElementById('addLeadForm').reset();
-
-        loadSalesManagers().then(() => {
+            document.getElementById('salutation').value = lead.salutation || '';
+            document.getElementById('firstName').value = lead.first_name || '';
+            document.getElementById('lastName').value = lead.last_name || '';
+            document.getElementById('email').value = lead.email_address || '';
+            document.getElementById('mobileNumber').value = lead.mobile_number || '';
+            document.getElementById('alternateMobile').value = lead.alternate_mobile_number || '';
+            document.getElementById('workingStatus').value = lead.working_status || '';
+            document.getElementById('street').value = lead.street || '';
+            document.getElementById('city').value = lead.city || '';
+            document.getElementById('state').value = lead.state || '';
+            document.getElementById('postalCode').value = lead.postal_code || '';
+            document.getElementById('country').value = lead.country || '';
+            document.getElementById('instituteName').value = lead.institute_name || '';
+            document.getElementById('qualification').value = lead.qualification || '';
+            document.getElementById('courseInterest').value = lead.course_interested_in || '';
+            document.getElementById('opportunityAmount').value = lead.opportunity_amount || '';
+            document.getElementById('leadSource').value = lead.lead_source || '';
+            document.getElementById('referredBy').value = lead.referred_by || '';
+            document.getElementById('status').value = lead.status || 'New';
+            document.getElementById('statusDescription').value = lead.status_description || '';
             document.getElementById('assignedTo').value = lead.assigned_to || '';
-        });
+            document.getElementById('description').value = lead.description || '';
 
-        document.getElementById('salutation').value = lead.salutation || '';
-        document.getElementById('firstName').value = lead.first_name || '';
-        document.getElementById('lastName').value = lead.last_name || '';
-        document.getElementById('email').value = lead.email_address || '';
-        document.getElementById('mobileNumber').value = lead.mobile_number || '';
-        document.getElementById('alternateMobile').value = lead.alternate_mobile_number || '';
-        document.getElementById('workingStatus').value = lead.working_status || '';
-        document.getElementById('street').value = lead.street || '';
-        document.getElementById('postalCode').value = lead.postal_code || '';
-        document.getElementById('city').value = lead.city || '';
-        document.getElementById('state').value = lead.state || '';
-        document.getElementById('country').value = lead.country || '';
-        document.getElementById('instituteName').value = lead.institute_name || '';
-        document.getElementById('qualification').value = lead.qualification || '';
-        document.getElementById('courseInterest').value = lead.course_interested_in || '';
-        document.getElementById('description').value = lead.description || '';
-        document.getElementById('opportunityAmount').value = lead.opportunity_amount || '';
-        document.getElementById('leadSource').value = lead.lead_source || '';
-        document.getElementById('referredBy').value = lead.referred_by || '';
-        document.getElementById('status').value = lead.status || 'New';
-        document.getElementById('statusDescription').value = lead.status_description || '';
-    }
-
-    document.getElementById('addLeadForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const leadData = {
-            salutation: document.getElementById('salutation').value || null,
-            first_name: document.getElementById('firstName').value.trim(),
-            last_name: document.getElementById('lastName').value.trim(),
-            email_address: document.getElementById('email').value.trim(),
-            mobile_number: document.getElementById('mobileNumber').value.trim(),
-            alternate_mobile_number: document.getElementById('alternateMobile').value.trim() || null,
-            working_status: document.getElementById('workingStatus').value || null,
-            street: document.getElementById('street').value.trim() || null,
-            postal_code: document.getElementById('postalCode').value.trim() || null,
-            city: document.getElementById('city').value.trim() || null,
-            state: document.getElementById('state').value.trim() || null,
-            country: document.getElementById('country').value || null,
-            institute_name: document.getElementById('instituteName').value.trim() || null,
-            qualification: document.getElementById('qualification').value.trim() || null,
-            course_interested_in: document.getElementById('courseInterest').value.trim() || null,
-            description: document.getElementById('description').value.trim() || null,
-            opportunity_amount: parseFloat(document.getElementById('opportunityAmount').value) || null,
-            lead_source: document.getElementById('leadSource').value || null,
-            referred_by: document.getElementById('referredBy').value.trim() || null,
-            status: document.getElementById('status').value || 'New',
-            status_description: document.getElementById('statusDescription').value.trim() || null,
-            assigned_to: parseInt(document.getElementById('assignedTo').value) || null
-        };
-
-        try {
-            // In the addLeadForm submit handler, after successful update
-            if (editingLeadId) {
-                const updatedLead = await apiRequest(`/leads/${editingLeadId}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(leadData)
-                });
-                const index = allLeads.findIndex(l => l.id === editingLeadId);
-                allLeads[index] = updatedLead;
-                editingLeadId = null;
-                showSuccess('Lead updated successfully!');
-                
-                // Check if we should return to lead detail
-                const returnToDetail = sessionStorage.getItem('returnToLeadDetail');
-                if (returnToDetail) {
-                    sessionStorage.removeItem('returnToLeadDetail');
-                    sessionStorage.setItem('leadJustEdited', 'true');
-                    window.location.href = `lead-detail.html?id=${returnToDetail}`;
-                    return;
-                }
-            }  else {
-                // ✅ CREATE new lead
-                const newLead = await apiRequest('/leads', {
-                    method: 'POST',
-                    body: JSON.stringify(leadData)
-                });
-                allLeads.push(newLead);
-            }
-
-            renderLeads(allLeads);
-            closeCreateLeadPage();
-        } catch (error) {
-            showError((editingLeadId ? 'Failed to update' : 'Failed to create') + ' lead: ' + error.message);
-        }
-    });
-
-    async function checkGoogleStatus() {
-        try {
-            const status = await apiRequest('/google/status');
-            googleConnected = status.connected;
-
-            document.getElementById('connectGoogleBtn').classList.toggle('hidden', googleConnected);
-            document.getElementById('composeEmailBtn').disabled = !googleConnected;
-            document.getElementById('createEventBtn').disabled = !googleConnected;
-        } catch (error) {
-            console.error('Failed to check Google status:', error);
-            document.getElementById('composeEmailBtn').disabled = true;
-            document.getElementById('createEventBtn').disabled = true;
-        }
-    }
-
-    // Enhanced openGmail function
-    function openGmail(email, leadId) {
-        currentLeadId = leadId;
-        const lead = allLeads.find(l => l.id === leadId);
-        
-        // Reset attachments
-        emailAttachments = [];
-        
-        // Populate the email fields
-        document.getElementById('emailTo').value = email || (lead ? lead.email_address : '');
-        document.getElementById('emailSubject').value = lead ? `Follow up - ${lead.first_name} ${lead.last_name}` : '';
-        document.getElementById('emailBody').value = lead ? `Dear ${lead.first_name},\n\n` : '';
-        
-        // Reset UI
-        updateAttachmentList();
-        updateSendButtonState();
-        
-        document.getElementById('emailModal').classList.remove('hidden');
-    }
-
-    // Compose Email button inside lead modal
-    document.getElementById('composeEmailBtn').addEventListener('click', () => {
-        if (!currentLeadId) return;
-        document.getElementById('emailSubject').value = '';
-        document.getElementById('emailBody').value = '';
-        document.getElementById('emailModal').classList.remove('hidden');
-    });
-
-
-    // Add character counter for email body
-    const emailBody = document.getElementById('emailBody');
-    if (emailBody) {
-        emailBody.addEventListener('input', function() {
-            const charCount = document.getElementById('charCount');
-            if (charCount) {
-                charCount.textContent = `${this.value.length} characters`;
-            }
-        });
-    }
-    
-    // Single email form submit handler
-    document.getElementById('emailForm').addEventListener('submit', sendEmailWithAttachments);
-
-    function closeEmailModal() {
-        document.getElementById('emailModal').classList.add('hidden');
-        // Clear attachments after a delay to allow animation
-        setTimeout(() => {
-            emailAttachments = [];
-            updateAttachmentList();
-        }, 300);
-    }
-
-    // Generate time options for dropdowns
-    function generateTimeOptions() {
-        const times = [];
-        for (let hour = 0; hour < 24; hour++) {
-            for (let minute = 0; minute < 60; minute += 15) {
-                const hourStr = hour.toString().padStart(2, '0');
-                const minuteStr = minute.toString().padStart(2, '0');
-                const time24 = `${hourStr}:${minuteStr}`;
-                
-                // Convert to 12-hour format for display
-                const period = hour >= 12 ? 'PM' : 'AM';
-                const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-                const display = `${hour12}:${minuteStr} ${period}`;
-                
-                times.push({ value: time24, display: display });
-            }
-        }
-        return times;
-    }
-
-    // Populate time dropdowns
-    function populateTimeDropdowns() {
-        const times = generateTimeOptions();
-        const startSelect = document.getElementById('eventStartTime');
-        const endSelect = document.getElementById('eventEndTime');
-        
-        if (startSelect && endSelect) {
-            const optionsHTML = times.map(t => 
-                `<option value="${t.value}">${t.display}</option>`
-            ).join('');
-            
-            startSelect.innerHTML = '<option value="">Select time</option>' + optionsHTML;
-            endSelect.innerHTML = '<option value="">Select time</option>' + optionsHTML;
-        }
-    }
-
-    // Calculate and display duration
-    function updateDuration() {
-        const startTime = document.getElementById('eventStartTime').value;
-        const endTime = document.getElementById('eventEndTime').value;
-        const durationHelper = document.getElementById('durationHelper');
-        const durationText = document.getElementById('durationText');
-        
-        if (startTime && endTime) {
-            const [startHour, startMin] = startTime.split(':').map(Number);
-            const [endHour, endMin] = endTime.split(':').map(Number);
-            
-            let durationMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
-            
-            if (durationMinutes < 0) {
-                durationHelper.classList.remove('hidden', 'bg-green-50', 'border-green-200');
-                durationHelper.classList.add('bg-red-50', 'border-red-200');
-                durationText.className = 'text-red-800';
-                durationText.textContent = 'End time must be after start time';
-            } else if (durationMinutes === 0) {
-                durationHelper.classList.add('hidden');
-            } else {
-                durationHelper.classList.remove('hidden', 'bg-red-50', 'border-red-200');
-                durationHelper.classList.add('bg-green-50', 'border-green-200');
-                durationText.className = 'text-green-800';
-                
-                const hours = Math.floor(durationMinutes / 60);
-                const minutes = durationMinutes % 60;
-                
-                let durationStr = 'Meeting duration: ';
-                if (hours > 0) durationStr += `${hours} hour${hours > 1 ? 's' : ''}`;
-                if (hours > 0 && minutes > 0) durationStr += ' and ';
-                if (minutes > 0) durationStr += `${minutes} minute${minutes > 1 ? 's' : ''}`;
-                
-                durationText.textContent = durationStr;
-            }
-        } else {
-            durationHelper.classList.add('hidden');
-        }
-    }
-
-    // Auto-set end time when start time is selected
-    function autoSetEndTime() {
-        const startTime = document.getElementById('eventStartTime').value;
-        const endTimeSelect = document.getElementById('eventEndTime');
-        
-        if (startTime && !endTimeSelect.value) {
-            const [hour, minute] = startTime.split(':').map(Number);
-            let newHour = hour + 1;
-            if (newHour >= 24) newHour = 23;
-            
-            const endTime = `${newHour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-            endTimeSelect.value = endTime;
-            updateDuration();
-        }
-    }
-
-    // Open calendar modal and pre-fill title
-    function openGoogleCalendar(name, email, leadId) {
-        currentLeadId = leadId;
-        
-        // Populate time dropdowns if not already done
-        const startSelect = document.getElementById('eventStartTime');
-        if (startSelect && startSelect.options.length <= 1) {
-            populateTimeDropdowns();
-            
-            // Add event listeners after populating dropdowns
-            startSelect.addEventListener('change', function() {
-                autoSetEndTime();
-                updateDuration();
-            });
-            
-            const endSelect = document.getElementById('eventEndTime');
-            endSelect.addEventListener('change', updateDuration);
-        }
-        
-        // Set default date to today
-        const today = new Date();
-        const dateStr = today.toISOString().split('T')[0];
-        document.getElementById('eventDate').value = dateStr;
-        
-        // Set default times (9:00 AM to 10:00 AM)
-        document.getElementById('eventStartTime').value = '09:00';
-        document.getElementById('eventEndTime').value = '10:00';
-        
-        // Pre-fill other fields
-        document.getElementById('eventTitle').value = `Meeting with ${name}`;
-        document.getElementById('eventDescription').value = '';
-        
-        updateDuration();
-        
-        document.getElementById('eventModal').classList.remove('hidden');
-    }
-
-    // Submit calendar event
-    document.getElementById('eventForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!currentLeadId) {
-            showError('No lead selected for this event.');
-            return;
+            document.getElementById('leadsPage').style.display = 'none';
+            document.getElementById('createLeadPage').classList.add('active');
+            window.scrollTo(0, 0);
         }
 
-        const date = document.getElementById('eventDate').value;
-        const startTime = document.getElementById('eventStartTime').value;
-        const endTime = document.getElementById('eventEndTime').value;
+        document.getElementById('addLeadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        if (!date || !startTime || !endTime) {
-            showError('Please select date and times.');
-            return;
-        }
-
-        // Combine date and time
-        const startDateTime = new Date(`${date}T${startTime}`);
-        const endDateTime = new Date(`${date}T${endTime}`);
-
-        // Validate end time is after start time
-        if (endDateTime <= startDateTime) {
-            showError('End time must be after start time.');
-            return;
-        }
-
-        const payload = {
-            lead_id: currentLeadId,
-            title: document.getElementById('eventTitle').value.trim(),
-            description: document.getElementById('eventDescription').value.trim(),
-            start_time: startDateTime.toISOString(),
-            end_time: endDateTime.toISOString()
-        };
-
-        try {
-            await apiRequest('/google/calendar/event', {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-            showSuccess('Calendar event created successfully!');
-            closeEventModal();
-        } catch (err) {
-            showError('Failed to create event: ' + err.message);
-        }
-    });
-
-// ============ FIXED FILE ATTACHMENT FUNCTIONS ============
-
-// Initialize email modal with file attachment handlers
-    function initEmailModal() {
-        const fileInput = document.getElementById('emailAttachments');
-        
-        // Handle file selection
-        if (fileInput) {
-            fileInput.addEventListener('change', handleFileSelection);
-        }
-
-        // Update character count for email body
-        const emailBody = document.getElementById('emailBody');
-        if (emailBody) {
-            emailBody.addEventListener('input', function() {
-                const charCount = document.getElementById('charCount');
-                if (charCount) {
-                    charCount.textContent = `${this.value.length} characters`;
-                }
-            });
-        }
-    }
-
-    // Handle file selection
-    function handleFileSelection(event) {
-        const files = Array.from(event.target.files);
-        const maxSize = 10 * 1024 * 1024; // 10MB
-
-        // Filter out files that are too large
-        const validFiles = files.filter(file => {
-            if (file.size > maxSize) {
-                alert(`File "${file.name}" exceeds 10MB size limit`);
-                return false;
-            }
-            return true;
-        });
-
-        // Add valid files to attachments
-        validFiles.forEach(file => {
-            if (!emailAttachments.some(att => att.name === file.name && att.size === file.size)) {
-                emailAttachments.push(file);
-            }
-        });
-
-        // Update UI
-        updateAttachmentList();
-        updateSendButtonState();
-        event.target.value = ''; // Reset input
-    }
-
-    // Update the attachment list UI
-    function updateAttachmentList() {
-        const fileList = document.getElementById('emailFileList');
-        const attachmentCount = document.getElementById('attachmentCount');
-
-        if (!fileList || !attachmentCount) return;
-
-        if (emailAttachments.length === 0) {
-            fileList.innerHTML = '';
-            attachmentCount.textContent = '(0 files)';
-            return;
-        }
-
-        attachmentCount.textContent = `(${emailAttachments.length} file${emailAttachments.length > 1 ? 's' : ''})`;
-
-        fileList.innerHTML = emailAttachments.map((file, index) => `
-            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 file-item">
-                <div class="flex items-center space-x-3 flex-1 min-w-0">
-                    <span class="material-symbols-outlined text-gray-500 flex-shrink-0">
-                        ${getFileIcon(file.type)}
-                    </span>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900 truncate">${file.name}</p>
-                        <p class="text-xs text-gray-500">${formatFileSize(file.size)}</p>
-                    </div>
-                </div>
-                <button 
-                    type="button" 
-                    onclick="removeAttachment(${index})"
-                    class="p-1 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                >
-                    <span class="material-symbols-outlined text-base">close</span>
-                </button>
-            </div>
-        `).join('');
-    }
-
-    // Get appropriate icon for file type
-    function getFileIcon(mimeType) {
-        if (mimeType.includes('pdf')) return 'picture_as_pdf';
-        if (mimeType.includes('image')) return 'image';
-        if (mimeType.includes('word') || mimeType.includes('document')) return 'description';
-        if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return 'table_chart';
-        if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return 'slideshow';
-        return 'insert_drive_file';
-    }
-
-    // Format file size for display
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-
-    // Remove attachment from list
-    function removeAttachment(index) {
-        emailAttachments.splice(index, 1);
-        updateAttachmentList();
-        updateSendButtonState();
-    }
-
-    // Update send button state
-    function updateSendButtonState() {
-        const sendBtn = document.getElementById('sendEmailBtn');
-        if (!sendBtn) return;
-        
-        const subject = document.getElementById('emailSubject')?.value.trim() || '';
-        const body = document.getElementById('emailBody')?.value.trim() || '';
-        
-        sendBtn.disabled = !subject || !body || isUploading;
-    }
-
-    // FIXED: Upload files and get attachment IDs
-    async function uploadEmailAttachments() {
-        if (emailAttachments.length === 0) return [];
-
-        const formData = new FormData();
-        
-        // Add all files to FormData
-        emailAttachments.forEach(file => {
-            formData.append('files', file);
-        });
-
-        // Add lead ID if available
-        if (currentLeadId) {
-            formData.append('lead_id', currentLeadId.toString());
-        }
-
-        try {
-            isUploading = true;
-            updateSendButtonState();
-            
-            const progressElement = document.getElementById('uploadProgress');
-            if (progressElement) {
-                progressElement.classList.remove('hidden');
-            }
-
-            console.log('Uploading files...', emailAttachments);
-
-            const response = await fetch(`${API_BASE_URL}/upload/files`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${authToken}`
-                    // Don't set Content-Type for FormData - let browser set it with boundary
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Upload error response:', errorText);
-                throw new Error(`Upload failed: ${response.status} - ${errorText}`);
-            }
-
-            const result = await response.json();
-            console.log('Upload API response:', result);
-
-            // Extract attachment IDs from the response
-            let attachmentIds = [];
-            if (result.uploads && Array.isArray(result.uploads)) {
-                attachmentIds = result.uploads
-                    .filter(upload => upload.id && !upload.error)
-                    .map(upload => upload.id);
-            }
-
-            console.log('Extracted attachment IDs:', attachmentIds);
-
-            // Check if any uploads failed
-            const failedUploads = result.uploads ? result.uploads.filter(upload => upload.error) : [];
-            if (failedUploads.length > 0) {
-                console.warn('Some files failed to upload:', failedUploads);
-                showError(`${failedUploads.length} file(s) failed to upload`);
-            }
-
-            return attachmentIds;
-
-        } catch (error) {
-            console.error('File upload error:', error);
-            throw new Error(`Failed to upload attachments: ${error.message}`);
-        } finally {
-            isUploading = false;
-            const progressElement = document.getElementById('uploadProgress');
-            if (progressElement) {
-                progressElement.classList.add('hidden');
-            }
-            updateSendButtonState();
-        }
-    }
-
-    // FIXED: Enhanced email submission with attachments
-    // FIXED: Enhanced email submission with attachments - always use send-with-attachments
-    async function sendEmailWithAttachments(e) {
-        e.preventDefault();
-        
-        if (!currentLeadId) {
-            showError('No lead selected for this email.');
-            return;
-        }
-
-        const lead = allLeads.find(l => l.id === currentLeadId);
-        if (!lead) {
-            showError('Lead not found.');
-            return;
-        }
-
-        const sendBtn = document.getElementById('sendEmailBtn');
-        const originalBtnText = sendBtn ? sendBtn.innerHTML : '';
-        
-        if (sendBtn) {
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = '<span class="material-symbols-outlined text-base mr-2 animate-spin">refresh</span>Sending...';
-        }
-
-        try {
-            // Upload files first and get attachment IDs
-            let attachmentIds = [];
-            
-            if (emailAttachments.length > 0) {
-                console.log('Uploading attachments before sending email...');
-                attachmentIds = await uploadEmailAttachments();
-                console.log('Attachments uploaded, IDs:', attachmentIds);
-            }
-
-            // Prepare email data - ALWAYS use send-with-attachments endpoint
-            const payload = {
-                lead_id: currentLeadId,
-                to: lead.email_address,
-                subject: document.getElementById('emailSubject').value.trim(),
-                body: document.getElementById('emailBody').value.trim(),
-                is_html: false
+            const leadData = {
+                salutation: document.getElementById('salutation').value || null,
+                first_name: document.getElementById('firstName').value.trim(),
+                last_name: document.getElementById('lastName').value.trim(),
+                email_address: document.getElementById('email').value.trim(),
+                mobile_number: document.getElementById('mobileNumber').value.trim(),
+                alternate_mobile_number: document.getElementById('alternateMobile').value.trim() || null,
+                working_status: document.getElementById('workingStatus').value || null,
+                street: document.getElementById('street').value.trim() || null,
+                city: document.getElementById('city').value.trim() || null,
+                state: document.getElementById('state').value.trim() || null,
+                postal_code: document.getElementById('postalCode').value.trim() || null,
+                country: document.getElementById('country').value.trim() || null,
+                institute_name: document.getElementById('instituteName').value.trim() || null,
+                qualification: document.getElementById('qualification').value.trim() || null,
+                course_interested_in: document.getElementById('courseInterest').value.trim() || null,
+                opportunity_amount: parseFloat(document.getElementById('opportunityAmount').value) || null,
+                lead_source: document.getElementById('leadSource').value || null,
+                referred_by: document.getElementById('referredBy').value.trim() || null,
+                status: document.getElementById('status').value || 'New',
+                status_description: document.getElementById('statusDescription').value.trim() || null,
+                assigned_to: parseInt(document.getElementById('assignedTo').value) || null,
+                description: document.getElementById('description').value.trim() || null
             };
 
-            // Add attachment IDs if any were successfully uploaded
-            if (attachmentIds.length > 0) {
-                payload.attachment_ids = attachmentIds;
-                console.log('Sending email with attachments:', payload);
-            } else {
-                console.log('Sending email without attachments:', payload);
-            }
+            try {
+                if (editingLeadId) {
+                    const updatedLead = await apiRequest(`/leads/${editingLeadId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(leadData)
+                    });
+                    const index = allLeads.findIndex(l => l.id === editingLeadId);
+                    allLeads[index] = updatedLead;
+                    editingLeadId = null;
+                    showSuccess('Lead updated successfully!');
+                    
+                    const returnToDetail = sessionStorage.getItem('returnToLeadDetail');
+                    if (returnToDetail) {
+                        sessionStorage.removeItem('returnToLeadDetail');
+                        sessionStorage.setItem('leadJustEdited', 'true');
+                        window.location.href = `lead-detail.html?id=${returnToDetail}`;
+                        return;
+                    }
+                } else {
+                    const newLead = await apiRequest('/leads', {
+                        method: 'POST',
+                        body: JSON.stringify(leadData)
+                    });
+                    allLeads.push(newLead);
+                    showSuccess('Lead created successfully!');
+                }
 
-            // ALWAYS use the send-with-attachments endpoint - it handles both cases
-            const response = await apiRequest('/google/gmail/send-with-attachments', {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-
-            console.log('Email sent successfully:', response);
-
-            const attachmentMsg = attachmentIds.length > 0 
-                ? ` with ${attachmentIds.length} attachment${attachmentIds.length > 1 ? 's' : ''}`
-                : '';
-            
-            showSuccess(`Email sent successfully${attachmentMsg}!`);
-            
-            // Clear attachments and close modal
-            emailAttachments = [];
-            closeEmailModal();
-            
-            // Reload lead data if on detail page
-            if (typeof refreshLeadData === 'function') {
-                refreshLeadData();
-            }
-
-        } catch (err) {
-            console.error('Email sending error:', err);
-            showError('Failed to send email: ' + err.message);
-        } finally {
-            if (sendBtn) {
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = originalBtnText;
-            }
-        }
-    }
-    // Save as draft function (placeholder)
-    function saveAsDraft() {
-        showSuccess('Draft saved successfully!');
-        // TODO: Implement draft saving logic
-    }
-
-    function closeEventModal() {
-        document.getElementById('eventModal').classList.add('hidden');
-    }
-
-document.addEventListener('DOMContentLoaded', () => {
-    if (!authToken) {
-        window.location.href = './login.html';
-        return;
-    }
-    
-    // Check user role and update navigation
-    checkUserRoleAndUpdateNav();
-
-    // Check Google Workspace status
-    checkGoogleWorkspaceStatus();
-
-    initEmailModal();
-    
-    loadLeads().then(() => {
-        loadSalesManagers().then(() => {
-            // Check for edit mode
-            const urlParams = new URLSearchParams(window.location.search);
-            const editLeadData = sessionStorage.getItem('editLeadData');
-            
-            if (urlParams.get('edit') === 'true' && editLeadData) {
-                sessionStorage.removeItem('editLeadData');
-                const lead = JSON.parse(editLeadData);
-                openEditLeadPageWithData(lead);
+                closeCreateLeadPage();
+                renderLeads(allLeads);
+                applyFilters();
+            } catch (error) {
+                showError((editingLeadId ? 'Failed to update' : 'Failed to create') + ' lead: ' + error.message);
             }
         });
-    });
-});
 
-async function checkUserRoleAndUpdateNav() {
-    try {
-        const user = await apiRequest('/me');
-        
-        // Show Sales Team link only for admins
-        if (user.role === 'ADMIN') {
-            const salesTeamLink = document.getElementById('salesTeamLink');
-            if (salesTeamLink) {
-                salesTeamLink.classList.remove('hidden');
+        function showDeleteModal(leadId) {
+            deletingLeadId = leadId;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            deletingLeadId = null;
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        async function confirmDelete() {
+            if (!deletingLeadId) return;
+
+            try {
+                await apiRequest(`/leads/${deletingLeadId}`, {
+                    method: 'DELETE'
+                });
+                
+                allLeads = allLeads.filter(l => l.id !== deletingLeadId);
+                showSuccess('Lead deleted successfully!');
+                closeDeleteModal();
+                applyFilters();
+            } catch (error) {
+                showError('Failed to delete lead: ' + error.message);
             }
         }
-    } catch (error) {
-        console.error('Failed to check user role:', error);
-    }
-}
 
-async function checkGoogleWorkspaceStatus() {
-    try {
-        const status = await apiRequest('/google/status');
-        const indicator = document.getElementById('googleStatusIndicator');
-        const icon = document.getElementById('googleStatusIcon');
-        const text = document.getElementById('googleStatusText');
-        const btn = document.getElementById('googleConnectBtn');
-        
-        if (indicator && icon && text && btn) {
-            indicator.classList.remove('hidden');
-            btn.classList.remove('hidden');
-            
-            if (status.connected) {
-                indicator.classList.remove('bg-gray-100');
-                indicator.classList.add('bg-green-50');
-                icon.textContent = 'cloud_done';
-                icon.classList.remove('text-gray-400');
-                icon.classList.add('text-green-600');
-                text.textContent = 'Connected';
-                text.classList.remove('text-gray-600');
-                text.classList.add('text-green-700');
-            } else {
-                indicator.classList.remove('bg-green-50');
-                indicator.classList.add('bg-gray-100');
-                icon.textContent = 'cloud_off';
-                icon.classList.remove('text-green-600');
-                icon.classList.add('text-gray-400');
-                text.textContent = 'Not Connected';
-                text.classList.remove('text-green-700');
-                text.classList.add('text-gray-600');
-            }
+        function showLoading(show) {
+            document.getElementById('loadingIndicator').classList.toggle('hidden', !show);
         }
-    } catch (error) {
-        console.error('Failed to check Google status:', error);
-    }
-}
 
-function openGoogleSettings() {
-    window.open('google-workspace.html', '_blank', 'width=800,height=600');
-}
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            document.getElementById('errorText').textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        }
 
-// Add this new function
-function openEditLeadPageWithData(lead) {
-    editingLeadId = lead.id;
-    document.getElementById('leadsPage').style.display = 'none';
-    document.getElementById('createLeadPage').classList.add('active');
-    
-    // Populate all fields
-    document.getElementById('salutation').value = lead.salutation || '';
-    document.getElementById('firstName').value = lead.first_name || '';
-    document.getElementById('lastName').value = lead.last_name || '';
-    document.getElementById('email').value = lead.email_address || '';
-    document.getElementById('mobileNumber').value = lead.mobile_number || '';
-    document.getElementById('alternateMobile').value = lead.alternate_mobile_number || '';
-    document.getElementById('workingStatus').value = lead.working_status || '';
-    document.getElementById('street').value = lead.street || '';
-    document.getElementById('postalCode').value = lead.postal_code || '';
-    document.getElementById('city').value = lead.city || '';
-    document.getElementById('state').value = lead.state || '';
-    document.getElementById('country').value = lead.country || '';
-    document.getElementById('instituteName').value = lead.institute_name || '';
-    document.getElementById('qualification').value = lead.qualification || '';
-    document.getElementById('courseInterest').value = lead.course_interested_in || '';
-    document.getElementById('description').value = lead.description || '';
-    document.getElementById('opportunityAmount').value = lead.opportunity_amount || '';
-    document.getElementById('leadSource').value = lead.lead_source || '';
-    document.getElementById('referredBy').value = lead.referred_by || '';
-    document.getElementById('status').value = lead.status || 'New';
-    document.getElementById('statusDescription').value = lead.status_description || '';
-    document.getElementById('assignedTo').value = lead.assigned_to || '';
-}
-</script>
+        function hideError() {
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        function showSuccess(message) {
+            alert(message);
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            window.location.href = './login.html';
+        }
+
+        init();
+    </script>
 </body>
 </html>
