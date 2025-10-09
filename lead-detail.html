@@ -123,9 +123,12 @@
                                         <span class="material-symbols-outlined text-base mr-1">mail</span>
                                         <span id="leadEmail">Loading...</span>
                                     </div>
-                                    <div class="flex items-center">
+                                    <div class="flex items-center gap-2">
                                         <span class="material-symbols-outlined text-base mr-1">call</span>
                                         <span id="leadPhone">Loading...</span>
+                                        <button onclick="messageWhatsApp()" class="ml-2 text-emerald-600 hover:text-emerald-700 transition-colors" title="Message on WhatsApp">
+                                            <span class="material-symbols-outlined text-base">chat</span>
+                                        </button>
                                     </div>
                                     <div class="flex items-center">
                                         <span class="material-symbols-outlined text-base mr-1">location_on</span>
@@ -138,6 +141,10 @@
                             <button onclick="callLead()" class="flex items-center space-x-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors">
                                 <span class="material-symbols-outlined text-base">call</span>
                                 <span>Call</span>
+                            </button>
+                            <button onclick="messageWhatsApp()" class="flex items-center space-x-1 px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors">
+                                <span class="material-symbols-outlined text-base">chat</span>
+                                <span>WhatsApp</span>
                             </button>
                             <button onclick="openEmailModal()" class="flex items-center space-x-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
                                 <span class="material-symbols-outlined text-base">mail</span>
@@ -795,6 +802,20 @@
         let currentLead = null;
         let googleConnected = false;
         let participants = [];
+
+
+        function messageWhatsApp() {
+            if (!currentLead || !currentLead.mobile_number) {
+                showError('No phone number available for this lead');
+                return;
+            }
+            
+            // Clean the phone number
+            const cleanNumber = currentLead.mobile_number.replace(/[\s\-\(\)\+]/g, '');
+            
+            // Open WhatsApp
+            window.open(`https://wa.me/${cleanNumber}`, '_blank');
+        }
         
         function addParticipant() {
         const input = document.getElementById('participantEmailInput');
