@@ -439,11 +439,15 @@
                 currentUser = await apiRequest('/me');
                 if (currentUser.role !== 'ADMIN') {
                     showError('Access denied. Admin privileges required.');
-                    setTimeout(() => window.location.href = './leads.html', 2000);
+                    // Immediate redirect without setTimeout - this prevents interference
+                    window.location.href = './leads.html';
+                    return false; // Indicate access denied
                 }
+                return true; // Indicate access granted
             } catch (error) {
                 showError('Failed to verify permissions');
-                setTimeout(() => window.location.href = './login.html', 2000);
+                window.location.href = './login.html';
+                return false;
             }
         }
 
@@ -766,8 +770,11 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
-            await checkAdminAccess();
-            loadSalesManagers();
+            const hasAccess = await checkAdminAccess();
+            if (hasAccess) {
+                loadSalesManagers();
+            }
+            // If no access, the function already redirected
         });
     </script>
 </body>
