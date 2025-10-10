@@ -387,7 +387,7 @@
 
         tbody.innerHTML = emails.map(email => {
             const manager = Array.isArray(allUsers) ? allUsers.find(u => u.id === email.manager_id) : null;
-            const sentDate = new Date(email.sent_at);
+            const sentDate = new Date(email.completed_at || email.created_at);  // ✅ CORRECT
             
             return `
                 <tr class="hover:bg-gray-50 cursor-pointer" onclick="viewEmail(${email.id}, ${email.lead_id})">
@@ -431,11 +431,18 @@
                 return;
             }
 
+            // Find the lead to get recipient email
+            const lead = allLeads.find(l => l.id === leadId);
+            const recipientEmail = lead ? lead.email_address : 'N/A';
+            
+            // Use completed_at for sent date (when email was actually sent), fallback to created_at
+            const sentDate = email.completed_at || email.created_at;
+
             // Populate modal
-            document.getElementById('modalTo').textContent = email.recipient || 'N/A';
-            document.getElementById('modalSubject').textContent = email.subject;
-            document.getElementById('modalDate').textContent = new Date(email.sent_at).toLocaleString();
-            document.getElementById('modalContent').textContent = email.content;
+            document.getElementById('modalTo').textContent = recipientEmail;
+            document.getElementById('modalSubject').textContent = email.subject || 'No Subject';
+            document.getElementById('modalDate').textContent = sentDate ? new Date(sentDate).toLocaleString() : 'N/A';
+            document.getElementById('modalContent').textContent = email.content || 'No content';
 
             // Show attachments if any
             const attachmentsDiv = document.getElementById('modalAttachmentsDiv');
@@ -447,8 +454,8 @@
                     attachmentsDiv.classList.remove('hidden');
                     attachmentsList.innerHTML = attachments.map(att => `
                         <a href="${API_BASE_URL}/leads/${leadId}/attachments/${att.id}/download" 
-                           target="_blank"
-                           class="flex items-center p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
+                        target="_blank"
+                        class="flex items-center p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
                             <span class="material-symbols-outlined text-blue-600 mr-2">description</span>
                             <span class="text-sm text-gray-900">${att.filename}</span>
                         </a>
