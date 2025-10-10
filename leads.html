@@ -517,14 +517,31 @@
             }
         }
 
+        async function initializeNavigation() {
+            try {
+                const user = await apiRequest('/me');
+                
+                // Show Sales Team link only for admins
+                if (user.role === 'ADMIN') {
+                    const salesTeamLink = document.getElementById('salesTeamLink');
+                    if (salesTeamLink) {
+                        salesTeamLink.classList.remove('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to check user role:', error);
+            }
+        }
+
         async function init() {
             try {
+                await initializeNavigation();
                 currentUser = await apiRequest('/me');
                 
-                if (currentUser.role !== 'ADMIN') {
-                    const salesTeamLink = document.getElementById('salesTeamLink');
-                    if (salesTeamLink) salesTeamLink.style.display = 'none';
-                }
+                // if (currentUser.role !== 'ADMIN') {
+                //     const salesTeamLink = document.getElementById('salesTeamLink');
+                //     if (salesTeamLink) salesTeamLink.style.display = 'none';
+                // }
 
                 await loadLeads();
                 await loadSalesManagers();
