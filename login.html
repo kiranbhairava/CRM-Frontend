@@ -156,7 +156,7 @@
 
       if (response.ok) {
         localStorage.setItem('authToken', data.access_token);
-        window.location.href = '/leads.html';
+        window.location.href = '/dashboard.html';
       } else {
         const errorBox = document.getElementById('errorMessage');
         const errorText = document.getElementById('errorText');
