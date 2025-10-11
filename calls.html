@@ -87,8 +87,8 @@
             <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-red-500">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-600 font-semibold">Missed</p>
-                        <p id="missedCalls" class="text-3xl font-bold text-gray-900 mt-1">0</p>
+                        <p class="text-sm text-gray-600 font-semibold">Not Held</p>
+                        <p id="notHeldCalls" class="text-3xl font-bold text-gray-900 mt-1">0</p>
                     </div>
                     <span class="material-symbols-outlined text-red-500 text-4xl">phone_missed</span>
                 </div>
@@ -118,7 +118,7 @@
                         <option value="">All Statuses</option>
                         <option value="held">Held</option>
                         <option value="scheduled">Scheduled</option>
-                        <option value="missed">Missed</option>
+                        <option value="not held">Not Held</option>
                         <option value="no answer">No Answer</option>
                     </select>
                 </div>
@@ -261,7 +261,7 @@
                         <option value="scheduled">Scheduled</option>
                         <option value="held">Held</option>
                         <option value="completed">Completed</option>
-                        <option value="missed">Missed</option>
+                        <option value="not held">Not Held</option>
                         <option value="no answer">No Answer</option>
                     </select>
                     <p class="text-xs text-gray-500 mt-1">Select 'Held' or 'Completed' for successful calls</p>
@@ -470,7 +470,7 @@
                 'held': 'bg-green-100 text-green-800',
                 'completed': 'bg-green-100 text-green-800',
                 'scheduled': 'bg-orange-100 text-orange-800',
-                'missed': 'bg-red-100 text-red-800',
+                'not held': 'bg-red-100 text-red-800',
                 'no answer': 'bg-gray-100 text-gray-800'
             };
             
@@ -575,13 +575,13 @@
         const total = calls.length;
         const held = calls.filter(c => c.status === 'held').length;
         const scheduled = calls.filter(c => c.status === 'scheduled').length;
-        const missed = calls.filter(c => c.status === 'missed' || c.status === 'no answer').length;
+        const notHeld = calls.filter(c => c.status === 'not held' || c.status === 'no answer').length;
 
         document.getElementById('totalCalls').textContent = `${total} Calls`;
         document.getElementById('totalCallsStat').textContent = total;
         document.getElementById('heldCalls').textContent = held;
         document.getElementById('scheduledCalls').textContent = scheduled;
-        document.getElementById('missedCalls').textContent = missed;
+        document.getElementById('notHeldCalls').textContent = notHeld;
     }
 
     function filterCalls() {
