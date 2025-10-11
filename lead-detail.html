@@ -737,7 +737,7 @@
                             <option value="">Select Status</option>
                             <option value="Scheduled">Scheduled</option>
                             <option value="Held">Held</option>
-                            <option value="Missed">Missed</option>
+                            <option value="Not Held">Not Held</option>
                             <option value="No Answer">No Answer</option>
                         </select>
                     </div>
@@ -1695,7 +1695,7 @@ function closeEventModal() {
                             <span class="text-gray-600 font-medium mr-2">Status:</span>
                             <span class="px-2 py-0.5 rounded-full text-xs font-medium ${
                                 callData.callStatus.toLowerCase() === 'held' ? 'bg-green-100 text-green-800' :
-                                callData.callStatus.toLowerCase() === 'missed' ? 'bg-red-100 text-red-800' :
+                                callData.callStatus.toLowerCase() === 'not held' ? 'bg-red-100 text-red-800' :
                                 'bg-gray-100 text-gray-800'
                             }">${callData.callStatus}</span>
                         </div>
