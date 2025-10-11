@@ -29,6 +29,112 @@
     </script>
 
     <style>
+        /* Website Leads Sync Badge Styles */
+        .sync-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sync-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sync-badge.has-pending {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            color: white;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .sync-badge.syncing {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .sync-badge.up-to-date {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .sync-badge .badge-icon {
+            font-size: 18px;
+        }
+
+        .sync-badge .pending-count {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+            }
+        }
+
+        .sync-badge .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Success Toast */
+        .sync-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .sync-toast.success {
+            border-left: 4px solid #10b981;
+        }
+
+        .sync-toast.error {
+            border-left: 4px solid #ef4444;
+        }
+
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
@@ -139,6 +245,14 @@
                     <p class="text-gray-500 mt-1">Manage and track all your leads</p>
                 </div>
                 <div class="flex items-center gap-3">
+                    <!-- Website Leads Sync Badge - NEW! -->
+                    <div id="websiteLeadsBadge" class="sync-badge up-to-date" onclick="checkAndSyncWebsiteLeads()" title="Click to sync website leads">
+                        <span class="material-symbols-outlined badge-icon">cloud_sync</span>
+                        <span id="syncBadgeText">Checking...</span>
+                        <span id="pendingCountBadge" class="pending-count hidden">0</span>
+                    </div>
+                    
+                    <!-- Existing buttons -->
                     <button onclick="window.location.href='import-leads.html'" class="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                         <span class="material-symbols-outlined text-base">upload</span>
                         <span>Import</span>
@@ -148,6 +262,9 @@
                         <span>New Lead</span>
                     </button>
                 </div>
+
+                <!-- Toast Container for notifications -->
+                <div id="syncToastContainer"></div>
             </div>
 
             <!-- Search & Filter Bar -->
@@ -538,6 +655,159 @@
                 console.error('Failed to check user role:', error);
             }
         }
+
+        let syncCheckInterval = null;
+
+        // Initialize sync status check on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSyncStatus();
+            // Auto-check every 30 seconds
+            syncCheckInterval = setInterval(checkSyncStatus, 30000);
+        });
+
+        // Check sync status (pending leads count)
+        async function checkSyncStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/external-leads/sync-status`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.error('Failed to check sync status');
+                    return;
+                }
+                
+                const data = await response.json();
+                updateSyncBadge(data);
+                
+            } catch (error) {
+                console.error('Error checking sync status:', error);
+            }
+        }
+
+        // Update the sync badge UI based on status
+        function updateSyncBadge(statusData) {
+            const badge = document.getElementById('websiteLeadsBadge');
+            const badgeText = document.getElementById('syncBadgeText');
+            const pendingCount = document.getElementById('pendingCountBadge');
+            
+            const pending = statusData.pending_leads || 0;
+            
+            // Remove all status classes
+            badge.classList.remove('has-pending', 'up-to-date', 'syncing');
+            
+            if (pending > 0) {
+                // Has pending leads - show orange badge with count
+                badge.classList.add('has-pending');
+                badgeText.textContent = `${pending} New Lead${pending > 1 ? 's' : ''}`;
+                pendingCount.textContent = pending;
+                pendingCount.classList.remove('hidden');
+                badge.title = `Click to sync ${pending} new website lead${pending > 1 ? 's' : ''}`;
+            } else {
+                // Up to date - show green badge
+                badge.classList.add('up-to-date');
+                badgeText.textContent = 'Website Leads Synced';
+                pendingCount.classList.add('hidden');
+                badge.title = 'All website leads are synced. Click to check again.';
+            }
+        }
+
+        // Main function to check and sync website leads
+        async function checkAndSyncWebsiteLeads() {
+            const badge = document.getElementById('websiteLeadsBadge');
+            const badgeText = document.getElementById('syncBadgeText');
+            const pendingCount = document.getElementById('pendingCountBadge');
+            
+            // Show syncing state
+            badge.classList.remove('has-pending', 'up-to-date');
+            badge.classList.add('syncing');
+            badgeText.innerHTML = '<span class="spinner"></span> Syncing...';
+            pendingCount.classList.add('hidden');
+            badge.style.pointerEvents = 'none'; // Disable clicking while syncing
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/external-leads/sync-website-leads`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Sync failed');
+                }
+                
+                const result = await response.json();
+                
+                // Show success toast
+                showSyncToast(
+                    'success',
+                    result.synced_count > 0 
+                        ? `✓ Synced ${result.synced_count} new lead${result.synced_count > 1 ? 's' : ''} from website!`
+                        : '✓ No new leads to sync'
+                );
+                
+                // Reload leads list if any were synced
+                if (result.synced_count > 0) {
+                    setTimeout(() => {
+                        loadLeads(); // Your existing function to reload leads
+                    }, 1000);
+                }
+                
+                // Update badge to show up-to-date
+                badge.classList.remove('syncing');
+                badge.classList.add('up-to-date');
+                badgeText.textContent = 'Website Leads Synced';
+                
+                // Check status again after 2 seconds
+                setTimeout(checkSyncStatus, 2000);
+                
+            } catch (error) {
+                console.error('Error syncing leads:', error);
+                
+                // Show error toast
+                showSyncToast('error', '✗ Failed to sync leads. Please try again.');
+                
+                // Revert badge state
+                badge.classList.remove('syncing');
+                checkSyncStatus(); // Check status to restore proper state
+                
+            } finally {
+                badge.style.pointerEvents = 'auto'; // Re-enable clicking
+            }
+        }
+
+        // Show toast notification
+        function showSyncToast(type, message) {
+            const container = document.getElementById('syncToastContainer');
+            
+            const toast = document.createElement('div');
+            toast.className = `sync-toast ${type}`;
+            toast.innerHTML = `
+                <span class="material-symbols-outlined text-${type === 'success' ? 'green' : 'red'}-600">
+                    ${type === 'success' ? 'check_circle' : 'error'}
+                </span>
+                <span class="font-medium text-gray-800">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Remove toast after 4 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideUp 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Clean up interval when page unloads
+        window.addEventListener('beforeunload', function() {
+            if (syncCheckInterval) {
+                clearInterval(syncCheckInterval);
+            }
+        });
 
         async function init() {
             try {
