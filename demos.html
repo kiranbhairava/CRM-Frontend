@@ -425,11 +425,18 @@
     async function completeMeetingFromModal() {
         if (!editingMeetingId) return;
         
-        if (!confirm('Mark this meeting as complete?')) return;
+        // Get feedback from user
+        const feedback = prompt("Enter feedback about this meeting (optional):");
+        
+        // User pressed Cancel
+        if (feedback === null) return;
         
         try {
             await apiRequest(`/communications/${editingMeetingId}/complete`, {
-                method: 'PUT'
+                method: 'PUT',
+                body: JSON.stringify({
+                    feedback: feedback
+                })
             });
             
             alert('Meeting completed');
@@ -437,6 +444,47 @@
             loadData();
         } catch (error) {
             alert('Failed to complete: ' + error.message);
+        }
+    }
+
+    function showFeedback(meetingId) {
+        const demo = allDemos.find(d => d.id === meetingId);
+        if (!demo) return;
+        
+        if (demo.feedback) {
+            // Create a nicer looking alert for feedback
+            const formattedFeedback = `
+                <div style="font-family: 'Inter', sans-serif; padding: 20px; max-width: 500px;">
+                    <h2 style="margin-top: 0; color: #1F2937; font-size: 18px; font-weight: 600;">${demo.subject}</h2>
+                    <p style="color: #6B7280; font-size: 14px; margin-bottom: 16px;">
+                        <span style="font-weight: 500;">Completed:</span> 
+                        ${new Date(demo.completed_at || demo.scheduled_at).toLocaleString('en-IN')}
+                    </p>
+                    <div style="background-color: #F9FAFB; padding: 16px; border-radius: 8px; margin-top: 12px;">
+                        <p style="color: #4B5563; font-size: 15px; white-space: pre-wrap; margin: 0;">${demo.feedback}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Create and show a custom modal-like alert
+            const modalContainer = document.createElement('div');
+            modalContainer.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;';
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = 'background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;';
+            modalContent.innerHTML = formattedFeedback;
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.innerText = 'Close';
+            closeBtn.style.cssText = 'display: block; width: calc(100% - 40px); margin: 0 20px 20px; padding: 10px; background: #E5E7EB; color: #1F2937; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;';
+            closeBtn.onclick = () => document.body.removeChild(modalContainer);
+            
+            modalContent.appendChild(closeBtn);
+            modalContainer.appendChild(modalContent);
+            document.body.appendChild(modalContainer);
+        } else {
+            // No feedback
+            alert(`No feedback has been provided for this meeting.`);
         }
     }
 
@@ -626,6 +674,23 @@
                 `;
             }
             
+            // Add feedback button for completed meetings
+            if (demo.status === 'completed') {
+                const feedbackButtonColor = demo.feedback ? 'text-green-600 hover:bg-green-50 border-green-200' : 'text-gray-500 hover:bg-gray-50 border-gray-200';
+                const feedbackIcon = demo.feedback ? 'comment' : 'add_comment';
+                const feedbackText = demo.feedback ? 'View Feedback' : 'No Feedback';
+                
+                actionButtons = `
+                    <button 
+                        onclick="showFeedback(${demo.id})"
+                        class="ml-3 px-3 py-1.5 text-xs font-semibold ${feedbackButtonColor} rounded-lg transition-colors border flex items-center"
+                    >
+                        <span class="material-symbols-outlined text-xs mr-1">${feedbackIcon}</span>
+                        ${feedbackText}
+                    </button>
+                `;
+            }
+            
             const participantsDisplay = participants.length > 0 
                 ? `<div class="flex flex-wrap gap-1 mt-1">
                     ${participants.slice(0, 2).map(p => 
@@ -641,6 +706,13 @@
                     : ''}
                 </div>`
                 : '<span class="text-xs text-gray-400">No additional participants</span>';
+            
+            // Add feedback indicator to status cell if feedback exists
+            const feedbackIndicator = demo.feedback && demo.status === 'completed' ? 
+                `<span class="ml-1 inline-flex items-center px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-xs">
+                    <span class="material-symbols-outlined text-xs mr-1">comment</span>
+                    Has feedback
+                </span>` : '';
             
             return `
                 <tr class="hover:bg-gray-50">
@@ -658,9 +730,12 @@
                         <div class="text-sm text-gray-500">${timeStr} IST</div>
                     </td>
                     <td class="px-6 py-4">
-                        <span class="px-3 py-1 text-xs font-bold rounded-full ${statusColors[demo.status] || 'bg-gray-100 text-gray-800'}">
-                            ${demo.status}
-                        </span>
+                        <div class="flex flex-wrap items-center gap-1">
+                            <span class="px-3 py-1 text-xs font-bold rounded-full ${statusColors[demo.status] || 'bg-gray-100 text-gray-800'}">
+                                ${demo.status}
+                            </span>
+                            ${feedbackIndicator}
+                        </div>
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center">
