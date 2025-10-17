@@ -449,19 +449,27 @@
 
     function showFeedback(meetingId) {
         const demo = allDemos.find(d => d.id === meetingId);
-        if (!demo) return;
+        if (!demo) {
+            alert('Meeting not found');
+            return;
+        }
         
-        if (demo.feedback) {
+        // Handle various possible feedback field locations
+        const feedback = demo.feedback || 
+                    (demo.data && demo.data.feedback) || 
+                    (demo.meeting_data && demo.meeting_data.feedback);
+        
+        if (feedback) {
             // Create a nicer looking alert for feedback
             const formattedFeedback = `
                 <div style="font-family: 'Inter', sans-serif; padding: 20px; max-width: 500px;">
-                    <h2 style="margin-top: 0; color: #1F2937; font-size: 18px; font-weight: 600;">${demo.subject}</h2>
+                    <h2 style="margin-top: 0; color: #1F2937; font-size: 18px; font-weight: 600;">${demo.subject || 'Meeting Feedback'}</h2>
                     <p style="color: #6B7280; font-size: 14px; margin-bottom: 16px;">
                         <span style="font-weight: 500;">Completed:</span> 
                         ${new Date(demo.completed_at || demo.scheduled_at).toLocaleString('en-IN')}
                     </p>
                     <div style="background-color: #F9FAFB; padding: 16px; border-radius: 8px; margin-top: 12px;">
-                        <p style="color: #4B5563; font-size: 15px; white-space: pre-wrap; margin: 0;">${demo.feedback}</p>
+                        <p style="color: #4B5563; font-size: 15px; white-space: pre-wrap; margin: 0;">${feedback}</p>
                     </div>
                 </div>
             `;
@@ -519,40 +527,39 @@
                     const comms = await apiRequest(`/leads/${lead.id}/communications`);
                     const demos = comms.filter(c => c.type === 'meeting');
                     
-                    // For each meeting, get the full details to ensure we have feedback
+                    // CRITICAL FIX: Process meetings without making additional API calls
+                    // The /leads/{lead_id}/communications endpoint already returns all data including feedback
                     for (const demo of demos) {
-                        try {
-                            // Get the complete meeting details including feedback
-                            const fullMeeting = await apiRequest(`/communications/${demo.id}`);
-                            
-                            // Add lead information to the meeting data
-                            allDemos.push({
-                                ...fullMeeting,
-                                lead_id: lead.id,
-                                lead_name: `${lead.first_name} ${lead.last_name}`,
-                                lead_email: lead.email_address,
-                                manager_id: lead.assigned_to
-                            });
-                        } catch (err) {
-                            console.error(`Error fetching details for meeting ${demo.id}:`, err);
-                            
-                            // Fallback to basic meeting data if details fetch fails
-                            allDemos.push({
-                                ...demo,
-                                lead_id: lead.id,
-                                lead_name: `${lead.first_name} ${lead.last_name}`,
-                                lead_email: lead.email_address,
-                                manager_id: lead.assigned_to
-                            });
-                        }
+                        // Ensure we have the feedback field and handle potential nesting
+                        const feedback = demo.feedback || 
+                                    (demo.data && demo.data.feedback) || 
+                                    (demo.meeting_data && demo.meeting_data.feedback);
+                        
+                        allDemos.push({
+                            ...demo,
+                            feedback: feedback, // Explicitly set feedback
+                            lead_id: lead.id,
+                            lead_name: `${lead.first_name} ${lead.last_name}`,
+                            lead_email: lead.email_address,
+                            manager_id: lead.assigned_to,
+                            // Ensure subject field exists
+                            subject: demo.subject || 'Meeting',
+                            // Ensure status field exists  
+                            status: demo.status || 'scheduled'
+                        });
                     }
                 } catch (err) {
-                    console.log(`No communications for lead ${lead.id}`);
+                    console.log(`No communications for lead ${lead.id}:`, err);
                 }
             }
 
             // Sort demos by scheduled date (newest first)
             allDemos.sort((a, b) => new Date(b.scheduled_at) - new Date(a.scheduled_at));
+
+            // Debug: Log demos with feedback to verify data
+            console.log('All Demos:', allDemos);
+            const demosWithFeedback = allDemos.filter(d => d.feedback);
+            console.log('Demos with feedback:', demosWithFeedback);
 
             // Setup manager filter dropdown
             const managerFilter = document.getElementById('managerFilter');
@@ -687,6 +694,17 @@
                 }
             }
             
+            // CRITICAL FIX: Properly check for feedback in multiple possible locations
+            const hasFeedback = !!(demo.feedback || 
+                                (demo.data && demo.data.feedback) || 
+                                (demo.meeting_data && demo.meeting_data.feedback));
+            
+            // Get the actual feedback text for display
+            const feedbackText = demo.feedback || 
+                            (demo.data && demo.data.feedback) || 
+                            (demo.meeting_data && demo.meeting_data.feedback) || 
+                            '';
+            
             let actionButtons = '';
             if (demo.status === 'scheduled' || demo.status === 'rescheduled') {
                 actionButtons = `
@@ -701,9 +719,9 @@
             
             // Add feedback button for completed meetings
             if (demo.status === 'completed') {
-                const feedbackButtonColor = demo.feedback ? 'text-green-600 hover:bg-green-50 border-green-200' : 'text-gray-500 hover:bg-gray-50 border-gray-200';
-                const feedbackIcon = demo.feedback ? 'comment' : 'add_comment';
-                const feedbackText = demo.feedback ? 'View Feedback' : 'No Feedback';
+                const feedbackButtonColor = hasFeedback ? 'text-green-600 hover:bg-green-50 border-green-200' : 'text-gray-500 hover:bg-gray-50 border-gray-200';
+                const feedbackIcon = hasFeedback ? 'comment' : 'add_comment';
+                const feedbackButtonText = hasFeedback ? 'View Feedback' : 'No Feedback';
                 
                 actionButtons = `
                     <button 
@@ -711,7 +729,7 @@
                         class="ml-3 px-3 py-1.5 text-xs font-semibold ${feedbackButtonColor} rounded-lg transition-colors border flex items-center"
                     >
                         <span class="material-symbols-outlined text-xs mr-1">${feedbackIcon}</span>
-                        ${feedbackText}
+                        ${feedbackButtonText}
                     </button>
                 `;
             }
@@ -733,7 +751,7 @@
                 : '<span class="text-xs text-gray-400">No additional participants</span>';
             
             // Add feedback indicator to status cell if feedback exists
-            const feedbackIndicator = demo.feedback && demo.status === 'completed' ? 
+            const feedbackIndicator = hasFeedback && demo.status === 'completed' ? 
                 `<span class="ml-1 inline-flex items-center px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-xs">
                     <span class="material-symbols-outlined text-xs mr-1">comment</span>
                     Has feedback
@@ -747,7 +765,7 @@
                     </td>
                     <td class="px-6 py-4 text-gray-700">${manager ? manager.name : 'N/A'}</td>
                     <td class="px-6 py-4">
-                        <div class="text-gray-900 font-medium">${demo.subject}</div>
+                        <div class="text-gray-900 font-medium">${demo.subject || 'Meeting'}</div>
                         ${participantsDisplay}
                     </td>
                     <td class="px-6 py-4">
@@ -757,7 +775,7 @@
                     <td class="px-6 py-4">
                         <div class="flex flex-wrap items-center gap-1">
                             <span class="px-3 py-1 text-xs font-bold rounded-full ${statusColors[demo.status] || 'bg-gray-100 text-gray-800'}">
-                                ${demo.status}
+                                ${demo.status || 'scheduled'}
                             </span>
                             ${feedbackIndicator}
                         </div>
@@ -775,7 +793,6 @@
             `;
         }).join('');
     }
-
     function logout() {
         localStorage.removeItem('authToken');
         window.location.href = './login.html';
