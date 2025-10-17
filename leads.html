@@ -244,7 +244,9 @@
                     <h2 class="text-3xl font-bold text-gray-900">Leads Management</h2>
                     <p class="text-gray-500 mt-1">Manage and track all your leads</p>
                 </div>
-                <div class="flex items-center gap-3">
+
+                <!-- Right-aligned action buttons -->
+                <div class="flex items-center gap-3 sm:ml-auto">
                     <!-- Website Leads Sync Badge - NEW! -->
                     <div id="websiteLeadsBadge" class="sync-badge up-to-date" onclick="checkAndSyncWebsiteLeads()" title="Click to sync website leads">
                         <span class="material-symbols-outlined badge-icon">cloud_sync</span>
@@ -266,6 +268,7 @@
                 <!-- Toast Container for notifications -->
                 <div id="syncToastContainer"></div>
             </div>
+
 
             <!-- Search & Filter Bar -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
