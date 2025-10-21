@@ -696,6 +696,9 @@
             document.getElementById('totalRevenue').textContent = `${formatNumber(data.summary.total_revenue)}`;
             document.getElementById('totalActivities').textContent = data.summary.total_activities;
             
+            // Add this line to update the total talk time
+            document.getElementById('totalTalkTime').textContent = formatTime(data.summary.total_talk_time || 0);
+            
             // Calculate and show success rates
             const answeredRate = data.summary.total_calls_dialed > 0 
                 ? Math.round((data.summary.total_calls_answered / data.summary.total_calls_dialed) * 100)
@@ -714,6 +717,7 @@
             updateChangeIndicator('demosCompletedChange', data.summary.demos_completed_change);
             updateChangeIndicator('revenueChange', data.summary.revenue_change);
             updateChangeIndicator('activitiesChange', data.summary.activities_change);
+            updateChangeIndicator('talkTimeChange', data.summary.talk_time_change || 0);
             
             // Render team performance table
             const tbody = document.getElementById('performanceTableBody');
@@ -762,9 +766,9 @@
             document.getElementById('emptyState').style.display = 'none';
         }
 
-        // Helper function to format minutes as hours and minutes
+        // Add this helper function to format minutes as hours and minutes
         function formatTime(minutes) {
-            if (minutes === 0) return '0m';
+            if (!minutes || minutes === 0) return '0m';
             const hours = Math.floor(minutes / 60);
             const mins = minutes % 60;
             return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
