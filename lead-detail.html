@@ -1686,7 +1686,7 @@ function closeEventModal() {
                     const callStatus = document.getElementById('callStatus').value;
                     const duration = parseInt(document.getElementById('callDuration').value);
                     
-                    if (!subject || !date || !time || !leadStatus || !description || !callType || !callStatus || !duration) {
+                    if (!subject || !date || !time || !leadStatus || !description || !callType || !callStatus || (duration === undefined || duration === null)) {
                         showError('Please fill in all required fields');
                         return;
                     }
