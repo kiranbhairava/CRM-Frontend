@@ -148,6 +148,7 @@
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase">Sales Manager</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase">Meeting Title</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase">Scheduled Date</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase">Created At</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase">Status</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase">Meet Link</th>
                     </tr>
@@ -881,7 +882,7 @@
                     Has feedback
                 </span>` : '';
             
-            return `
+            return
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4">
                         <div class="font-semibold text-gray-900">${demo.lead_name}</div>
@@ -895,6 +896,10 @@
                     <td class="px-6 py-4">
                         <div class="text-gray-900">${dateStr}</div>
                         <div class="text-sm text-gray-500">${timeStr} IST</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-gray-900">${createdDateStr}</div>
+                        <div class="text-sm text-gray-500">${createdTimeStr} IST</div>
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex flex-wrap items-center gap-1">
@@ -914,7 +919,7 @@
                         </div>
                     </td>
                 </tr>
-            `;
+            ;
         }).join('');
     }
 
