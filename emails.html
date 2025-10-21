@@ -230,60 +230,54 @@
 
     async function loadData() {
         try {
-
             await initializeNavigation();
+            
             // Get current user info first
             currentUser = await apiRequest('/me');
             
-            // Load users for filter dropdown
+            // Load users for filter dropdown - single API call
             const users = await apiRequest('/sales-managers');
             allUsers = users || [];
             
-            // Load leads - filter based on user role
+            // Load leads based on user role
             let leads;
             if (currentUser.role === 'ADMIN') {
-                // Admin sees all leads
                 leads = await apiRequest('/leads');
             } else {
-                // Sales manager sees only their assigned leads
                 const allLeadsData = await apiRequest('/leads');
                 leads = allLeadsData.filter(lead => lead.assigned_to === currentUser.id);
             }
             
             allLeads = leads;
             
+            // OPTIMIZATION: Make single API calls for communications and attachments
+            const allCommunications = await apiRequest('/communications');
+            const allAttachments = await apiRequest('/attachments');
+            
             // Get all emails from filtered leads only
             allEmails = [];
             for (const lead of leads) {
-                try {
-                    const comms = await apiRequest(`/leads/${lead.id}/communications`);
-                    const emails = comms.filter(c => c.type === 'email');
-                    
-                    // Get attachments for this lead
-                    let attachmentsCount = 0;
-                    try {
-                        const attachments = await apiRequest(`/leads/${lead.id}/attachments`);
-                        attachmentsCount = attachments.length;
-                    } catch (err) {
-                        console.log(`No attachments for lead ${lead.id}`);
-                    }
-                    
-                    emails.forEach(email => {
-                        allEmails.push({
-                            ...email,
-                            lead_id: lead.id,
-                            lead_name: `${lead.first_name} ${lead.last_name}`,
-                            lead_email: lead.email_address,
-                            manager_id: lead.assigned_to,
-                            attachments: attachmentsCount
-                        });
+                // Filter communications for this lead
+                const leadComms = allCommunications.filter(c => c.lead_id === lead.id);
+                const emails = leadComms.filter(c => c.type === 'email');
+                
+                // Get attachments count for this lead
+                const leadAttachments = allAttachments.filter(a => a.lead_id === lead.id);
+                const attachmentsCount = leadAttachments.length;
+                
+                emails.forEach(email => {
+                    allEmails.push({
+                        ...email,
+                        lead_id: lead.id,
+                        lead_name: `${lead.first_name} ${lead.last_name}`,
+                        lead_email: lead.email_address,
+                        manager_id: lead.assigned_to,
+                        attachments: attachmentsCount
                     });
-                } catch (err) {
-                    console.log(`No communications for lead ${lead.id}`);
-                }
+                });
             }
 
-            // Populate manager filter - show all users for admin, hide for sales managers
+            // Populate manager filter
             const managerFilter = document.getElementById('managerFilter');
             const managerFilterContainer = managerFilter.closest('.flex-1');
             
@@ -310,7 +304,6 @@
             document.getElementById('emailsContainer').classList.remove('hidden');
         }
     }
-
     function updateStats() {
         const totalSent = allEmails.length;
         const withAttachments = allEmails.filter(e => e.attachments > 0).length;

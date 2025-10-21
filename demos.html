@@ -624,68 +624,61 @@
 
     async function loadData() {
         try {
+            // Get current user info first
             await initializeNavigation();
             currentUser = await apiRequest('/me');
             
-            if (currentUser.role === 'ADMIN') {
-                const users = await apiRequest('/sales-managers');
-                allUsers = users || [];
-            } else {
-                allUsers = [currentUser];
-            }
+            // Load users for filter dropdown - single API call
+            const users = await apiRequest('/sales-managers');
+            allUsers = Array.isArray(users) ? users : [];
             
+            // Load leads - filter based on user role
             let leads;
             if (currentUser.role === 'ADMIN') {
+                // Admin sees all leads - single API call
                 leads = await apiRequest('/leads');
             } else {
+                // Sales manager sees only their assigned leads
                 const allLeadsData = await apiRequest('/leads');
                 leads = allLeadsData.filter(lead => lead.assigned_to === currentUser.id);
             }
             
             allLeads = leads;
             
+            // OPTIMIZATION: Make a single API call to get all communications
+            const allCommunications = await apiRequest('/communications');
+            
             // Reset allDemos
             allDemos = [];
             
-            // For each lead, get communications and extract meetings
+            // Process communications without making additional API calls
             for (const lead of leads) {
-                try {
-                    const comms = await apiRequest(`/leads/${lead.id}/communications`);
-                    const demos = comms.filter(c => c.type === 'meeting');
+                // Filter communications for this lead
+                const leadComms = allCommunications.filter(c => c.lead_id === lead.id);
+                const demos = leadComms.filter(c => c.type === 'meeting');
+                
+                // Process meetings without making additional API calls
+                for (const demo of demos) {
+                    // Get feedback from the existing data
+                    const feedback = demo.feedback || 
+                                (demo.data && demo.data.feedback) || 
+                                (demo.meeting_data && demo.meeting_data.feedback);
                     
-                    // CRITICAL FIX: Process meetings without making additional API calls
-                    // The /leads/{lead_id}/communications endpoint already returns all data including feedback
-                    for (const demo of demos) {
-                        // Ensure we have the feedback field and handle potential nesting
-                        const feedback = demo.feedback || 
-                                    (demo.data && demo.data.feedback) || 
-                                    (demo.meeting_data && demo.meeting_data.feedback);
-                        
-                        allDemos.push({
-                            ...demo,
-                            feedback: feedback, // Explicitly set feedback
-                            lead_id: lead.id,
-                            lead_name: `${lead.first_name} ${lead.last_name}`,
-                            lead_email: lead.email_address,
-                            manager_id: lead.assigned_to,
-                            // Ensure subject field exists
-                            subject: demo.subject || 'Meeting',
-                            // Ensure status field exists  
-                            status: demo.status || 'scheduled'
-                        });
-                    }
-                } catch (err) {
-                    console.log(`No communications for lead ${lead.id}:`, err);
+                    allDemos.push({
+                        ...demo,
+                        feedback: feedback,
+                        lead_id: lead.id,
+                        lead_name: `${lead.first_name} ${lead.last_name}`,
+                        lead_email: lead.email_address,
+                        manager_id: lead.assigned_to,
+                        subject: demo.subject || 'Meeting',
+                        status: demo.status || 'scheduled'
+                    });
                 }
             }
 
             // Sort demos by scheduled date (newest first)
             allDemos.sort((a, b) => new Date(b.scheduled_at) - new Date(a.scheduled_at));
-
-            // Debug: Log demos with feedback to verify data
-            console.log('All Demos:', allDemos);
-            const demosWithFeedback = allDemos.filter(d => d.feedback);
-            console.log('Demos with feedback:', demosWithFeedback);
 
             // Setup manager filter dropdown
             const managerFilter = document.getElementById('managerFilter');
@@ -715,6 +708,7 @@
             document.getElementById('demosContainer').classList.remove('hidden');
         }
     }
+
     function updateStats() {
         const scheduled = allDemos.filter(d => d.status === 'scheduled').length;
         const completed = allDemos.filter(d => d.status === 'completed').length;

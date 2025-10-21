@@ -115,11 +115,11 @@
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                         onchange="filterCalls()"
                     >
-                        <option value="">All Statuses</option>
+                        <!-- <option value="">All Statuses</option> -->
                         <option value="held">Held</option>
                         <option value="scheduled">Scheduled</option>
                         <option value="not held">Not Held</option>
-                        <option value="no answer">No Answer</option>
+                        <option value="dnp">DNP</option>
                     </select>
                 </div>
                 <div>
@@ -257,12 +257,12 @@
                         required
                         class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent appearance-none bg-white"
                     >
-                        <option value="">Select Status</option>
+                        <!-- <option value="">Select Status</option> -->
                         <option value="scheduled">Scheduled</option>
                         <option value="held">Held</option>
                         <option value="completed">Completed</option>
                         <option value="not held">Not Held</option>
-                        <option value="no answer">No Answer</option>
+                        <option value="DNP">DNP</option>
                     </select>
                     <p class="text-xs text-gray-500 mt-1">Select 'Held' or 'Completed' for successful calls</p>
                 </div>
@@ -417,22 +417,29 @@
             await initializeNavigation();
             currentUser = await apiRequest('/me');
             
-            // Load users for filter dropdown
+            // Load users for filter dropdown - single API call
             const users = await apiRequest('/sales-managers');
             allUsers = Array.isArray(users) ? users : [];
             
-            // Populate manager filter
+            // Setup manager filter dropdown
             const managerFilter = document.getElementById('managerFilter');
-            if (allUsers.length > 0) {
+            const managerFilterContainer = managerFilter.closest('.flex-1');
+            
+            if (currentUser.role === 'ADMIN') {
+                managerFilter.innerHTML = '<option value="">All Sales Managers</option>';
                 allUsers.forEach(user => {
                     const option = document.createElement('option');
                     option.value = user.id;
                     option.textContent = user.name;
                     managerFilter.appendChild(option);
                 });
+            } else {
+                if (managerFilterContainer) {
+                    managerFilterContainer.style.display = 'none';
+                }
             }
             
-            // Load leads - filter based on user role
+            // Load leads based on user role
             let leads;
             if (currentUser.role === 'ADMIN') {
                 leads = await apiRequest('/leads');
@@ -443,40 +450,34 @@
             
             allLeads = leads;
             
-            // Get all calls from filtered leads only
+            // Reset call collection
             allCalls = [];
+            
+            // OPTIMIZATION: Make a single API call to get all communications
+            const allCommunications = await apiRequest('/communications');
+            
+            // Process each lead's communication data
             for (const lead of leads) {
-                try {
-                    const comms = await apiRequest(`/leads/${lead.id}/communications`);
-                    // Filter for calls only
-                    const calls = comms.filter(c => c.type === 'call');
+                // Filter communications for this lead
+                const leadComms = allCommunications.filter(c => c.lead_id === lead.id);
+                const calls = leadComms.filter(c => c.type === 'call');
+                
+                // Process calls
+                calls.forEach(call => {
+                    // Find the user who created this call
+                    const callCreator = allUsers.find(u => u.id === call.user_id);
                     
-                    // IMPORTANT: For non-admin users, only show calls they created (user_id matches)
-                    const filteredCalls = currentUser.role === 'ADMIN' 
-                        ? calls 
-                        : calls.filter(c => c.user_id === currentUser.id);
-                    
-                    filteredCalls.forEach(call => {
-                        // Find the user who created this call
-                        const callCreator = allUsers.find(u => u.id === call.user_id);
-                        
-                        allCalls.push({
-                            ...call,
-                            lead_id: lead.id,
-                            lead_name: `${lead.first_name} ${lead.last_name}`,
-                            lead_email: lead.email_address,
-                            manager_id: call.user_id, // The person who made the call
-                            manager_name: callCreator?.name || 'Unknown User'
-                        });
+                    allCalls.push({
+                        ...call,
+                        lead_id: lead.id,
+                        lead_name: `${lead.first_name} ${lead.last_name}`,
+                        lead_email: lead.email_address,
+                        manager_id: call.user_id,
+                        manager_name: callCreator?.name || 'Unknown User'
                     });
-                } catch (err) {
-                    console.error(`Error loading calls for lead ${lead.id}:`, err);
-                }
+                });
             }
             
-            console.log(`Loaded ${allCalls.length} calls for user ${currentUser.name}`);
-            console.log('Sample call:', allCalls[0]);
-
             renderCalls(allCalls);
             updateStats(allCalls);
             
@@ -491,11 +492,10 @@
             console.error(err);
             document.getElementById('loading').innerHTML = `
                 <span class="material-symbols-outlined text-red-500 text-6xl">error</span>
-                <p class="text-red-600 mt-4">Failed to load calls. Please try again.</p>
+                <p class="text-red-600 mt-4">Failed to load calls.</p>
             `;
         }
     }
-
     function renderCalls(calls) {
         const tbody = document.getElementById('callsTableBody');
         tbody.innerHTML = '';
@@ -518,7 +518,7 @@
                 'completed': 'bg-green-100 text-green-800',
                 'scheduled': 'bg-orange-100 text-orange-800',
                 'not held': 'bg-red-100 text-red-800',
-                'no answer': 'bg-gray-100 text-gray-800'
+                'dnp': 'bg-gray-100 text-gray-800'
             };
             
             const statusClass = statusColors[call.status] || 'bg-gray-100 text-gray-800';
@@ -630,7 +630,7 @@
         const total = calls.length;
         const held = calls.filter(c => c.status === 'held').length;
         const scheduled = calls.filter(c => c.status === 'scheduled').length;
-        const notHeld = calls.filter(c => c.status === 'not held' || c.status === 'no answer').length;
+        const notHeld = calls.filter(c => c.status === 'not held' || c.status === 'dnp').length;
 
         document.getElementById('totalCalls').textContent = `${total} Calls`;
         document.getElementById('totalCallsStat').textContent = total;

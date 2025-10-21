@@ -296,37 +296,7 @@
                     </div>
                 </div>
 
-                <!-- Google Workspace Integration -->
-                <div id="googleIntegration" class="bg-white rounded-xl shadow-sm p-6 hidden">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Google Workspace</h3>
-                    <div class="space-y-3">
-                        <button id="connectGoogleBtn" onclick="connectGoogle()" class="w-full flex items-center justify-between p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
-                            <div class="flex items-center">
-                                <span class="material-symbols-outlined text-blue-600 mr-3">link</span>
-                                <span class="text-sm font-medium">Connect Google</span>
-                            </div>
-                            <span class="material-symbols-outlined text-gray-400">chevron_right</span>
-                        </button>
-                        <button id="gmailBtn" onclick="openEmailModal()" class="w-full flex items-center justify-between p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors" disabled>
-                            <div class="flex items-center">
-                                <span class="material-symbols-outlined text-red-600 mr-3">mail</span>
-                                <span class="text-sm font-medium">Gmail</span>
-                            </div>
-                            <span class="material-symbols-outlined text-gray-400">chevron_right</span>
-                        </button>
-                        <button id="calendarBtn" onclick="openCalendarModal()" class="w-full flex items-center justify-between p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors" disabled>
-                            <div class="flex items-center">
-                                <span class="material-symbols-outlined text-green-600 mr-3">calendar_today</span>
-                                <span class="text-sm font-medium">Calendar</span>
-                            </div>
-                            <span class="material-symbols-outlined text-gray-400">chevron_right</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
+                
     <!-- Email Modal -->
     <div id="emailModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-fadeIn">
@@ -704,7 +674,7 @@
                         required
                         class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
                     >
-                        <option value="">Select Status</option>
+                        <!-- <option value="">Select Status</option> -->
                         <option value="Contacted">Contacted</option>
                         <option value="Lead">Lead</option>
                         <option value="Prospect">Prospect</option>
@@ -746,7 +716,7 @@
                             required
                             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
                         >
-                            <option value="">Select Type</option>
+                            <!-- <option value="">Select Type</option> -->
                             <option value="Outbound">Outbound</option>
                             <option value="Inbound">Inbound</option>
                         </select>
@@ -761,11 +731,12 @@
                             required
                             class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none bg-white"
                         >
-                            <option value="">Select Status</option>
+                            <!-- <option value="">Select Status</option> -->
                             <option value="Scheduled">Scheduled</option>
+                            <option value="Completed">Completed</option>
                             <option value="Held">Held</option>
                             <option value="Not Held">Not Held</option>
-                            <option value="No Answer">No Answer</option>
+                            <option value="DNP">DNP</option>
                         </select>
                     </div>
                 </div>
@@ -1174,11 +1145,16 @@
                 // Add status badge for calls
                 if (comm.status === 'scheduled') {
                     statusBadgeHtml = '<span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">Scheduled</span>';
-                } else if (comm.status === 'no answer') {
-                    statusBadgeHtml = '<span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">No Answer</span>';
+                } else if (comm.status === 'held') {
+                    statusBadgeHtml = '<span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">Held</span>';
+                } else if (comm.status === 'not held') {
+                    statusBadgeHtml = '<span class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-800">Not Held</span>';
+                } else if (comm.status === 'dnp') {
+                    statusBadgeHtml = '<span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">DNP</span>';
                 } else if (comm.status === 'completed') {
                     statusBadgeHtml = '<span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">Completed</span>';
                 }
+
                 
             } else if (comm.type === 'meeting') {
                 borderColor = 'border-purple-500';
