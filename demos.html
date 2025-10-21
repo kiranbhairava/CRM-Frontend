@@ -882,7 +882,7 @@
                     Has feedback
                 </span>` : '';
             
-            return
+            return `
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4">
                         <div class="font-semibold text-gray-900">${demo.lead_name}</div>
@@ -911,15 +911,17 @@
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center">
-                            ${demo.meet_link ? `<a href="${demo.meet_link}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                                <span class="material-symbols-outlined text-sm mr-1">videocam</span>
-                                Join
-                            </a>` : '<span class="text-gray-400">No link</span>'}
+                            ${demo.meet_link ? `
+                                <a href="${demo.meet_link}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                                    <span class="material-symbols-outlined text-sm mr-1">videocam</span>
+                                    Join
+                                </a>` : '<span class="text-gray-400">No link</span>'}
                             ${actionButtons}
                         </div>
                     </td>
                 </tr>
-            ;
+            `;
+
         }).join('');
     }
 
