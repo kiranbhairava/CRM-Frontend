@@ -538,6 +538,7 @@
                             <th>Demos Scheduled</th>
                             <th>Demos Completed</th>
                             <th>Revenue</th>
+                            <th>Total Talk Time</th>
                             <th>Total Activities</th>
                         </tr>
                     </thead>
@@ -697,6 +698,38 @@
             updateChangeIndicator('revenueChange', data.summary.revenue_change);
             updateChangeIndicator('activitiesChange', data.summary.activities_change);
             
+            // Add Talk Time to metrics grid if not already present
+            if (document.getElementById('totalTalkTime') === null && data.summary.total_talk_time !== undefined) {
+                const metricsGrid = document.querySelector('.metrics-grid');
+                const talkTimeCard = document.createElement('div');
+                talkTimeCard.className = 'metric-card';
+                talkTimeCard.innerHTML = `
+                    <div class="metric-header">
+                        <span class="metric-label">Total Talk Time</span>
+                        <div class="metric-icon bg-gradient-blue">
+                            <span class="material-symbols-outlined" style="color: white; font-size: 1.5rem;">timer</span>
+                        </div>
+                    </div>
+                    <div class="metric-value" id="totalTalkTime">${formatTime(data.summary.total_talk_time || 0)}</div>
+                    <div class="metric-subtext">Total minutes on calls</div>
+                    ${data.summary.talk_time_change !== undefined ? `
+                        <div class="metric-change ${data.summary.talk_time_change >= 0 ? 'positive' : 'negative'}" id="talkTimeChange">
+                            <span class="material-symbols-outlined" style="font-size: 1rem;">
+                                ${data.summary.talk_time_change >= 0 ? 'arrow_upward' : 'arrow_downward'}
+                            </span>
+                            <span>${Math.abs(data.summary.talk_time_change)}%</span>
+                        </div>
+                    ` : ''}
+                `;
+                metricsGrid.appendChild(talkTimeCard);
+            } else if (data.summary.total_talk_time !== undefined) {
+                // Update existing talk time card
+                document.getElementById('totalTalkTime').textContent = formatTime(data.summary.total_talk_time || 0);
+                if (data.summary.talk_time_change !== undefined) {
+                    updateChangeIndicator('talkTimeChange', data.summary.talk_time_change);
+                }
+            }
+            
             // Render team performance table
             const tbody = document.getElementById('performanceTableBody');
             tbody.innerHTML = '';
@@ -734,6 +767,7 @@
                         </div>
                     </td>
                     <td style="font-weight: 600; color: #48bb78;">${formatNumber(member.revenue_generated)}</td>
+                    <td>${formatTime(member.talk_time || 0)}</td>
                     <td>${member.activities}</td>
                 `;
                 tbody.appendChild(row);
@@ -743,6 +777,13 @@
             document.getElementById('emptyState').style.display = 'none';
         }
 
+        // Add this helper function to format minutes as hours and minutes
+        function formatTime(minutes) {
+            if (minutes === 0) return '0m';
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+        }
         function updateChangeIndicator(elementId, change) {
             const element = document.getElementById(elementId);
             const isPositive = change >= 0;
@@ -784,8 +825,8 @@
             }
             
             try {
-                // Create CSV content with new columns
-                let csv = 'Sales Rep,Calls Dialed,Calls Answered,Answer Rate,Demos Scheduled,Demos Completed,Completion Rate,Revenue Generated,Activities\n';
+                // Create CSV content with new columns including talk time
+                let csv = 'Sales Rep,Calls Dialed,Calls Answered,Answer Rate,Demos Scheduled,Demos Completed,Completion Rate,Revenue Generated,Talk Time,Activities\n';
                 
                 reportData.team_performance.forEach(member => {
                     const answerRate = member.calls_dialed > 0
@@ -795,7 +836,7 @@
                         ? Math.round((member.demos_completed / member.demos_scheduled) * 100)
                         : 0;
                     
-                    csv += `${member.name},${member.calls_dialed},${member.calls_answered},${answerRate}%,${member.demos_scheduled},${member.demos_completed},${completionRate}%,${member.revenue_generated},${member.activities}\n`;
+                    csv += `${member.name},${member.calls_dialed},${member.calls_answered},${answerRate}%,${member.demos_scheduled},${member.demos_completed},${completionRate}%,${member.revenue_generated},${formatTime(member.talk_time || 0)},${member.activities}\n`;
                 });
                 
                 // Add summary row
@@ -806,7 +847,7 @@
                     ? Math.round((reportData.summary.total_demos_completed / reportData.summary.total_demos_scheduled) * 100)
                     : 0;
                 
-                csv += `Total,${reportData.summary.total_calls_dialed},${reportData.summary.total_calls_answered},${totalAnswerRate}%,${reportData.summary.total_demos_scheduled},${reportData.summary.total_demos_completed},${totalCompletionRate}%,${reportData.summary.total_revenue},${reportData.summary.total_activities}\n`;
+                csv += `Total,${reportData.summary.total_calls_dialed},${reportData.summary.total_calls_answered},${totalAnswerRate}%,${reportData.summary.total_demos_scheduled},${reportData.summary.total_demos_completed},${totalCompletionRate}%,${reportData.summary.total_revenue},${formatTime(reportData.summary.total_talk_time || 0)},${reportData.summary.total_activities}\n`;
                 
                 // Trigger CSV download
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -822,7 +863,6 @@
                 console.error('Error exporting reports:', error);
             }
         }
-
         // Event listeners
         document.getElementById('exportButton').addEventListener('click', exportReports);
     </script>
