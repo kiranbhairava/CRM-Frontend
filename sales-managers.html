@@ -47,6 +47,21 @@
             from { opacity: 0; transform: translateY(10px); } 
             to { opacity: 1; transform: translateY(0); } 
         }
+
+        @keyframes spinner {
+            to {transform: rotate(360deg);}
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            animation: spinner 0.6s linear infinite;
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 <body class="font-display bg-background-light min-h-screen">
@@ -450,6 +465,45 @@
             }
         }
 
+        // Utility function to prevent duplicate submissions
+        function disableDuringProcess(button, actionFunction) {
+            // If button is already disabled, do nothing
+            if (button.disabled) return;
+            
+            // Store original text
+            const originalText = button.innerHTML;
+            
+            // Disable button and show processing state
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner"></span> Processing...';
+            
+            // Perform the action
+            try {
+                const result = actionFunction();
+                
+                // If the action returns a promise, wait for it
+                if (result instanceof Promise) {
+                    result
+                        .finally(() => {
+                            // Re-enable button and restore text when done
+                            button.disabled = false;
+                            button.innerHTML = originalText;
+                        });
+                } else {
+                    // If not a promise, re-enable immediately
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                }
+                
+                return result;
+            } catch (error) {
+                // In case of error, re-enable the button
+                button.disabled = false;
+                button.innerHTML = originalText;
+                throw error;
+            }
+        }
+
         async function loadSalesManagers() {
             try {
                 showLoading(true);
@@ -531,39 +585,47 @@
         }
 
         function openCreateModal() {
-            editingManagerId = null;
-            document.getElementById('modalTitle').textContent = 'Add Sales Manager';
-            document.getElementById('submitButtonText').textContent = 'Save Manager';
-            document.getElementById('salesManagerForm').reset();
-            document.getElementById('managerId').value = '';
-            document.getElementById('passwordField').style.display = 'block';
-            document.getElementById('managerPassword').required = true;
-            document.getElementById('salesManagerModal').classList.remove('hidden');
+            const createButton = document.querySelector('button[onclick="openCreateModal()"]');
+            
+            disableDuringProcess(createButton, () => {
+                editingManagerId = null;
+                document.getElementById('modalTitle').textContent = 'Add Sales Manager';
+                document.getElementById('submitButtonText').textContent = 'Save Manager';
+                document.getElementById('salesManagerForm').reset();
+                document.getElementById('managerId').value = '';
+                document.getElementById('passwordField').style.display = 'block';
+                document.getElementById('managerPassword').required = true;
+                document.getElementById('salesManagerModal').classList.remove('hidden');
+            });
         }
 
         async function openEditModal(managerId) {
-            try {
-                const managers = await apiRequest('/sales-managers');
-                const manager = managers.find(m => m.id === managerId);
-                
-                if (!manager) {
-                    showError('Manager not found');
-                    return;
-                }
+            const editButton = document.querySelector(`button[onclick="openEditModal(${managerId})"]`);
+            
+            disableDuringProcess(editButton, async () => {
+                try {
+                    const managers = await apiRequest('/sales-managers');
+                    const manager = managers.find(m => m.id === managerId);
+                    
+                    if (!manager) {
+                        showError('Manager not found');
+                        return;
+                    }
 
-                editingManagerId = managerId;
-                document.getElementById('modalTitle').textContent = 'Edit Sales Manager';
-                document.getElementById('submitButtonText').textContent = 'Update Manager';
-                document.getElementById('managerId').value = managerId;
-                document.getElementById('managerName').value = manager.name;
-                document.getElementById('managerEmail').value = manager.email;
-                document.getElementById('monthlyTarget').value = manager.monthly_target;
-                document.getElementById('passwordField').style.display = 'none';
-                document.getElementById('managerPassword').required = false;
-                document.getElementById('salesManagerModal').classList.remove('hidden');
-            } catch (error) {
-                showError('Failed to load manager details');
-            }
+                    editingManagerId = managerId;
+                    document.getElementById('modalTitle').textContent = 'Edit Sales Manager';
+                    document.getElementById('submitButtonText').textContent = 'Update Manager';
+                    document.getElementById('managerId').value = managerId;
+                    document.getElementById('managerName').value = manager.name;
+                    document.getElementById('managerEmail').value = manager.email;
+                    document.getElementById('monthlyTarget').value = manager.monthly_target;
+                    document.getElementById('passwordField').style.display = 'none';
+                    document.getElementById('managerPassword').required = false;
+                    document.getElementById('salesManagerModal').classList.remove('hidden');
+                } catch (error) {
+                    showError('Failed to load manager details');
+                }
+            });
         }
 
         function closeModal() {
@@ -573,148 +635,192 @@
         }
 
         async function openViewModal(managerId) {
-            try {
-                // Get manager details
-                const managers = await apiRequest('/sales-managers');
-                const manager = managers.find(m => m.id === managerId);
-                
-                if (!manager) {
-                    showError('Manager not found');
-                    return;
-                }
-
-                // Filter leads for this manager
-                const managerLeads = allLeads.filter(lead => lead.assigned_to === managerId);
-                
-                // Calculate statistics
-                const statusCounts = {
-                    'New': 0,
-                    'Assigned': 0,
-                    'In Process': 0,
-                    'Converted': 0
-                };
-                
-                managerLeads.forEach(lead => {
-                    if (statusCounts.hasOwnProperty(lead.status)) {
-                        statusCounts[lead.status]++;
+            const viewButton = document.querySelector(`button[onclick="openViewModal(${managerId})"]`);
+            
+            disableDuringProcess(viewButton, async () => {
+                try {
+                    // Get manager details
+                    const managers = await apiRequest('/sales-managers');
+                    const manager = managers.find(m => m.id === managerId);
+                    
+                    if (!manager) {
+                        showError('Manager not found');
+                        return;
                     }
-                });
 
-                // Update modal title and stats
-                document.getElementById('viewModalTitle').textContent = `${manager.name}'s Performance`;
-                document.getElementById('viewTotalLeads').textContent = managerLeads.length;
-                document.getElementById('viewConvertedLeads').textContent = statusCounts['Converted'];
-                document.getElementById('viewMonthlyTarget').textContent = manager.monthly_target.toLocaleString();
-                
-                // Update status breakdown
-                document.getElementById('viewStatusNew').textContent = statusCounts['New'];
-                document.getElementById('viewStatusAssigned').textContent = statusCounts['Assigned'];
-                document.getElementById('viewStatusInProcess').textContent = statusCounts['In Process'];
-                document.getElementById('viewStatusConverted').textContent = statusCounts['Converted'];
-
-                // Render leads table
-                const leadsTableBody = document.getElementById('viewLeadsTableBody');
-                
-                if (managerLeads.length === 0) {
-                    leadsTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
-                                <span class="material-symbols-outlined text-4xl text-gray-300 mb-2">inbox</span>
-                                <p>No leads assigned yet</p>
-                            </td>
-                        </tr>
-                    `;
-                } else {
-                    const statusColors = {
-                        'New': 'bg-blue-100 text-blue-800',
-                        'Assigned': 'bg-yellow-100 text-yellow-800',
-                        'In Process': 'bg-orange-100 text-orange-800',
-                        'Converted': 'bg-green-100 text-green-800'
+                    // Filter leads for this manager
+                    const managerLeads = allLeads.filter(lead => lead.assigned_to === managerId);
+                    
+                    // Calculate statistics
+                    const statusCounts = {
+                        'New': 0,
+                        'Assigned': 0,
+                        'In Process': 0,
+                        'Converted': 0
                     };
+                    
+                    managerLeads.forEach(lead => {
+                        if (statusCounts.hasOwnProperty(lead.status)) {
+                            statusCounts[lead.status]++;
+                        }
+                    });
 
-                    leadsTableBody.innerHTML = managerLeads.map(lead => `
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-4 py-3 font-medium text-gray-900">${lead.first_name} ${lead.last_name}</td>
-                            <td class="px-4 py-3 text-gray-600 text-xs">${lead.email_address || '-'}</td>
-                            <td class="px-4 py-3 text-gray-600 text-xs">${lead.mobile_number || '-'}</td>
-                            <td class="px-4 py-3">
-                                <span class="px-2 py-1 text-xs font-bold rounded-full ${statusColors[lead.status] || 'bg-gray-100 text-gray-800'}">
-                                    ${lead.status || 'New'}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-gray-600 text-xs">${lead.course_interested_in || '-'}</td>
-                        </tr>
-                    `).join('');
+                    // Update modal title and stats
+                    document.getElementById('viewModalTitle').textContent = `${manager.name}'s Performance`;
+                    document.getElementById('viewTotalLeads').textContent = managerLeads.length;
+                    document.getElementById('viewConvertedLeads').textContent = statusCounts['Converted'];
+                    document.getElementById('viewMonthlyTarget').textContent = manager.monthly_target.toLocaleString();
+                    
+                    // Update status breakdown
+                    document.getElementById('viewStatusNew').textContent = statusCounts['New'];
+                    document.getElementById('viewStatusAssigned').textContent = statusCounts['Assigned'];
+                    document.getElementById('viewStatusInProcess').textContent = statusCounts['In Process'];
+                    document.getElementById('viewStatusConverted').textContent = statusCounts['Converted'];
+
+                    // Render leads table
+                    const leadsTableBody = document.getElementById('viewLeadsTableBody');
+                    
+                    if (managerLeads.length === 0) {
+                        leadsTableBody.innerHTML = `
+                            <tr>
+                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                    <span class="material-symbols-outlined text-4xl text-gray-300 mb-2">inbox</span>
+                                    <p>No leads assigned yet</p>
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        const statusColors = {
+                            'New': 'bg-blue-100 text-blue-800',
+                            'Assigned': 'bg-yellow-100 text-yellow-800',
+                            'In Process': 'bg-orange-100 text-orange-800',
+                            'Converted': 'bg-green-100 text-green-800'
+                        };
+
+                        leadsTableBody.innerHTML = managerLeads.map(lead => `
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-4 py-3 font-medium text-gray-900">${lead.first_name} ${lead.last_name}</td>
+                                <td class="px-4 py-3 text-gray-600 text-xs">${lead.email_address || '-'}</td>
+                                <td class="px-4 py-3 text-gray-600 text-xs">${lead.mobile_number || '-'}</td>
+                                <td class="px-4 py-3">
+                                    <span class="px-2 py-1 text-xs font-bold rounded-full ${statusColors[lead.status] || 'bg-gray-100 text-gray-800'}">
+                                        ${lead.status || 'New'}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-gray-600 text-xs">${lead.course_interested_in || '-'}</td>
+                            </tr>
+                        `).join('');
+                    }
+
+                    // Show modal
+                    document.getElementById('viewModal').classList.remove('hidden');
+                    
+                } catch (error) {
+                    showError('Failed to load manager details: ' + error.message);
                 }
-
-                // Show modal
-                document.getElementById('viewModal').classList.remove('hidden');
-                
-            } catch (error) {
-                showError('Failed to load manager details: ' + error.message);
-            }
+            });
         }
-
         function closeViewModal() {
             document.getElementById('viewModal').classList.add('hidden');
         }
 
-        document.getElementById('salesManagerForm').addEventListener('submit', async (e) => {
+        document.getElementById('salesManagerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const name = document.getElementById('managerName').value;
-            const email = document.getElementById('managerEmail').value;
-            const password = document.getElementById('managerPassword').value;
-            const monthlyTarget = parseInt(document.getElementById('monthlyTarget').value);
+            const submitButton = this.querySelector('button[type="submit"]');
+            
+            disableDuringProcess(submitButton, async () => {
+                const name = document.getElementById('managerName').value;
+                const email = document.getElementById('managerEmail').value;
+                const password = document.getElementById('managerPassword').value;
+                const monthlyTarget = parseInt(document.getElementById('monthlyTarget').value);
 
-            try {
-                if (editingManagerId) {
-                    // Update existing manager
-                    await apiRequest(`/sales-managers/${editingManagerId}`, {
-                        method: 'PUT',
-                        body: JSON.stringify({
-                            name: name,
-                            email: email,
-                            monthly_target: monthlyTarget
-                        })
-                    });
-                    showSuccess('Sales manager updated successfully');
-                } else {
-                    // Create new manager
-                    await apiRequest('/sales-managers', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            name: name,
-                            email: email,
-                            password: password,
-                            monthly_target: monthlyTarget
-                        })
-                    });
-                    showSuccess('Sales manager created successfully');
+                try {
+                    if (editingManagerId) {
+                        // Update existing manager
+                        await apiRequest(`/sales-managers/${editingManagerId}`, {
+                            method: 'PUT',
+                            body: JSON.stringify({
+                                name: name,
+                                email: email,
+                                monthly_target: monthlyTarget
+                            })
+                        });
+                        showSuccess('Sales manager updated successfully');
+                    } else {
+                        // Create new manager
+                        await apiRequest('/sales-managers', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                name: name,
+                                email: email,
+                                password: password,
+                                monthly_target: monthlyTarget
+                            })
+                        });
+                        showSuccess('Sales manager created successfully');
+                    }
+                    
+                    closeModal();
+                    loadSalesManagers();
+                } catch (error) {
+                    showError('Failed to save manager: ' + error.message);
                 }
-                
-                closeModal();
-                loadSalesManagers();
-            } catch (error) {
-                showError('Failed to save manager: ' + error.message);
-            }
+            });
         });
 
+
         async function toggleStatus(managerId, activate) {
-            try {
-                const endpoint = activate ? `/sales-managers/${managerId}/activate` : `/sales-managers/${managerId}/deactivate`;
-                await apiRequest(endpoint, { method: 'PUT' });
-                showSuccess(`Sales manager ${activate ? 'activated' : 'deactivated'} successfully`);
-                loadSalesManagers();
-            } catch (error) {
-                showError(`Failed to ${activate ? 'activate' : 'deactivate'} manager: ` + error.message);
-            }
+            const statusButton = document.querySelector(`button[onclick="${activate ? `toggleStatus(${managerId}, true)` : `toggleStatus(${managerId}, false)`}"]`);
+            
+            disableDuringProcess(statusButton, async () => {
+                try {
+                    const endpoint = activate ? `/sales-managers/${managerId}/activate` : `/sales-managers/${managerId}/deactivate`;
+                    
+                    // Try the direct endpoint first
+                    try {
+                        await apiRequest(endpoint, { method: 'PUT' });
+                        showSuccess(`Sales manager ${activate ? 'activated' : 'deactivated'} successfully`);
+                    } catch (endpointError) {
+                        // If that fails, fall back to the general update endpoint
+                        console.log("Using fallback method due to error:", endpointError);
+                        
+                        // Get current manager data
+                        const managers = await apiRequest('/sales-managers');
+                        const manager = managers.find(m => m.id === managerId);
+                        
+                        if (!manager) throw new Error("Manager not found");
+                        
+                        // Update with regular PUT request
+                        await apiRequest(`/sales-managers/${managerId}`, {
+                            method: 'PUT',
+                            body: JSON.stringify({
+                                name: manager.name,
+                                email: manager.email,
+                                monthly_target: manager.monthly_target,
+                                is_active: activate // This is the key field to change
+                            })
+                        });
+                        
+                        showSuccess(`Sales manager ${activate ? 'activated' : 'deactivated'} successfully`);
+                    }
+                    
+                    // Refresh the list after update
+                    loadSalesManagers();
+                } catch (error) {
+                    showError(`Failed to ${activate ? 'activate' : 'deactivate'} manager: ` + error.message);
+                }
+            });
         }
 
         function openDeleteModal(managerId, managerName) {
-            deletingManagerId = managerId;
-            document.getElementById('deleteManagerName').textContent = managerName;
-            document.getElementById('deleteModal').classList.remove('hidden');
+            const deleteButton = document.querySelector(`button[onclick="openDeleteModal(${managerId}, '${managerName}')"]`);
+            
+            disableDuringProcess(deleteButton, () => {
+                deletingManagerId = managerId;
+                document.getElementById('deleteManagerName').textContent = managerName;
+                document.getElementById('deleteModal').classList.remove('hidden');
+            });
         }
 
         function closeDeleteModal() {
@@ -725,16 +831,20 @@
         async function confirmDelete() {
             if (!deletingManagerId) return;
 
-            try {
-                await apiRequest(`/sales-managers/${deletingManagerId}`, {
-                    method: 'DELETE'
-                });
-                showSuccess('Sales manager deleted successfully');
-                closeDeleteModal();
-                loadSalesManagers();
-            } catch (error) {
-                showError('Failed to delete manager: ' + error.message);
-            }
+            const deleteButton = document.querySelector('button[onclick="confirmDelete()"]');
+            
+            disableDuringProcess(deleteButton, async () => {
+                try {
+                    await apiRequest(`/sales-managers/${deletingManagerId}`, {
+                        method: 'DELETE'
+                    });
+                    showSuccess('Sales manager deleted successfully');
+                    closeDeleteModal();
+                    loadSalesManagers();
+                } catch (error) {
+                    showError('Failed to delete manager: ' + error.message);
+                }
+            });
         }
 
         function showLoading(show) {

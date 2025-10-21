@@ -248,7 +248,7 @@
                 <!-- Right-aligned action buttons -->
                 <div class="flex items-center gap-3 sm:ml-auto">
                     <!-- Website Leads Sync Badge - NEW! -->
-                    <div id="websiteLeadsBadge" class="sync-badge up-to-date" onclick="checkAndSyncWebsiteLeads()" title="Click to sync website leads">
+                    <div id="websiteLeadsBadge" class="sync-badge up-to-date" onclick="disableDuringProcess(this, checkAndSyncWebsiteLeads)" title="Click to sync website leads"></div>
                         <span class="material-symbols-outlined badge-icon">cloud_sync</span>
                         <span id="syncBadgeText">Checking...</span>
                         <span id="pendingCountBadge" class="pending-count hidden">0</span>
@@ -597,6 +597,45 @@
     </div>
 
 <script>
+        // Add this at the top of your script
+        function disableDuringProcess(button, actionFunction) {
+          // If button is already disabled, do nothing
+          if (button.disabled) return;
+          
+          // Store original text
+          const originalText = button.innerHTML;
+          
+          // Disable button and show processing state
+          button.disabled = true;
+          button.innerHTML = '<span class="spinner"></span> Processing...';
+          
+          // Perform the action
+          try {
+            const result = actionFunction();
+            
+            // If the action returns a promise, wait for it
+            if (result instanceof Promise) {
+              result
+                .finally(() => {
+                  // Re-enable button and restore text when done
+                  button.disabled = false;
+                  button.innerHTML = originalText;
+                });
+            } else {
+              // If not a promise, re-enable immediately
+              button.disabled = false;
+              button.innerHTML = originalText;
+            }
+            
+            return result;
+          } catch (error) {
+            // In case of error, re-enable the button
+            button.disabled = false;
+            button.innerHTML = originalText;
+            throw error;
+          }
+        }
+
         const API_BASE_URL = 'https://crm-1-ss55.onrender.com';
         let authToken = localStorage.getItem('authToken');
         let currentUser = null;
@@ -871,6 +910,45 @@
                 console.error('Failed to load sales managers:', error);
             }
         }
+
+        // Utility function to prevent duplicate submissions
+        function disableDuringProcess(button, actionFunction) {
+            // If button is already disabled, do nothing
+            if (button.disabled) return;
+            
+            // Store original text
+            const originalText = button.innerHTML;
+            
+            // Disable button and show processing state
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner"></span> Processing...';
+            
+            // Perform the action
+            try {
+                const result = actionFunction();
+                
+                // If the action returns a promise, wait for it
+                if (result instanceof Promise) {
+                result
+                    .finally(() => {
+                    // Re-enable button and restore text when done
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                    });
+                } else {
+                // If not a promise, re-enable immediately
+                button.disabled = false;
+                button.innerHTML = originalText;
+                }
+                
+                return result;
+            } catch (error) {
+                // In case of error, re-enable the button
+                button.disabled = false;
+                button.innerHTML = originalText;
+                throw error;
+            }
+            }
 
         function renderLeads(leads) {
         filteredLeads = leads;
@@ -1205,21 +1283,23 @@
             document.getElementById('deleteModal').classList.add('hidden');
         }
 
-        async function confirmDelete() {
-            if (!deletingLeadId) return;
-
-            try {
-                await apiRequest(`/leads/${deletingLeadId}`, {
-                    method: 'DELETE'
-                });
-                
-                allLeads = allLeads.filter(l => l.id !== deletingLeadId);
-                showSuccess('Lead deleted successfully!');
-                closeDeleteModal();
-                applyFilters();
-            } catch (error) {
-                showError('Failed to delete lead: ' + error.message);
-            }
+        function confirmDelete() {
+            const deleteButton = document.querySelector('button[onclick="confirmDelete()"]');
+            
+            disableDuringProcess(deleteButton, async () => {
+                try {
+                    await apiRequest(`/leads/${deletingLeadId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    closeDeleteModal();
+                    // Change this line to use the correct function
+                    showSuccess('Lead deleted successfully');
+                    loadLeads();
+                } catch (error) {
+                    showError('Failed to delete lead: ' + error.message);
+                }
+            });
         }
 
         function showLoading(show) {

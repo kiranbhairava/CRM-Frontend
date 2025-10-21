@@ -9,6 +9,21 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+        @keyframes spinner {
+            to {transform: rotate(360deg);}
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            animation: spinner 0.6s linear infinite;
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -359,123 +374,135 @@
 
     // ✅ FIXED: Open Edit Modal with proper IST conversion
     async function openEditModal(meetingId) {
-        try {
-            editingMeetingId = meetingId;
-            
-            // Get meeting details
-            const meeting = await apiRequest(`/communications/${meetingId}`);
-            
-            // Fill form
-            document.getElementById('editMeetingTitle').value = meeting.subject || '';
-            document.getElementById('editMeetingDescription').value = meeting.content || '';
-            
-            if (meeting.scheduled_at) {
-                // CRITICAL FIX: Backend sends UTC, we need to display IST
-                // Example: Backend sends "2025-10-08T14:30:00Z" (2:30 PM UTC)
-                // We need to show "20:00" (8:00 PM IST)
+        const editButton = document.querySelector(`button[onclick="openEditModal(${meetingId})"]`);
+        
+        disableDuringProcess(editButton, async () => {
+            try {
+                editingMeetingId = meetingId;
                 
-                const utcDateStr = meeting.scheduled_at;
-                const utcDate = new Date(utcDateStr);
+                // Get meeting details
+                const meeting = await apiRequest(`/communications/${meetingId}`);
                 
-                // Add 5.5 hours to convert UTC to IST
-                const istDate = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
+                // Fill form
+                document.getElementById('editMeetingTitle').value = meeting.subject || '';
+                document.getElementById('editMeetingDescription').value = meeting.content || '';
                 
-                // Format date as YYYY-MM-DD for input field
-                const year = istDate.getFullYear();
-                const month = String(istDate.getMonth() + 1).padStart(2, '0');
-                const day = String(istDate.getDate()).padStart(2, '0');
-                const dateStr = `${year}-${month}-${day}`;
+                if (meeting.scheduled_at) {
+                    // CRITICAL FIX: Backend sends UTC, we need to display IST
+                    // Example: Backend sends "2025-10-08T14:30:00Z" (2:30 PM UTC)
+                    // We need to show "20:00" (8:00 PM IST)
+                    
+                    const utcDateStr = meeting.scheduled_at;
+                    const utcDate = new Date(utcDateStr);
+                    
+                    // Add 5.5 hours to convert UTC to IST
+                    const istDate = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
+                    
+                    // Format date as YYYY-MM-DD for input field
+                    const year = istDate.getFullYear();
+                    const month = String(istDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(istDate.getDate()).padStart(2, '0');
+                    const dateStr = `${year}-${month}-${day}`;
+                    
+                    // Format time as HH:MM for input field
+                    const hours = String(istDate.getHours()).padStart(2, '0');
+                    const minutes = String(istDate.getMinutes()).padStart(2, '0');
+                    const timeStr = `${hours}:${minutes}`;
+                    
+                    document.getElementById('editMeetingDate').value = dateStr;
+                    document.getElementById('editMeetingTime').value = timeStr;
+                    
+                    console.log('UTC from backend:', utcDateStr);
+                    console.log('IST displayed:', dateStr, timeStr);
+                }
                 
-                // Format time as HH:MM for input field
-                const hours = String(istDate.getHours()).padStart(2, '0');
-                const minutes = String(istDate.getMinutes()).padStart(2, '0');
-                const timeStr = `${hours}:${minutes}`;
-                
-                document.getElementById('editMeetingDate').value = dateStr;
-                document.getElementById('editMeetingTime').value = timeStr;
-                
-                console.log('UTC from backend:', utcDateStr);
-                console.log('IST displayed:', dateStr, timeStr);
+                document.getElementById('editMeetingModal').classList.remove('hidden');
+            } catch (error) {
+                alert('Failed to load meeting: ' + error.message);
             }
-            
-            document.getElementById('editMeetingModal').classList.remove('hidden');
-        } catch (error) {
-            alert('Failed to load meeting: ' + error.message);
-        }
+        });
     }
-
     function closeEditModal() {
         document.getElementById('editMeetingModal').classList.add('hidden');
         editingMeetingId = null;
     }
 
     // ✅ FIXED: Form submission with proper UTC conversion
-    document.getElementById('editMeetingForm').addEventListener('submit', async (e) => {
+    document.getElementById('editMeetingForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        if (!editingMeetingId) return;
+        const submitButton = this.querySelector('button[type="submit"]');
         
-        const dateInput = document.getElementById('editMeetingDate').value;
-        const timeInput = document.getElementById('editMeetingTime').value;
-        
-        // CRITICAL FIX: User enters IST time, we need to send UTC to backend
-        // Example: User enters "2025-10-08 22:00" (10:00 PM IST)
-        // We need to send "2025-10-08T16:30:00Z" (4:30 PM UTC)
-        
-        // Parse date and time components manually
-        const [year, month, day] = dateInput.split('-').map(Number);
-        const [hours, minutes] = timeInput.split(':').map(Number);
-        
-        // Create date in IST by using UTC and adding 5.5 hours offset
-        // First create UTC date with the IST values
-        const istAsUTC = Date.UTC(year, month - 1, day, hours, minutes, 0);
-        
-        // Now subtract 5.5 hours to get actual UTC time
-        const utcMillis = istAsUTC - (5.5 * 60 * 60 * 1000);
-        const utcDate = new Date(utcMillis);
-        const utcEndDate = new Date(utcMillis + (60 * 60 * 1000)); // +1 hour for end time
-        
-        console.log('IST from user:', `${dateInput} ${timeInput}`);
-        console.log('UTC to send:', utcDate.toISOString());
-        console.log('Expected: If user enters 10:00 PM IST, backend should get 4:30 PM UTC');
-        
-        const payload = {
-            title: document.getElementById('editMeetingTitle').value,
-            description: document.getElementById('editMeetingDescription').value,
-            start_time: utcDate.toISOString(),
-            end_time: utcEndDate.toISOString()
-        };
-        
-        try {
-            await apiRequest(`/communications/${editingMeetingId}/reschedule`, {
-                method: 'PUT',
-                body: JSON.stringify(payload)
-            });
+        disableDuringProcess(submitButton, async () => {
+            if (!editingMeetingId) return;
             
-            alert('Meeting updated successfully!');
-            closeEditModal();
-            loadData();
-        } catch (error) {
-            alert('Failed to update meeting: ' + error.message);
-        }
+            const dateInput = document.getElementById('editMeetingDate').value;
+            const timeInput = document.getElementById('editMeetingTime').value;
+            
+            // CRITICAL FIX: User enters IST time, we need to send UTC to backend
+            // Example: User enters "2025-10-08 22:00" (10:00 PM IST)
+            // We need to send "2025-10-08T16:30:00Z" (4:30 PM UTC)
+            
+            // Parse date and time components manually
+            const [year, month, day] = dateInput.split('-').map(Number);
+            const [hours, minutes] = timeInput.split(':').map(Number);
+            
+            // Create date in IST by using UTC and adding 5.5 hours offset
+            // First create UTC date with the IST values
+            const istAsUTC = Date.UTC(year, month - 1, day, hours, minutes, 0);
+            
+            // Now subtract 5.5 hours to get actual UTC time
+            const utcMillis = istAsUTC - (5.5 * 60 * 60 * 1000);
+            const utcDate = new Date(utcMillis);
+            const utcEndDate = new Date(utcMillis + (60 * 60 * 1000)); // +1 hour for end time
+            
+            console.log('IST from user:', `${dateInput} ${timeInput}`);
+            console.log('UTC to send:', utcDate.toISOString());
+            console.log('Expected: If user enters 10:00 PM IST, backend should get 4:30 PM UTC');
+            
+            const payload = {
+                title: document.getElementById('editMeetingTitle').value,
+                description: document.getElementById('editMeetingDescription').value,
+                start_time: utcDate.toISOString(),
+                end_time: utcEndDate.toISOString()
+            };
+            
+            try {
+                await apiRequest(`/communications/${editingMeetingId}/reschedule`, {
+                    method: 'PUT',
+                    body: JSON.stringify(payload)
+                });
+                
+                alert('Meeting updated successfully!');
+                closeEditModal();
+                loadData();
+            } catch (error) {
+                alert('Failed to update meeting: ' + error.message);
+            }
+        });
     });
+
 
     async function cancelMeetingFromModal() {
         if (!editingMeetingId) return;
         
         if (!confirm('Cancel this meeting?')) return;
         
-        try {
-            await apiRequest(`/communications/${editingMeetingId}/cancel`, {
-                method: 'PUT'
-            });
-            
-            alert('Meeting cancelled');
-            closeEditModal();
-            loadData();
-        } catch (error) {
-            alert('Failed to cancel: ' + error.message);
-        }
+        const cancelButton = document.querySelector('button[onclick="cancelMeetingFromModal()"]');
+        
+        disableDuringProcess(cancelButton, async () => {
+            try {
+                await apiRequest(`/communications/${editingMeetingId}/cancel`, {
+                    method: 'PUT'
+                });
+                
+                alert('Meeting cancelled');
+                closeEditModal();
+                loadData();
+            } catch (error) {
+                alert('Failed to cancel: ' + error.message);
+            }
+        });
     }
 
     async function completeMeetingFromModal() {
@@ -504,51 +531,94 @@
     }
 
     function showFeedback(meetingId) {
-        const demo = allDemos.find(d => d.id === meetingId);
-        if (!demo) {
-            alert('Meeting not found');
-            return;
-        }
+        const feedbackButton = document.querySelector(`button[onclick="showFeedback(${meetingId})"]`);
         
-        // Handle various possible feedback field locations
-        const feedback = demo.feedback || 
-                    (demo.data && demo.data.feedback) || 
-                    (demo.meeting_data && demo.meeting_data.feedback);
-        
-        if (feedback) {
-            // Create a nicer looking alert for feedback
-            const formattedFeedback = `
-                <div style="font-family: 'Inter', sans-serif; padding: 20px; max-width: 500px;">
-                    <h2 style="margin-top: 0; color: #1F2937; font-size: 18px; font-weight: 600;">${demo.subject || 'Meeting Feedback'}</h2>
-                    <p style="color: #6B7280; font-size: 14px; margin-bottom: 16px;">
-                        <span style="font-weight: 500;">Completed:</span> 
-                        ${new Date(demo.completed_at || demo.scheduled_at).toLocaleString('en-IN')}
-                    </p>
-                    <div style="background-color: #F9FAFB; padding: 16px; border-radius: 8px; margin-top: 12px;">
-                        <p style="color: #4B5563; font-size: 15px; white-space: pre-wrap; margin: 0;">${feedback}</p>
+        disableDuringProcess(feedbackButton, () => {
+            const demo = allDemos.find(d => d.id === meetingId);
+            if (!demo) {
+                alert('Meeting not found');
+                return;
+            }
+            
+            // Handle various possible feedback field locations
+            const feedback = demo.feedback || 
+                        (demo.data && demo.data.feedback) || 
+                        (demo.meeting_data && demo.meeting_data.feedback);
+            
+            if (feedback) {
+                // Create a nicer looking alert for feedback
+                const formattedFeedback = `
+                    <div style="font-family: 'Inter', sans-serif; padding: 20px; max-width: 500px;">
+                        <h2 style="margin-top: 0; color: #1F2937; font-size: 18px; font-weight: 600;">${demo.subject || 'Meeting Feedback'}</h2>
+                        <p style="color: #6B7280; font-size: 14px; margin-bottom: 16px;">
+                            <span style="font-weight: 500;">Completed:</span> 
+                            ${new Date(demo.completed_at || demo.scheduled_at).toLocaleString('en-IN')}
+                        </p>
+                        <div style="background-color: #F9FAFB; padding: 16px; border-radius: 8px; margin-top: 12px;">
+                            <p style="color: #4B5563; font-size: 15px; white-space: pre-wrap; margin: 0;">${feedback}</p>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+                
+                // Create and show a custom modal-like alert
+                const modalContainer = document.createElement('div');
+                modalContainer.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;';
+                
+                const modalContent = document.createElement('div');
+                modalContent.style.cssText = 'background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;';
+                modalContent.innerHTML = formattedFeedback;
+                
+                const closeBtn = document.createElement('button');
+                closeBtn.innerText = 'Close';
+                closeBtn.style.cssText = 'display: block; width: calc(100% - 40px); margin: 0 20px 20px; padding: 10px; background: #E5E7EB; color: #1F2937; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;';
+                closeBtn.onclick = () => document.body.removeChild(modalContainer);
+                
+                modalContent.appendChild(closeBtn);
+                modalContainer.appendChild(modalContent);
+                document.body.appendChild(modalContainer);
+            } else {
+                // No feedback
+                alert(`No feedback has been provided for this meeting.`);
+            }
+        });
+    }
+
+    // Utility function to prevent duplicate submissions
+    function disableDuringProcess(button, actionFunction) {
+        // If button is already disabled, do nothing
+        if (button.disabled) return;
+        
+        // Store original text
+        const originalText = button.innerHTML;
+        
+        // Disable button and show processing state
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner"></span> Processing...';
+        
+        // Perform the action
+        try {
+            const result = actionFunction();
             
-            // Create and show a custom modal-like alert
-            const modalContainer = document.createElement('div');
-            modalContainer.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;';
+            // If the action returns a promise, wait for it
+            if (result instanceof Promise) {
+                result
+                    .finally(() => {
+                        // Re-enable button and restore text when done
+                        button.disabled = false;
+                        button.innerHTML = originalText;
+                    });
+            } else {
+                // If not a promise, re-enable immediately
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
             
-            const modalContent = document.createElement('div');
-            modalContent.style.cssText = 'background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;';
-            modalContent.innerHTML = formattedFeedback;
-            
-            const closeBtn = document.createElement('button');
-            closeBtn.innerText = 'Close';
-            closeBtn.style.cssText = 'display: block; width: calc(100% - 40px); margin: 0 20px 20px; padding: 10px; background: #E5E7EB; color: #1F2937; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;';
-            closeBtn.onclick = () => document.body.removeChild(modalContainer);
-            
-            modalContent.appendChild(closeBtn);
-            modalContainer.appendChild(modalContent);
-            document.body.appendChild(modalContainer);
-        } else {
-            // No feedback
-            alert(`No feedback has been provided for this meeting.`);
+            return result;
+        } catch (error) {
+            // In case of error, re-enable the button
+            button.disabled = false;
+            button.innerHTML = originalText;
+            throw error;
         }
     }
 
@@ -668,37 +738,41 @@
     }
 
     function applyFilters() {
-        const managerId = document.getElementById('managerFilter').value;
-        const status = document.getElementById('statusFilter').value;
-        const dateRange = document.getElementById('dateFilter').value;
+        const filterButton = document.querySelector('button[onclick="applyFilters()"]');
+        
+        disableDuringProcess(filterButton, () => {
+            const managerId = document.getElementById('managerFilter').value;
+            const status = document.getElementById('statusFilter').value;
+            const dateRange = document.getElementById('dateFilter').value;
 
-        let filtered = [...allDemos];
+            let filtered = [...allDemos];
 
-        if (managerId && currentUser.role === 'ADMIN') {
-            filtered = filtered.filter(d => d.manager_id == managerId);
-        }
+            if (managerId && currentUser.role === 'ADMIN') {
+                filtered = filtered.filter(d => d.manager_id == managerId);
+            }
 
-        if (status) {
-            filtered = filtered.filter(d => d.status === status);
-        }
+            if (status) {
+                filtered = filtered.filter(d => d.status === status);
+            }
 
-        if (dateRange !== 'all') {
-            const now = new Date();
-            filtered = filtered.filter(d => {
-                const date = new Date(d.scheduled_at);
-                if (dateRange === 'today') {
-                    return date.toDateString() === now.toDateString();
-                } else if (dateRange === 'week') {
-                    const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
-                    return date >= weekStart;
-                } else if (dateRange === 'month') {
-                    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-                }
-                return true;
-            });
-        }
+            if (dateRange !== 'all') {
+                const now = new Date();
+                filtered = filtered.filter(d => {
+                    const date = new Date(d.scheduled_at);
+                    if (dateRange === 'today') {
+                        return date.toDateString() === now.toDateString();
+                    } else if (dateRange === 'week') {
+                        const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
+                        return date >= weekStart;
+                    } else if (dateRange === 'month') {
+                        return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+                    }
+                    return true;
+                });
+            }
 
-        renderDemos(filtered);
+            renderDemos(filtered);
+        });
     }
 
     function renderDemos(demos) {
@@ -879,47 +953,56 @@
     }
 
     // Handle feedback form submission
-    document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+    document.getElementById('feedbackForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        if (!feedbackMeetingId) return;
+        const submitButton = this.querySelector('button[type="submit"]');
         
-        const feedback = document.getElementById('meetingFeedback').value;
-        
-        try {
-            await apiRequest(`/communications/${feedbackMeetingId}/complete`, {
-                method: 'PUT',
-                body: JSON.stringify({
-                    feedback: feedback
-                })
-            });
+        disableDuringProcess(submitButton, async () => {
+            if (!feedbackMeetingId) return;
             
-            // Show success message
-            const successMessage = document.createElement('div');
-            successMessage.className = 'fixed bottom-4 right-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-lg z-50 animate-fadeIn';
-            successMessage.innerHTML = `
-                <div class="flex items-center">
-                    <span class="material-symbols-outlined mr-2">check_circle</span>
-                    <p class="font-medium">Meeting completed successfully!</p>
-                </div>
-            `;
-            document.body.appendChild(successMessage);
+            const feedback = document.getElementById('meetingFeedback').value;
             
-            // Remove the message after 3 seconds
-            setTimeout(() => {
-                document.body.removeChild(successMessage);
-            }, 3000);
-            
-            closeFeedbackModal();
-            loadData();
-        } catch (error) {
-            alert('Failed to complete meeting: ' + error.message);
-        }
+            try {
+                await apiRequest(`/communications/${feedbackMeetingId}/complete`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        feedback: feedback
+                    })
+                });
+                
+                // Show success message
+                const successMessage = document.createElement('div');
+                successMessage.className = 'fixed bottom-4 right-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-lg z-50 animate-fadeIn';
+                successMessage.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="material-symbols-outlined mr-2">check_circle</span>
+                        <p class="font-medium">Meeting completed successfully!</p>
+                    </div>
+                `;
+                document.body.appendChild(successMessage);
+                
+                // Remove the message after 3 seconds
+                setTimeout(() => {
+                    document.body.removeChild(successMessage);
+                }, 3000);
+                
+                closeFeedbackModal();
+                loadData();
+            } catch (error) {
+                alert('Failed to complete meeting: ' + error.message);
+            }
+        });
     });
+
 
     // Replace the completeMeetingFromModal function with this:
     function completeMeetingFromModal() {
-        openFeedbackModal();
+        const completeButton = document.querySelector('button[onclick="completeMeetingFromModal()"]');
+        
+        disableDuringProcess(completeButton, () => {
+            openFeedbackModal();
+        });
     }
 
     // Add this CSS to your style section for animations

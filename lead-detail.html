@@ -59,6 +59,31 @@
             border-color: #1173d4; 
             box-shadow: 0 0 0 3px rgba(17,115,212,0.1); 
         }
+
+        .timeline-container {
+            max-height: 600px; /* Adjust height as needed */
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* Add custom scrollbar styling for better appearance (optional) */
+        .timeline-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .timeline-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .timeline-container::-webkit-scrollbar-thumb {
+            background: #c5c5c5;
+            border-radius: 10px;
+        }
+
+        .timeline-container::-webkit-scrollbar-thumb:hover {
+            background: #a0a0a0;
+        }
     </style>
 </head>
 <body class="font-sans bg-gray-50">
@@ -232,7 +257,8 @@
             <div class="space-y-6">
                 <!-- Activity Timeline -->
                 <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Activity Timeline</h3>
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Activity Timeline</h3>
+                <div class="timeline-container">
                     <div id="timelineContent" class="space-y-0">
                         <div class="text-center py-8 text-gray-500">
                             <span class="material-symbols-outlined text-4xl mb-2">history</span>
@@ -240,6 +266,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
                 <!-- Quick Actions -->
                 <div class="bg-white rounded-xl shadow-sm p-6">
@@ -1204,7 +1231,7 @@
                     
                     ${comm.content ? `<p class="text-sm text-gray-700 mb-2 whitespace-pre-line">${comm.content}</p>` : ''}
                     
-                    ${comm.scheduled_at ? `
+                    ${comm.scheduled_at && comm.type !== 'call' ? `
                         <div class="text-sm text-gray-600 mb-2 flex items-center">
                             <span class="material-symbols-outlined text-sm mr-1">schedule</span>
                             <span class="font-medium">Scheduled for:</span> ${scheduledTimeStr} IST
@@ -1223,6 +1250,45 @@
                 </div>
             `;
         }).join('');
+    }
+
+    // Add this function to your main JavaScript file or a common script
+    function disableDuringProcess(button, actionFunction) {
+    // If button is already disabled, do nothing
+    if (button.disabled) return;
+    
+    // Store original text
+    const originalText = button.innerHTML;
+    
+    // Disable button and show processing state
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner"></span> Processing...';
+    
+    // Perform the action
+    try {
+        const result = actionFunction();
+        
+        // If the action returns a promise, wait for it
+        if (result instanceof Promise) {
+        result
+            .finally(() => {
+            // Re-enable button and restore text when done
+            button.disabled = false;
+            button.innerHTML = originalText;
+            });
+        } else {
+        // If not a promise, re-enable immediately
+        button.disabled = false;
+        button.innerHTML = originalText;
+        }
+        
+        return result;
+    } catch (error) {
+        // In case of error, re-enable the button
+        button.disabled = false;
+        button.innerHTML = originalText;
+        throw error;
+    }
     }
 
     // Helper function to format dates (if needed elsewhere)
@@ -1408,140 +1474,159 @@
             document.getElementById('statusModal').classList.add('hidden');
         }
 
-        async function updateStatus() {
+        function updateStatus() {
             if (!currentLeadId) return;
             
-            const newStatus = document.getElementById('statusSelect').value;
-            
-            try {
-                const updatedLead = await apiRequest(`/leads/${currentLeadId}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ status: newStatus })
-                });
+            const statusButton = document.querySelector('button[onclick="updateStatus()"]');
+            disableDuringProcess(statusButton, async () => {
+                const newStatus = document.getElementById('statusSelect').value;
                 
-                currentLead = updatedLead;
-                populateLeadData(updatedLead);
-                closeStatusModal();
-                showSuccess('Status updated successfully!');
-            } catch (error) {
-                showError('Failed to update status: ' + error.message);
-            }
+                try {
+                    const updatedLead = await apiRequest(`/leads/${currentLeadId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ status: newStatus })
+                    });
+                    
+                    currentLead = updatedLead;
+                    populateLeadData(updatedLead);
+                    closeStatusModal();
+                    showSuccess('Status updated successfully!');
+                } catch (error) {
+                    showError('Failed to update status: ' + error.message);
+                }
+            });
         }
 
         // Form submissions
-        document.getElementById('emailForm').addEventListener('submit', async (e) => {
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            if (!currentLeadId) return;
+            
+            const submitButton = this.querySelector('button[type="submit"]');
+            disableDuringProcess(submitButton, async () => {
+                if (!currentLeadId) return;
 
-            const payload = {
-                lead_id: currentLeadId,
-                to: document.getElementById('emailTo').value,
-                subject: document.getElementById('emailSubject').value,
-                body: document.getElementById('emailBody').value
-            };
+                const payload = {
+                    lead_id: currentLeadId,
+                    to: document.getElementById('emailTo').value,
+                    subject: document.getElementById('emailSubject').value,
+                    body: document.getElementById('emailBody').value
+                };
 
-            try {
-                if (googleConnected) {
-                    await apiRequest('/google/gmail/send-with-attachments', {
-                        method: 'POST',
-                        body: JSON.stringify(payload)
-                    });
-                    showSuccess('Email sent successfully via Gmail!');
-                } else {
-                    // Fallback to regular email
-                    window.open(`mailto:${payload.to}?subject=${encodeURIComponent(payload.subject)}&body=${encodeURIComponent(payload.body)}`);
-                    showSuccess('Email client opened!');
+                try {
+                    if (googleConnected) {
+                        // Send email through Gmail API
+                        await apiRequest('/google/gmail/send-with-attachments', {
+                            method: 'POST',
+                            body: JSON.stringify(payload)
+                        });
+                        showSuccess('Email sent successfully via Gmail!');
+                        
+                        // REMOVE THIS LINE - Backend already creates the communication record
+                        // await addCommunication({...});
+                    } else {
+                        // Fallback to regular email
+                        window.open(`mailto:${payload.to}?subject=${encodeURIComponent(payload.subject)}&body=${encodeURIComponent(payload.body)}`);
+                        showSuccess('Email client opened!');
+                        
+                        // KEEP THIS ONLY FOR NON-GMAIL CASE
+                        // Add to timeline only when using regular email client
+                        await addCommunication({
+                            type: 'email',
+                            subject: payload.subject,
+                            content: 'Email sent to lead'  // Use content instead of description to match backend
+                        });
+                    }
+                    
+                    closeEmailModal();
+                    
+                    // Refresh communications to display the new entry
+                    await loadCommunications(currentLeadId);
+                    
+                } catch (err) {
+                    showError('Failed to send email: ' + err.message);
                 }
-                
-                closeEmailModal();
-                
-                // Add to timeline
-                await addCommunication({
-                    type: 'email',
-                    subject: payload.subject,
-                    description: 'Email sent to lead'
-                });
-                
-            } catch (err) {
-                showError('Failed to send email: ' + err.message);
-            }
+            });
         });
 
-        document.getElementById('eventForm').addEventListener('submit', async (e) => {
+        document.getElementById('eventForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            if (!currentLeadId) return;
-
-            const date = document.getElementById('eventDate').value;
-            const startTime = document.getElementById('eventStartTime').value;
-            const endTime = document.getElementById('eventEndTime').value;
-
-            if (!date || !startTime || !endTime) {
-                showError('Please select date and times.');
-                return;
-            }
-
-            const startDateTime = new Date(`${date}T${startTime}`);
-            const endDateTime = new Date(`${date}T${endTime}`);
-
-            if (endDateTime <= startDateTime) {
-                showError('End time must be after start time.');
-                return;
-            }
-
-            // Get current lead email to add as primary attendee
-            const leadEmail = currentLead.email || currentLead.email_address;
             
-            // Filter out empty emails and validate
-            const validParticipants = participants.filter(email => {
-                return email && email.trim() !== '' && email.includes('@');
-            });
-            
-            // Combine lead email with additional participants (only if lead email exists)
-            const allAttendees = leadEmail 
-                ? [leadEmail, ...validParticipants]
-                : validParticipants;
+            const submitButton = this.querySelector('button[type="submit"]');
+            disableDuringProcess(submitButton, async () => {
+                if (!currentLeadId) return;
 
-            const payload = {
-                lead_id: currentLeadId,
-                title: document.getElementById('eventTitle').value.trim(),
-                description: document.getElementById('eventDescription').value.trim(),
-                start_time: startDateTime.toISOString(),
-                end_time: endDateTime.toISOString(),
-                // Only include attendee_emails if we have valid emails
-                ...(allAttendees.length > 0 && { attendee_emails: allAttendees }),
-                participants: validParticipants.join(',')  // Store additional participants
-            };
+                const date = document.getElementById('eventDate').value;
+                const startTime = document.getElementById('eventStartTime').value;
+                const endTime = document.getElementById('eventEndTime').value;
 
-            try {
-                if (googleConnected) {
-                    await apiRequest('/google/calendar/event', {
-                        method: 'POST',
-                        body: JSON.stringify(payload)
-                    });
-                    showSuccess('Calendar event created successfully!');
-                } else {
-                    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(payload.title)}&details=${encodeURIComponent(payload.description)}&dates=${formatGoogleCalendarDate(payload.start_time)}/${formatGoogleCalendarDate(payload.end_time)}`;
-                    window.open(googleCalendarUrl, '_blank');
-                    showSuccess('Google Calendar opened!');
+                if (!date || !startTime || !endTime) {
+                    showError('Please select date and times.');
+                    return;
                 }
-                
-                closeEventModal();
-                
-                // ADD: Include participants in communication content
-                const commContent = participants.length > 0 
-                    ? `Meeting scheduled with lead\n\nParticipants: ${allAttendees.join(', ')}`
-                    : 'Meeting scheduled with lead';
-                    
-                
-                // ADD: Reset participants after successful submission
-                participants = [];
-                renderParticipants();
 
-                await loadCommunications(currentLeadId);
+                const startDateTime = new Date(`${date}T${startTime}`);
+                const endDateTime = new Date(`${date}T${endTime}`);
+
+                if (endDateTime <= startDateTime) {
+                    showError('End time must be after start time.');
+                    return;
+                }
+
+                // Get current lead email to add as primary attendee
+                const leadEmail = currentLead.email || currentLead.email_address;
                 
-            } catch (err) {
-                showError('Failed to create event: ' + err.message);
-            }
+                // Filter out empty emails and validate
+                const validParticipants = participants.filter(email => {
+                    return email && email.trim() !== '' && email.includes('@');
+                });
+                
+                // Combine lead email with additional participants (only if lead email exists)
+                const allAttendees = leadEmail 
+                    ? [leadEmail, ...validParticipants]
+                    : validParticipants;
+
+                const payload = {
+                    lead_id: currentLeadId,
+                    title: document.getElementById('eventTitle').value.trim(),
+                    description: document.getElementById('eventDescription').value.trim(),
+                    start_time: startDateTime.toISOString(),
+                    end_time: endDateTime.toISOString(),
+                    // Only include attendee_emails if we have valid emails
+                    ...(allAttendees.length > 0 && { attendee_emails: allAttendees }),
+                    participants: validParticipants.join(',')  // Store additional participants
+                };
+
+                try {
+                    if (googleConnected) {
+                        await apiRequest('/google/calendar/event', {
+                            method: 'POST',
+                            body: JSON.stringify(payload)
+                        });
+                        showSuccess('Calendar event created successfully!');
+                    } else {
+                        const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(payload.title)}&details=${encodeURIComponent(payload.description)}&dates=${formatGoogleCalendarDate(payload.start_time)}/${formatGoogleCalendarDate(payload.end_time)}`;
+                        window.open(googleCalendarUrl, '_blank');
+                        showSuccess('Google Calendar opened!');
+                    }
+                    
+                    closeEventModal();
+                    
+                    // ADD: Include participants in communication content
+                    const commContent = participants.length > 0 
+                        ? `Meeting scheduled with lead\n\nParticipants: ${allAttendees.join(', ')}`
+                        : 'Meeting scheduled with lead';
+                        
+                    
+                    // ADD: Reset participants after successful submission
+                    participants = [];
+                    renderParticipants();
+
+                    await loadCommunications(currentLeadId);
+                    
+                } catch (err) {
+                    showError('Failed to create event: ' + err.message);
+                }
+            });
         });
 
 
@@ -1587,6 +1672,7 @@ function closeEventModal() {
     function closeCallLogModal() {
         document.getElementById('callLogModal').classList.add('hidden');
         document.getElementById('callLogForm').reset();
+        
     }
 
     // Update the existing callLead function to open the call log modal
@@ -1604,76 +1690,81 @@ function closeEventModal() {
     document.addEventListener('DOMContentLoaded', function() {
         const callLogForm = document.getElementById('callLogForm');
         if (callLogForm) {
-            callLogForm.addEventListener('submit', async function(e) {
+            callLogForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                
-                if (!currentLeadId) {
-                    showError('No lead selected');
-                    return;
-                }
-                
-                // Gather form data
-                const subject = document.getElementById('callSubject').value.trim();
-                const date = document.getElementById('callDate').value;
-                const time = document.getElementById('callTime').value;
-                const leadStatus = document.getElementById('callLeadStatus').value;
-                const description = document.getElementById('callDescription').value.trim();
-                const callType = document.getElementById('callType').value;
-                const callStatus = document.getElementById('callStatus').value;
-                const duration = parseInt(document.getElementById('callDuration').value);
-                
-                if (!subject || !date || !time || !leadStatus || !description || !callType || !callStatus || !duration) {
-                    showError('Please fill in all required fields');
-                    return;
-                }
-                
-                // Combine date and time
-                const callDateTime = new Date(`${date}T${time}`);
-                
-                // Prepare call log data - match the CommunicationCreate model
-                const callLogData = {
-                    type: 'call',
-                    subject: subject,
-                    content: `Call Type: ${callType}\nStatus: ${callStatus}\nDuration: ${duration} minutes\n\nDescription:\n${description}`,
-                    scheduled_at: callDateTime.toISOString(),
-                    completed_at: callStatus === 'Held' ? callDateTime.toISOString() : null,
-                    status: callStatus.toLowerCase(),
-                    call_type: callType,
-                    call_duration: duration,
-                    lead_status: leadStatus
-                };
-                
-                try {
-                    // Save call log as communication
-                    await apiRequest(`/leads/${currentLeadId}/communications`, {
-                        method: 'POST',
-                        body: JSON.stringify(callLogData)
-                    });
                     
-                    // Update lead status if changed
-                    if (leadStatus && leadStatus !== currentLead.status) {
-                        await apiRequest(`/leads/${currentLeadId}`, {
-                            method: 'PUT',
-                            body: JSON.stringify({ status: leadStatus })
-                        });
-                        
-                        // Refresh lead data
-                        await loadLeadDetail();
+                const submitButton = this.querySelector('button[type="submit"]');
+                disableDuringProcess(submitButton, async () => {
+                    if (!currentLeadId) {
+                        showError('No lead selected');
+                        return;
                     }
                     
-                    showSuccess('Call logged successfully!');
-                    closeCallLogModal();
+                    // Gather form data
+                    const subject = document.getElementById('callSubject').value.trim();
+                    const date = document.getElementById('callDate').value;
+                    const time = document.getElementById('callTime').value;
+                    const leadStatus = document.getElementById('callLeadStatus').value;
+                    const description = document.getElementById('callDescription').value.trim();
+                    const callType = document.getElementById('callType').value;
+                    const callStatus = document.getElementById('callStatus').value;
+                    const duration = parseInt(document.getElementById('callDuration').value);
                     
-                    // Refresh communications timeline
-                    await loadCommunications();
+                    if (!subject || !date || !time || !leadStatus || !description || !callType || !callStatus || !duration) {
+                        showError('Please fill in all required fields');
+                        return;
+                    }
                     
-                } catch (error) {
-                    console.error('Error logging call:', error);
-                    showError('Failed to log call: ' + error.message);
-                }
+                    // Combine date and time
+                    const callDateTime = new Date(`${date}T${time}`);
+                    
+                    // Prepare call log data - match the CommunicationCreate model
+                    const callLogData = {
+                        type: 'call',
+                        subject: subject,
+                        content: `Call Type: ${callType}\nStatus: ${callStatus}\nDuration: ${duration} minutes\n\nDescription:\n${description}`,
+                        scheduled_at: callDateTime.toISOString(),
+                        completed_at: callStatus === 'Held' ? callDateTime.toISOString() : null,
+                        status: callStatus.toLowerCase(),
+                        call_type: callType,
+                        call_duration: duration,
+                        lead_status: leadStatus
+                    };
+                    
+                    try {
+                        // Save call log as communication
+                        await apiRequest(`/leads/${currentLeadId}/communications`, {
+                            method: 'POST',
+                            body: JSON.stringify(callLogData)
+                        });
+                        
+                        // Update lead status if changed
+                        if (leadStatus && leadStatus !== currentLead.status) {
+                            await apiRequest(`/leads/${currentLeadId}`, {
+                                method: 'PUT',
+                                body: JSON.stringify({ status: leadStatus })
+                            });
+                            
+                            // Refresh lead data
+                            await loadLeadDetail();
+                        }
+                        
+                        showSuccess('Call logged successfully!');
+                        closeCallLogModal();
+                        
+                        // Refresh communications timeline
+                        await loadCommunications();
+                        
+                    } catch (error) {
+                        console.error('Error logging call:', error);
+                        showError('Failed to log call: ' + error.message);
+                    }
+                });
             });
         }
     });
+
+
     // Add function to display call logs in timeline
     function formatCallLog(comm) {
         const callData = parseCallLogContent(comm.content);
@@ -1706,14 +1797,9 @@ function closeEventModal() {
                             <span>${callData.duration} minutes</span>
                         </div>
                     ` : ''}
-                    ${callData.scheduledAt ? `
-                        <div class="text-sm text-gray-600">
-                            <span class="font-medium">Scheduled:</span> ${formatDate(callData.scheduledAt)}
-                        </div>
-                    ` : ''}
-                    ${callData.notes ? `
+                    ${callData.description ? `
                         <div class="mt-2 text-sm text-gray-700 bg-gray-50 rounded p-2">
-                            ${callData.notes}
+                            ${callData.description}
                         </div>
                     ` : ''}
                 </div>
@@ -1721,6 +1807,45 @@ function closeEventModal() {
             </div>
         `;
     }
+
+    // Utility function to prevent duplicate submissions
+    function disableDuringProcess(button, actionFunction) {
+        // If button is already disabled, do nothing
+        if (button.disabled) return;
+        
+        // Store original text
+        const originalText = button.innerHTML;
+        
+        // Disable button and show processing state
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner"></span> Processing...';
+        
+        // Perform the action
+        try {
+            const result = actionFunction();
+            
+            // If the action returns a promise, wait for it
+            if (result instanceof Promise) {
+            result
+                .finally(() => {
+                // Re-enable button and restore text when done
+                button.disabled = false;
+                button.innerHTML = originalText;
+                });
+            } else {
+            // If not a promise, re-enable immediately
+            button.disabled = false;
+            button.innerHTML = originalText;
+            }
+            
+            return result;
+        } catch (error) {
+            // In case of error, re-enable the button
+            button.disabled = false;
+            button.innerHTML = originalText;
+            throw error;
+        }
+        }
 
     // Helper function to parse call log content
     function parseCallLogContent(content) {
@@ -1912,44 +2037,48 @@ function closeEventModal() {
         //         });
         //     }
         // }
-        async function saveNote() {
-            const noteText = document.getElementById('newNote').value.trim();
-            if (!noteText) {
-                alert('Please enter a note');
-                return;
-            }
-
-            try {
-                // Update lead description
-                const updatedLead = await apiRequest(`/leads/${currentLeadId}`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ 
-                        description: noteText + (currentLead.description ? '\n\n' + currentLead.description : '')
-                    })
-                });
-                
-                currentLead = updatedLead;
-                
-                // Update notes display
-                if (updatedLead.description && updatedLead.description.trim()) {
-                    document.getElementById('notesContent').innerHTML = `<p class="text-sm text-gray-700 whitespace-pre-wrap">${updatedLead.description}</p>`;
-                } else {
-                    document.getElementById('notesContent').innerHTML = `<p class="text-sm text-gray-500 italic">No notes added yet</p>`;
+        function saveNote() {
+            const saveButton = document.querySelector('button[onclick="saveNote()"]');
+            
+            disableDuringProcess(saveButton, async () => {
+                const noteText = document.getElementById('newNote').value.trim();
+                if (!noteText) {
+                    alert('Please enter a note');
+                    return;
                 }
-                
-                document.getElementById('newNote').value = '';
-                showSuccess('Note saved successfully!');
-                
-                // Add to timeline as a communication
-                await addCommunication({
-                    type: 'note',
-                    subject: 'Note added',
-                    content: noteText
-                });
-                
-            } catch (error) {
-                showError('Failed to save note: ' + error.message);
-            }
+
+                try {
+                    // Update lead description
+                    const updatedLead = await apiRequest(`/leads/${currentLeadId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ 
+                            description: noteText + (currentLead.description ? '\n\n' + currentLead.description : '')
+                        })
+                    });
+                    
+                    currentLead = updatedLead;
+                    
+                    // Update notes display
+                    if (updatedLead.description && updatedLead.description.trim()) {
+                        document.getElementById('notesContent').innerHTML = `<p class="text-sm text-gray-700 whitespace-pre-wrap">${updatedLead.description}</p>`;
+                    } else {
+                        document.getElementById('notesContent').innerHTML = `<p class="text-sm text-gray-500 italic">No notes added yet</p>`;
+                    }
+                    
+                    document.getElementById('newNote').value = '';
+                    showSuccess('Note saved successfully!');
+                    
+                    // Add to timeline as a communication
+                    await addCommunication({
+                        type: 'note',
+                        subject: 'Note added',
+                        content: noteText
+                    });
+                    
+                } catch (error) {
+                    showError('Failed to save note: ' + error.message);
+                }
+            });
         }
 
         // Initialize when page loads

@@ -230,7 +230,7 @@
             </div>
 
             <!-- Modal Content -->
-            <form id="editCallForm" onsubmit="saveCallChanges(event)" class="p-6 space-y-5">
+            <form id="editCallForm" class="p-6 space-y-5">
                 <!-- Subject -->
                 <div>
                     <label for="editCallSubject" class="block text-sm font-semibold text-gray-700 mb-2">
@@ -363,6 +363,53 @@
             console.error('Failed to check user role:', error);
         }
     }
+
+    // Utility function to prevent duplicate submissions
+    function disableDuringProcess(button, actionFunction) {
+        // If button is already disabled, do nothing
+        if (button.disabled) return;
+        
+        // Store original text
+        const originalText = button.innerHTML;
+        
+        // Disable button and show processing state
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner"></span> Processing...';
+        
+        // Perform the action
+        try {
+            const result = actionFunction();
+            
+            // If the action returns a promise, wait for it
+            if (result instanceof Promise) {
+            result
+                .finally(() => {
+                // Re-enable button and restore text when done
+                button.disabled = false;
+                button.innerHTML = originalText;
+                });
+            } else {
+            // If not a promise, re-enable immediately
+            button.disabled = false;
+            button.innerHTML = originalText;
+            }
+            
+            return result;
+        } catch (error) {
+            // In case of error, re-enable the button
+            button.disabled = false;
+            button.innerHTML = originalText;
+            throw error;
+        }
+        }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const editCallForm = document.getElementById('editCallForm');
+        if (editCallForm) {
+            editCallForm.addEventListener('submit', saveCallChanges);
+        }
+    });
+
 
     async function loadData() {
         try {
@@ -508,18 +555,22 @@
     let editingCallId = null;
 
     function openEditModal(callId) {
-        const call = allCalls.find(c => c.id === callId);
-        if (!call) return;
+        const editButton = document.querySelector(`button[onclick="openEditModal(${callId})"]`);
+        
+        disableDuringProcess(editButton, () => {
+            const call = allCalls.find(c => c.id === callId);
+            if (!call) return;
 
-        editingCallId = callId;
-        
-        // Populate the edit form
-        document.getElementById('editCallSubject').value = call.subject;
-        document.getElementById('editCallStatus').value = call.status;
-        document.getElementById('editCallNotes').value = call.content || '';
-        
-        // Show modal
-        document.getElementById('editCallModal').classList.remove('hidden');
+            editingCallId = callId;
+            
+            // Populate the edit form
+            document.getElementById('editCallSubject').value = call.subject;
+            document.getElementById('editCallStatus').value = call.status;
+            document.getElementById('editCallNotes').value = call.content || '';
+            
+            // Show modal
+            document.getElementById('editCallModal').classList.remove('hidden');
+        });
     }
 
     function closeEditModal() {
@@ -528,47 +579,51 @@
         editingCallId = null;
     }
 
-    async function saveCallChanges(event) {
+    function saveCallChanges(event) {
         event.preventDefault();
         
         if (!editingCallId) return;
         
-        const subject = document.getElementById('editCallSubject').value;
-        const status = document.getElementById('editCallStatus').value;
-        const notes = document.getElementById('editCallNotes').value;
+        const submitButton = document.querySelector('#editCallForm button[type="submit"]');
         
-        try {
-            // Update the communication
-            const response = await fetch(`${API_BASE_URL}/communications/${editingCallId}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    subject: subject,
-                    status: status,
-                    content: notes
-                })
-            });
+        disableDuringProcess(submitButton, async () => {
+            const subject = document.getElementById('editCallSubject').value;
+            const status = document.getElementById('editCallStatus').value;
+            const notes = document.getElementById('editCallNotes').value;
             
-            if (!response.ok) {
-                throw new Error('Failed to update call');
+            try {
+                // Update the communication
+                const response = await fetch(`${API_BASE_URL}/communications/${editingCallId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        subject: subject,
+                        status: status,
+                        content: notes
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to update call');
+                }
+                
+                // Show success message
+                alert('Call updated successfully!');
+                
+                // Close modal
+                closeEditModal();
+                
+                // Reload data
+                await loadData();
+                
+            } catch (error) {
+                console.error('Error updating call:', error);
+                alert('Failed to update call. Please try again.');
             }
-            
-            // Show success message
-            alert('Call updated successfully!');
-            
-            // Close modal
-            closeEditModal();
-            
-            // Reload data
-            await loadData();
-            
-        } catch (error) {
-            console.error('Error updating call:', error);
-            alert('Failed to update call. Please try again.');
-        }
+        });
     }
 
     function updateStats(calls) {
@@ -605,23 +660,31 @@
     }
 
     function resetFilters() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('statusFilter').value = '';
-        document.getElementById('managerFilter').value = '';
-        filterCalls();
+        const resetButton = document.querySelector('button[onclick="resetFilters()"]');
+        
+        disableDuringProcess(resetButton, () => {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('managerFilter').value = '';
+            filterCalls();
+        });
     }
 
     function viewCall(callId) {
-        const call = allCalls.find(c => c.id === callId);
-        if (!call) return;
+        const viewButton = document.querySelector(`button[onclick="viewCall(${callId})"]`);
+        
+        disableDuringProcess(viewButton, () => {
+            const call = allCalls.find(c => c.id === callId);
+            if (!call) return;
 
-        document.getElementById('modalLead').textContent = call.lead_name;
-        document.getElementById('modalSubject').textContent = call.subject;
-        document.getElementById('modalDate').textContent = new Date(call.completed_at || call.scheduled_at || call.created_at).toLocaleString();
-        document.getElementById('modalStatus').textContent = call.status.toUpperCase();
-        document.getElementById('modalContent').textContent = call.content || 'No notes available';
+            document.getElementById('modalLead').textContent = call.lead_name;
+            document.getElementById('modalSubject').textContent = call.subject;
+            document.getElementById('modalDate').textContent = new Date(call.completed_at || call.scheduled_at || call.created_at).toLocaleString();
+            document.getElementById('modalStatus').textContent = call.status.toUpperCase();
+            document.getElementById('modalContent').textContent = call.content || 'No notes available';
 
-        document.getElementById('callModal').classList.remove('hidden');
+            document.getElementById('callModal').classList.remove('hidden');
+        });
     }
 
     function closeModal() {
