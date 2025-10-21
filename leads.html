@@ -63,6 +63,7 @@
         .sync-badge.up-to-date {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3); /* Add subtle shadow */
         }
 
         .sync-badge .badge-icon {
@@ -248,7 +249,7 @@
                 <!-- Right-aligned action buttons -->
                 <div class="flex items-center gap-3 sm:ml-auto">
                     <!-- Website Leads Sync Badge - NEW! -->
-                    <div id="websiteLeadsBadge" class="sync-badge up-to-date" onclick="disableDuringProcess(this, checkAndSyncWebsiteLeads)" title="Click to sync website leads"></div>
+                    <div id="websiteLeadsBadge" class="sync-badge up-to-date" onclick="disableDuringProcess(this, checkAndSyncWebsiteLeads)" title="Click to sync website leads">
                         <span class="material-symbols-outlined badge-icon">cloud_sync</span>
                         <span id="syncBadgeText">Checking...</span>
                         <span id="pendingCountBadge" class="pending-count hidden">0</span>
