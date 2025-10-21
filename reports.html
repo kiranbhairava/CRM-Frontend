@@ -698,38 +698,6 @@
             updateChangeIndicator('revenueChange', data.summary.revenue_change);
             updateChangeIndicator('activitiesChange', data.summary.activities_change);
             
-            // Add Talk Time to metrics grid if not already present
-            if (document.getElementById('totalTalkTime') === null && data.summary.total_talk_time !== undefined) {
-                const metricsGrid = document.querySelector('.metrics-grid');
-                const talkTimeCard = document.createElement('div');
-                talkTimeCard.className = 'metric-card';
-                talkTimeCard.innerHTML = `
-                    <div class="metric-header">
-                        <span class="metric-label">Total Talk Time</span>
-                        <div class="metric-icon bg-gradient-blue">
-                            <span class="material-symbols-outlined" style="color: white; font-size: 1.5rem;">timer</span>
-                        </div>
-                    </div>
-                    <div class="metric-value" id="totalTalkTime">${formatTime(data.summary.total_talk_time || 0)}</div>
-                    <div class="metric-subtext">Total minutes on calls</div>
-                    ${data.summary.talk_time_change !== undefined ? `
-                        <div class="metric-change ${data.summary.talk_time_change >= 0 ? 'positive' : 'negative'}" id="talkTimeChange">
-                            <span class="material-symbols-outlined" style="font-size: 1rem;">
-                                ${data.summary.talk_time_change >= 0 ? 'arrow_upward' : 'arrow_downward'}
-                            </span>
-                            <span>${Math.abs(data.summary.talk_time_change)}%</span>
-                        </div>
-                    ` : ''}
-                `;
-                metricsGrid.appendChild(talkTimeCard);
-            } else if (data.summary.total_talk_time !== undefined) {
-                // Update existing talk time card
-                document.getElementById('totalTalkTime').textContent = formatTime(data.summary.total_talk_time || 0);
-                if (data.summary.talk_time_change !== undefined) {
-                    updateChangeIndicator('talkTimeChange', data.summary.talk_time_change);
-                }
-            }
-            
             // Render team performance table
             const tbody = document.getElementById('performanceTableBody');
             tbody.innerHTML = '';
@@ -775,6 +743,14 @@
             
             document.getElementById('mainContent').style.display = 'block';
             document.getElementById('emptyState').style.display = 'none';
+        }
+
+        // Helper function to format minutes as hours and minutes
+        function formatTime(minutes) {
+            if (minutes === 0) return '0m';
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
         }
 
         // Add this helper function to format minutes as hours and minutes
@@ -825,7 +801,7 @@
             }
             
             try {
-                // Create CSV content with new columns including talk time
+                // Create CSV content with talk time column
                 let csv = 'Sales Rep,Calls Dialed,Calls Answered,Answer Rate,Demos Scheduled,Demos Completed,Completion Rate,Revenue Generated,Talk Time,Activities\n';
                 
                 reportData.team_performance.forEach(member => {
@@ -863,6 +839,7 @@
                 console.error('Error exporting reports:', error);
             }
         }
+
         // Event listeners
         document.getElementById('exportButton').addEventListener('click', exportReports);
     </script>
