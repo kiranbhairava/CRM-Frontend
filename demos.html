@@ -795,17 +795,33 @@
             const manager = Array.isArray(allUsers) ? 
                 allUsers.find(u => u.id === demo.manager_id) : null;
             
-            // Convert UTC to IST for display
-            const utcDate = new Date(demo.scheduled_at);
-            const istDate = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
+            // Convert UTC to IST for display (scheduled_at date)
+            const utcScheduleDate = new Date(demo.scheduled_at);
+            const istScheduleDate = new Date(utcScheduleDate.getTime() + (5.5 * 60 * 60 * 1000));
             
-            const dateStr = istDate.toLocaleDateString('en-IN', {
+            const dateStr = istScheduleDate.toLocaleDateString('en-IN', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric'
             });
             
-            const timeStr = istDate.toLocaleTimeString('en-IN', {
+            const timeStr = istScheduleDate.toLocaleTimeString('en-IN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+            
+            // Format created_at date for display
+            const createdDate = new Date(demo.created_at);
+            const istCreatedDate = new Date(createdDate.getTime() + (5.5 * 60 * 60 * 1000));
+            
+            const createdDateStr = istCreatedDate.toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+            
+            const createdTimeStr = istCreatedDate.toLocaleTimeString('en-IN', {
                 hour: '2-digit',
                 minute: '2-digit',
                 hour12: true
@@ -819,7 +835,7 @@
                 }
             }
             
-            // CRITICAL FIX: Properly check for feedback in multiple possible locations
+            // Check for feedback in multiple possible locations
             const hasFeedback = !!(demo.feedback || 
                                 (demo.data && demo.data.feedback) || 
                                 (demo.meeting_data && demo.meeting_data.feedback));
@@ -921,10 +937,8 @@
                     </td>
                 </tr>
             `;
-
         }).join('');
     }
-
     let feedbackMeetingId = null;
 
     // Function to open the feedback modal
