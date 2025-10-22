@@ -26,6 +26,7 @@
         }
     </style>
 </head>
+<div id="toast-container" class="fixed bottom-5 right-5 z-50"></div>
 <body class="bg-gray-50">
 <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
     <div class="container mx-auto px-6 lg:px-8">
@@ -462,10 +463,11 @@
                 
                 document.getElementById('editMeetingModal').classList.remove('hidden');
             } catch (error) {
-                alert('Failed to load meeting: ' + error.message);
+                showError('Failed to load meeting: ' + error.message); // Changed from alert to showError
             }
         });
     }
+
     function closeEditModal() {
         document.getElementById('editMeetingModal').classList.add('hidden');
         editingMeetingId = null;
@@ -517,14 +519,55 @@
                     body: JSON.stringify(payload)
                 });
                 
-                showSuccess('Meeting updated successfully!');
+                showSuccess('Meeting updated successfully!'); // Changed from alert to showSuccess
                 closeEditModal();
                 loadData();
             } catch (error) {
-                showError('Failed to update meeting: ' + error.message);
+                showError('Failed to update meeting: ' + error.message); // Changed from alert to showError
             }
         });
     });
+
+    function showToast(message, type) {
+        // Create toast element
+        const toast = document.createElement('div');
+        
+        // Set style based on type
+        let bgColor = 'bg-blue-100 border-blue-500';
+        let icon = 'info';
+        
+        if (type === 'success') {
+            bgColor = 'bg-green-100 border-green-500';
+            icon = 'check_circle';
+        } else if (type === 'error') {
+            bgColor = 'bg-red-100 border-red-500';
+            icon = 'error';
+        }
+        
+        // Set toast content
+        toast.className = `mb-3 p-3 rounded shadow-md border-l-4 ${bgColor} flex items-center`;
+        toast.innerHTML = `
+            <span class="material-symbols-outlined mr-2">${icon}</span>
+            <div class="text-sm font-medium">${message}</div>
+        `;
+        
+        // Add to container
+        const container = document.getElementById('toast-container');
+        container.appendChild(toast);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+        }
+
+        function showSuccess(message) {
+        showToast(message, 'success');
+        }
+
+        function showError(message) {
+        showToast(message, 'error');
+        }
 
 
     async function cancelMeetingFromModal() {
@@ -540,11 +583,11 @@
                     method: 'PUT'
                 });
                 
-                alert('Meeting cancelled');
+                showSuccess('Meeting cancelled'); // Changed from alert to showSuccess
                 closeEditModal();
                 loadData();
             } catch (error) {
-                alert('Failed to cancel: ' + error.message);
+                showError('Failed to cancel: ' + error.message); // Changed from alert to showError
             }
         });
     }
@@ -566,11 +609,11 @@
                 })
             });
             
-            alert('Meeting completed');
+            showSuccess('Meeting completed'); // Changed from alert to showSuccess
             closeEditModal();
             loadData();
         } catch (error) {
-            alert('Failed to complete: ' + error.message);
+            showError('Failed to complete: ' + error.message); // Changed from alert to showError
         }
     }
 
@@ -580,7 +623,7 @@
         disableDuringProcess(feedbackButton, () => {
             const demo = allDemos.find(d => d.id === meetingId);
             if (!demo) {
-                alert('Meeting not found');
+                showError('Meeting not found'); // Changed from alert to showError
                 return;
             }
             
@@ -622,7 +665,7 @@
                 document.body.appendChild(modalContainer);
             } else {
                 // No feedback
-                alert(`No feedback has been provided for this meeting.`);
+                showError('No feedback has been provided for this meeting.'); // Changed from alert to showError
             }
         });
     }
@@ -746,7 +789,7 @@
             renderDemos(allDemos);
         } catch (error) {
             console.error('Error loading data:', error);
-            alert('Failed to load data: ' + error.message);
+            showError('Failed to load data: ' + error.message);
         } finally {
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('demosContainer').classList.remove('hidden');
@@ -1032,7 +1075,7 @@
                 closeFeedbackModal();
                 loadData();
             } catch (error) {
-                alert('Failed to complete meeting: ' + error.message);
+                showError('Failed to complete meeting: ' + error.message);
             }
         });
     });
