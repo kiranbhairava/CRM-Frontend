@@ -374,6 +374,20 @@
                     </div>
                 </div>
 
+                <div id="audioUrlContainer" class="hidden">
+                    <label for="callAudioUrl" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <span class="material-symbols-outlined text-sm align-middle mr-1">mic</span>
+                        Audio URL
+                    </label>
+                    <input 
+                        type="url" 
+                        id="callAudioUrl" 
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Enter the playback audio URL"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">URL to the recorded call audio on your playback platform</p>
+                </div>
+
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-between pt-4 border-t border-gray-200">
                     <button 
@@ -1694,6 +1708,31 @@ function closeEventModal() {
         
     }
 
+    // Show/hide the audio URL field based on call status
+    document.addEventListener('DOMContentLoaded', function() {
+        const callStatusSelect = document.getElementById('callStatus');
+        const audioUrlContainer = document.getElementById('audioUrlContainer');
+        
+        if (callStatusSelect && audioUrlContainer) {
+            // Initial check
+            toggleAudioUrlField();
+            
+            // Add change listener
+            callStatusSelect.addEventListener('change', toggleAudioUrlField);
+            
+            function toggleAudioUrlField() {
+                const status = callStatusSelect.value;
+                if (status === 'Held' || status === 'Completed') {
+                    audioUrlContainer.classList.remove('hidden');
+                } else {
+                    audioUrlContainer.classList.add('hidden');
+                    // Clear the field when hidden
+                    document.getElementById('callAudioUrl').value = '';
+                }
+            }
+        }
+    });
+
     // Update the existing callLead function to open the call log modal
     function callLead() {
         if (!currentLead) {
@@ -1747,6 +1786,7 @@ function closeEventModal() {
                         status: callStatus.toLowerCase(),
                         call_type: callType,
                         call_duration: duration,
+                        audio_url: document.getElementById('callAudioUrl').value.trim() || null,
                         lead_status: leadStatus
                     };
                     
@@ -1787,6 +1827,16 @@ function closeEventModal() {
     // Add function to display call logs in timeline
     function formatCallLog(comm) {
         const callData = parseCallLogContent(comm.content);
+
+        let audioLinkHtml = '';
+        if (comm.audio_url) {
+            audioLinkHtml = `
+                <div class="flex items-center text-sm mt-2">
+                    <span class="material-symbols-outlined text-gray-500 text-base mr-1">play_circle</span>
+                    <a href="${comm.audio_url}" target="_blank" class="text-blue-600 hover:underline">Listen to call recording</a>
+                </div>
+            `;
+        }
         
         return `
             <div class="timeline-item bg-white border-l-4 border-green-500 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
@@ -1816,6 +1866,7 @@ function closeEventModal() {
                             <span>${callData.duration} minutes</span>
                         </div>
                     ` : ''}
+                    ${audioLinkHtml}
                     ${callData.description ? `
                         <div class="mt-2 text-sm text-gray-700 bg-gray-50 rounded p-2">
                             ${callData.description}
