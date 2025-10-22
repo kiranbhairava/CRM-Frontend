@@ -133,6 +133,7 @@
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase">Actions</th>
                     </tr>
                 </thead>
+                <div id="toast-container" class="fixed bottom-5 right-5 z-50"></div>
                 <tbody id="emailsTableBody" class="divide-y divide-gray-200">
                 </tbody>
             </table>
@@ -181,11 +182,6 @@
         </div>
     </div>
 
-<!-- ============================================
-     COMPLETE FIXED SCRIPT SECTION FOR emails.html
-     Replace the entire <script> section with this
-     ============================================ -->
-
 <script>
     const API_BASE_URL = 'https://crm-1-ss55.onrender.com';
     let authToken = localStorage.getItem('authToken');
@@ -227,6 +223,48 @@
         }
         return await response.json();
     }
+
+    // Simple toast notification functions
+    function showToast(message, type) {
+        // Create toast element
+        const toast = document.createElement('div');
+        
+        // Set style based on type
+        let bgColor = 'bg-blue-100 border-blue-500';
+        let icon = 'info';
+        
+        if (type === 'success') {
+            bgColor = 'bg-green-100 border-green-500';
+            icon = 'check_circle';
+        } else if (type === 'error') {
+            bgColor = 'bg-red-100 border-red-500';
+            icon = 'error';
+        }
+        
+        // Set toast content
+        toast.className = `mb-3 p-3 rounded shadow-md border-l-4 ${bgColor} flex items-center`;
+        toast.innerHTML = `
+            <span class="material-symbols-outlined mr-2">${icon}</span>
+            <div class="text-sm font-medium">${message}</div>
+        `;
+        
+        // Add to container
+        const container = document.getElementById('toast-container');
+        container.appendChild(toast);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+        }
+
+        function showSuccess(message) {
+        showToast(message, 'success');
+        }
+
+        function showError(message) {
+        showToast(message, 'error');
+        }
 
     async function loadData() {
         try {
@@ -423,56 +461,57 @@
     }
 
     async function viewEmail(emailId, leadId) {
-        try {
-            const comms = await apiRequest(`/leads/${leadId}/communications`);
-            const email = comms.find(c => c.id === emailId);
-            
-            if (!email) {
-                alert('Email not found');
-                return;
-            }
-
-            // Find the lead to get recipient email
-            const lead = allLeads.find(l => l.id === leadId);
-            const recipientEmail = lead ? lead.email_address : 'N/A';
-            
-            // Use completed_at for sent date (when email was actually sent), fallback to created_at
-            const sentDate = email.completed_at || email.created_at;
-
-            // Populate modal
-            document.getElementById('modalTo').textContent = recipientEmail;
-            document.getElementById('modalSubject').textContent = email.subject || 'No Subject';
-            document.getElementById('modalDate').textContent = sentDate ? new Date(sentDate).toLocaleString() : 'N/A';
-            document.getElementById('modalContent').textContent = email.content || 'No content';
-
-            // Show attachments if any
-            const attachmentsDiv = document.getElementById('modalAttachmentsDiv');
-            const attachmentsList = document.getElementById('modalAttachmentsList');
-            
-            try {
-                const attachments = await apiRequest(`/leads/${leadId}/attachments`);
-                if (attachments && attachments.length > 0) {
-                    attachmentsDiv.classList.remove('hidden');
-                    attachmentsList.innerHTML = attachments.map(att => `
-                        <a href="${API_BASE_URL}/leads/${leadId}/attachments/${att.id}/download" 
-                        target="_blank"
-                        class="flex items-center p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
-                            <span class="material-symbols-outlined text-blue-600 mr-2">description</span>
-                            <span class="text-sm text-gray-900">${att.filename}</span>
-                        </a>
-                    `).join('');
-                } else {
-                    attachmentsDiv.classList.add('hidden');
-                }
-            } catch (err) {
-                attachmentsDiv.classList.add('hidden');
-            }
-
-            document.getElementById('emailModal').classList.remove('hidden');
-        } catch (error) {
-            console.error('Error loading email:', error);
-            alert('Failed to load email details');
+    try {
+        const comms = await apiRequest(`/leads/${leadId}/communications`);
+        const email = comms.find(c => c.id === emailId);
+        
+        if (!email) {
+        showError('Email not found');
+        return;
         }
+
+        // Find the lead to get recipient email
+        const lead = allLeads.find(l => l.id === leadId);
+        const recipientEmail = lead ? lead.email_address : 'N/A';
+        
+        // Use completed_at for sent date (when email was actually sent), fallback to created_at
+        const sentDate = email.completed_at || email.created_at;
+
+        // Populate modal
+        document.getElementById('modalTo').textContent = recipientEmail;
+        document.getElementById('modalSubject').textContent = email.subject || 'No Subject';
+        document.getElementById('modalDate').textContent = sentDate ? new Date(sentDate).toLocaleString() : 'N/A';
+        document.getElementById('modalContent').textContent = email.content || 'No content';
+
+        // Show attachments if any
+        const attachmentsDiv = document.getElementById('modalAttachmentsDiv');
+        const attachmentsList = document.getElementById('modalAttachmentsList');
+        
+        try {
+        const attachments = await apiRequest(`/leads/${leadId}/attachments`);
+        if (attachments && attachments.length > 0) {
+            attachmentsDiv.classList.remove('hidden');
+            attachmentsList.innerHTML = attachments.map(att => `
+            <a href="${API_BASE_URL}/leads/${leadId}/attachments/${att.id}/download" 
+                target="_blank"
+                class="flex items-center p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
+                <span class="material-symbols-outlined text-blue-600 mr-2">description</span>
+                <span class="text-sm text-gray-900">${att.filename}</span>
+            </a>
+            `).join('');
+        } else {
+            attachmentsDiv.classList.add('hidden');
+        }
+        } catch (err) {
+        attachmentsDiv.classList.add('hidden');
+        showError('Failed to load attachments');
+        }
+
+        document.getElementById('emailModal').classList.remove('hidden');
+    } catch (error) {
+        console.error('Error loading email:', error);
+        showError('Failed to load email details');
+    }
     }
 
     function closeModal() {
