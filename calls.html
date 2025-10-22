@@ -202,16 +202,13 @@
                         <label class="text-sm font-semibold text-gray-700">Status:</label>
                         <p id="modalStatus" class="text-gray-900"></p>
                     </div>
-                    <div id="audioUrlContainer" class="hidden">
-                        <label class="text-sm font-semibold text-gray-700">Audio Recording:</label>
-                        <div class="flex items-center text-sm mt-2">
-                            <span class="material-symbols-outlined text-gray-500 text-base mr-1">play_circle</span>
-                            <a id="modalAudioUrl" href="#" target="_blank" class="text-blue-600 hover:underline">Listen to call recording</a>
-                        </div>
-                    </div>
                     <div>
                         <label class="text-sm font-semibold text-gray-700">Notes:</label>
                         <div id="modalContent" class="mt-2 p-4 bg-gray-50 rounded-lg text-gray-900 whitespace-pre-wrap"></div>
+                    </div>
+                    <div id="modalAudioUrl" class="hidden space-y-2 mt-4">
+                        <label class="text-sm font-semibold text-gray-700">Call Recording:</label>
+                        <div class="audio-link-container"></div>
                     </div>
                 </div>
             </div>
@@ -783,14 +780,20 @@
             document.getElementById('modalStatus').textContent = call.status.toUpperCase();
             document.getElementById('modalContent').textContent = call.content || 'No notes available';
 
+            // Debug: Check if audio_url exists in the call object
+            console.log("Call object:", call);
+            console.log("Audio URL:", call.audio_url);
+            
+            // Handle audio URL display
             const audioUrlContainer = document.getElementById('modalAudioUrl');
             if (audioUrlContainer) {
-                if (call.audio_url) {
-                    audioUrlContainer.innerHTML = `
-                        <label class="text-sm font-semibold text-gray-700">Call Recording:</label>
+                if (call.audio_url && call.audio_url.trim() !== '') {
+                    audioUrlContainer.querySelector('.audio-link-container').innerHTML = `
                         <div class="flex items-center mt-2">
-                            <span class="material-symbols-outlined text-gray-500 mr-2">play_circle</span>
-                            <a href="${call.audio_url}" target="_blank" class="text-blue-600 hover:underline">Listen to call recording</a>
+                            <span class="material-symbols-outlined text-purple-500 mr-2">play_circle</span>
+                            <a href="${call.audio_url}" target="_blank" class="text-purple-600 hover:underline font-medium">
+                                Listen to call recording
+                            </a>
                         </div>
                     `;
                     audioUrlContainer.classList.remove('hidden');
@@ -798,6 +801,7 @@
                     audioUrlContainer.classList.add('hidden');
                 }
             }
+            
             document.getElementById('callModal').classList.remove('hidden');
         });
     }
