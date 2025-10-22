@@ -374,20 +374,6 @@
                     </div>
                 </div>
 
-                <div id="audioUrlContainer" class="hidden">
-                    <label for="callAudioUrl" class="block text-sm font-semibold text-gray-700 mb-2">
-                        <span class="material-symbols-outlined text-sm align-middle mr-1">mic</span>
-                        Audio URL
-                    </label>
-                    <input 
-                        type="url" 
-                        id="callAudioUrl" 
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        placeholder="Enter the playback audio URL"
-                    >
-                    <p class="text-xs text-gray-500 mt-1">URL to the recorded call audio on your playback platform</p>
-                </div>
-
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-between pt-4 border-t border-gray-200">
                     <button 
@@ -775,7 +761,19 @@
                     <p class="text-xs text-gray-500 mt-1">How long did the call last?</p>
                 </div>
 
-
+                <div id="audioUrlContainer" class="hidden">
+                    <label for="callAudioUrl" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <span class="material-symbols-outlined text-sm align-middle mr-1">mic</span>
+                        Audio URL
+                    </label>
+                    <input 
+                        type="url" 
+                        id="callAudioUrl" 
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Enter the playback audio URL"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">URL to the recorded call audio on your playback platform</p>
+                </div>
 
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
