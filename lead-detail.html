@@ -1220,6 +1220,13 @@
                     </div>
                     
                     ${comm.content ? `<p class="text-sm text-gray-700 mb-2 whitespace-pre-line">${comm.content}</p>` : ''}
+
+                    ${comm.audio_url ? `
+                        <div class="flex items-center text-sm mt-2">
+                            <span class="material-symbols-outlined text-gray-500 text-base mr-1">play_circle</span>
+                            <a href="${comm.audio_url}" target="_blank" class="text-blue-600 hover:underline">Listen to call recording</a>
+                        </div>
+                    ` : ''}
                     
                     ${comm.scheduled_at && comm.type !== 'call' ? `
                         <div class="text-sm text-gray-600 mb-2 flex items-center">
