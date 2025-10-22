@@ -289,14 +289,14 @@
         function handleFile(file) {
             // Validate file type
             if (!file.name.endsWith('.csv')) {
-                alert('Please select a CSV file');
+                showWarning('Please select a CSV file');
                 return;
             }
 
             // Validate file size (5MB limit)
             const maxSize = 5 * 1024 * 1024;
             if (file.size > maxSize) {
-                alert('File size exceeds 5MB limit');
+                showError('File size exceeds 5MB limit');
                 return;
             }
 
@@ -330,7 +330,7 @@
 
         async function uploadCSV() {
             if (!selectedFile) {
-                alert('Please select a file first');
+                showWarning('Please select a file first');
                 return;
             }
 
@@ -376,7 +376,7 @@
                 }
             } catch (error) {
                 console.error('Upload error:', error);
-                alert('Failed to upload file: ' + error.message);
+                showError('Failed to upload file: ' + error.message);
                 document.getElementById('uploadProgress').classList.add('hidden');
                 document.getElementById('uploadBtn').disabled = false;
             }

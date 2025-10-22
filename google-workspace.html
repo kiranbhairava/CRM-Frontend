@@ -152,7 +152,7 @@
                     window.location.href = response.authorization_url;
                 }
             } catch (error) {
-                alert('Failed to initiate Google connection: ' + error.message);
+                showError('Failed to initiate Google connection: ' + error.message);
             }
         }
 
@@ -163,11 +163,11 @@
 
             try {
                 await apiRequest('/google/disconnect', { method: 'POST' });
-                alert('Google account disconnected successfully');
+                showSuccess('Google account disconnected successfully');
                 isConnected = false;
                 renderStatus();
             } catch (error) {
-                alert('Failed to disconnect: ' + error.message);
+                showError('Failed to disconnect: ' + error.message);
             }
         }
 

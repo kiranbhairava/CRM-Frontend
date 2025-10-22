@@ -237,7 +237,7 @@
         } catch (error) {
             console.error('Dashboard error:', error);
             showLoading(false);
-            alert('Failed to load dashboard: ' + error.message);
+            showError('Failed to load dashboard: ' + error.message);
         }
     }
     
