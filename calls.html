@@ -164,6 +164,7 @@
                 </thead>
                 <tbody id="callsTableBody" class="divide-y divide-gray-200">
                 </tbody>
+                <div id="toast-container" class="fixed bottom-5 right-5 z-50"></div>
             </table>
         </div>
 
@@ -410,7 +411,46 @@
         }
     });
 
+    function showToast(message, type) {
+        // Create toast element
+        const toast = document.createElement('div');
+        
+        // Set style based on type
+        let bgColor = 'bg-blue-100 border-blue-500';
+        let icon = 'info';
+        
+        if (type === 'success') {
+            bgColor = 'bg-green-100 border-green-500';
+            icon = 'check_circle';
+        } else if (type === 'error') {
+            bgColor = 'bg-red-100 border-red-500';
+            icon = 'error';
+        }
+        
+        // Set toast content
+        toast.className = `mb-3 p-3 rounded shadow-md border-l-4 ${bgColor} flex items-center`;
+        toast.innerHTML = `
+            <span class="material-symbols-outlined mr-2">${icon}</span>
+            <div class="text-sm font-medium">${message}</div>
+        `;
+        
+        // Add to container
+        const container = document.getElementById('toast-container');
+        container.appendChild(toast);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+        }
 
+        function showSuccess(message) {
+        showToast(message, 'success');
+        }
+
+        function showError(message) {
+        showToast(message, 'error');
+        }
     async function loadData() {
         try {
             // Get current user info first
@@ -611,7 +651,7 @@
                 }
                 
                 // Show success message
-                alert('Call updated successfully!');
+                showSuccess('Call updated successfully!');
                 
                 // Close modal
                 closeEditModal();
@@ -621,7 +661,7 @@
                 
             } catch (error) {
                 console.error('Error updating call:', error);
-                alert('Failed to update call. Please try again.');
+                showError('Failed to update call. Please try again.');
             }
         });
     }
