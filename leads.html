@@ -675,7 +675,7 @@
         let usersList = [];
 
         // API base URL - change this in production
-        const API_BASE_URL = '/api';
+        const API_BASE_URL = 'https://crm-1-ss55.onrender.com';
 
         // Initialize the application
         async function init() {
@@ -724,7 +724,7 @@
         // Get current user information
         async function getCurrentUser() {
             try {
-                return await apiRequest('/auth/me');
+                return await apiRequest('/me');
             } catch (error) {
                 throw new Error('Failed to get current user: ' + error.message);
             }
@@ -799,7 +799,7 @@
         // Check for pending leads from the website
         async function checkSyncStatus() {
             try {
-                const response = await apiRequest('/external-leads/sync-status');
+                const response = await apiRequest('/api/external-leads/sync-status');
                 updateSyncBadge(response);
             } catch (error) {
                 console.error('Error checking sync status:', error);
@@ -855,7 +855,7 @@
             badge.style.pointerEvents = 'none'; // Disable clicking while syncing
             
             try {
-                const result = await apiRequest('/external-leads/sync-website-leads', {
+                const result = await apiRequest('/api/external-leads/sync-website-leads', {
                     method: 'POST'
                 });
                 
