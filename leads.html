@@ -270,10 +270,10 @@
                 <!-- Right-aligned action buttons -->
                 <div class="flex items-center gap-3 sm:ml-auto">
                     <!-- Website Leads Sync Badge -->
-                    <button id="syncWebsiteLeadsBtn" class="sync-badge has-pending hidden" onclick="syncExternalWebsiteLeads()">
+                    <button id="websiteLeadsBadge" class="sync-badge has-pending" onclick="checkAndSyncWebsiteLeads()" title="Click to sync website leads">
                         <span class="material-symbols-outlined badge-icon">sync</span>
-                        <span>Website Leads</span>
-                        <span class="pending-count" id="pendingLeadsCount">0</span>
+                        <span id="syncBadgeText">Website Leads</span>
+                        <span class="pending-count" id="pendingCountBadge">0</span>
                     </button>
 
                     <!-- Import Leads Button -->
@@ -669,7 +669,7 @@
         let usersList = [];
 
         // API base URL - change this in production
-        const API_BASE_URL = 'https://crm-1-ss55.onrender.com';
+        const API_BASE_URL = '/api';
 
         // Initialize the application
         async function init() {
@@ -704,7 +704,10 @@
 
                 // Check for pending website leads if admin
                 if (isAdminUser) {
-                    checkPendingWebsiteLeads();
+                    checkSyncStatus();
+                    
+                    // Periodically check for new leads
+                    setInterval(checkSyncStatus, 5 * 60 * 1000); // Check every 5 minutes
                 }
             } catch (error) {
                 console.error('Initialization error:', error);
@@ -715,7 +718,7 @@
         // Get current user information
         async function getCurrentUser() {
             try {
-                return await apiRequest('/me');
+                return await apiRequest('/auth/me');
             } catch (error) {
                 throw new Error('Failed to get current user: ' + error.message);
             }
@@ -788,70 +791,103 @@
         }
 
         // Check for pending leads from the website
-        async function checkPendingWebsiteLeads() {
+        async function checkSyncStatus() {
             try {
-                const response = await apiRequest('/external-leads/pending-count');
-                pendingExternalLeads = response.count || 0;
-                
-                const syncBtn = document.getElementById('syncWebsiteLeadsBtn');
-                const countElement = document.getElementById('pendingLeadsCount');
-                
-                if (pendingExternalLeads > 0) {
-                    syncBtn.classList.remove('hidden');
-                    syncBtn.classList.add('has-pending');
-                    countElement.textContent = pendingExternalLeads;
-                } else {
-                    syncBtn.classList.add('hidden');
-                }
+                const response = await apiRequest('/external-leads/sync-status');
+                updateSyncBadge(response);
             } catch (error) {
-                console.error('Error checking pending leads:', error);
+                console.error('Error checking sync status:', error);
             }
         }
 
-        // Sync external website leads
-        async function syncExternalWebsiteLeads() {
-            const syncBtn = document.getElementById('syncWebsiteLeadsBtn');
+        // Update the sync badge UI based on status
+        function updateSyncBadge(statusData) {
+            const badge = document.getElementById('websiteLeadsBadge');
+            const badgeText = document.getElementById('syncBadgeText');
+            const pendingCount = document.getElementById('pendingCountBadge');
             
-            // Update UI to show syncing state
-            syncBtn.classList.remove('has-pending');
-            syncBtn.classList.add('syncing');
-            syncBtn.innerHTML = `<span class="spinner"></span><span>Syncing Leads...</span>`;
+            const pending = statusData.pending_leads || 0;
+            
+            // Remove all status classes
+            badge.classList.remove('has-pending', 'up-to-date', 'syncing');
+            
+            if (pending > 0) {
+                // Has pending leads - show orange badge with count
+                badge.classList.add('has-pending');
+                badgeText.textContent = `${pending} New Lead${pending > 1 ? 's' : ''}`;
+                pendingCount.textContent = pending;
+                pendingCount.classList.remove('hidden');
+                badge.title = `Click to sync ${pending} new website lead${pending > 1 ? 's' : ''}`;
+                badge.classList.remove('hidden');
+            } else if (pending === 0) {
+                // Up to date - show green badge
+                badge.classList.add('up-to-date');
+                badgeText.textContent = 'Website Leads Synced';
+                pendingCount.classList.add('hidden');
+                badge.title = 'All website leads are synced. Click to check again.';
+                // Hide the badge after a few seconds if there are no pending leads
+                setTimeout(() => {
+                    badge.classList.add('hidden');
+                }, 3000);
+            } else {
+                // No data or error - hide badge
+                badge.classList.add('hidden');
+            }
+        }
+
+        // Main function to check and sync website leads
+        async function checkAndSyncWebsiteLeads() {
+            const badge = document.getElementById('websiteLeadsBadge');
+            const badgeText = document.getElementById('syncBadgeText');
+            const pendingCount = document.getElementById('pendingCountBadge');
+            
+            // Show syncing state
+            badge.classList.remove('has-pending', 'up-to-date');
+            badge.classList.add('syncing');
+            badgeText.innerHTML = '<span class="spinner"></span> Syncing...';
+            pendingCount.classList.add('hidden');
+            badge.style.pointerEvents = 'none'; // Disable clicking while syncing
             
             try {
-                const response = await apiRequest('api/external-leads/sync-website-leads', {
+                const result = await apiRequest('/external-leads/sync-website-leads', {
                     method: 'POST'
                 });
                 
-                // Show success state
-                syncBtn.classList.remove('syncing');
-                syncBtn.classList.add('up-to-date');
-                syncBtn.innerHTML = `<span class="material-symbols-outlined badge-icon">check_circle</span><span>All Synced</span>`;
+                // Show success toast
+                showToast(
+                    result.synced_count > 0 
+                        ? `Synced ${result.synced_count} new lead${result.synced_count > 1 ? 's' : ''} from website!`
+                        : 'No new leads to sync', 
+                    'success'
+                );
                 
-                // Show success message with count
-                const importedCount = response.imported_count || 0;
-                showSuccess(`Successfully imported ${importedCount} lead${importedCount !== 1 ? 's' : ''} from website`);
-                
-                // Reload leads after a successful sync
-                if (importedCount > 0) {
-                    await loadLeads();
+                // Reload leads list if any were synced
+                if (result.synced_count > 0) {
+                    setTimeout(() => {
+                        loadLeads(); // Reload leads with the new data
+                    }, 1000);
                 }
                 
-                // Reset UI after a delay
-                setTimeout(() => {
-                    syncBtn.classList.remove('up-to-date');
-                    syncBtn.classList.add('hidden');
-                }, 3000);
+                // Update badge to show up-to-date
+                badge.classList.remove('syncing');
+                badge.classList.add('up-to-date');
+                badgeText.textContent = 'Website Leads Synced';
                 
-                // Reset pending count
-                pendingExternalLeads = 0;
+                // Check status again after 2 seconds
+                setTimeout(checkSyncStatus, 2000);
                 
             } catch (error) {
-                // Show error state
-                syncBtn.classList.remove('syncing');
-                syncBtn.classList.add('has-pending');
-                syncBtn.innerHTML = `<span class="material-symbols-outlined badge-icon">sync</span><span>Website Leads</span><span class="pending-count" id="pendingLeadsCount">${pendingExternalLeads}</span>`;
+                console.error('Error syncing leads:', error);
                 
-                showError('Failed to sync website leads: ' + error.message);
+                // Show error toast
+                showToast('Failed to sync leads. Please try again.', 'error');
+                
+                // Revert badge state
+                badge.classList.remove('syncing');
+                checkSyncStatus(); // Check status to restore proper state
+                
+            } finally {
+                badge.style.pointerEvents = 'auto'; // Re-enable clicking
             }
         }
 
@@ -1332,23 +1368,6 @@
             document.getElementById('loadingIndicator').classList.toggle('hidden', !show);
         }
 
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            document.getElementById('errorText').textContent = message;
-            errorDiv.classList.remove('hidden');
-            setTimeout(() => {
-                errorDiv.classList.add('hidden');
-            }, 5000);
-        }
-
-        function hideError() {
-            document.getElementById('errorMessage').classList.add('hidden');
-        }
-
-        function showSuccess(message) {
-            showToast(message, 'success');
-        }
-
         function showToast(message, type = 'success') {
             const toastTemplate = document.getElementById('toastTemplate');
             const toast = toastTemplate.firstElementChild.cloneNode(true);
@@ -1376,6 +1395,23 @@
             setTimeout(() => {
                 toast.remove();
             }, 5000);
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            document.getElementById('errorText').textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+        
+        function showSuccess(message) {
+            showToast(message, 'success');
         }
 
         // Handle back navigation from lead detail page
