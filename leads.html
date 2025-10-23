@@ -689,7 +689,7 @@
         // Get current user information
         async function getCurrentUser() {
             try {
-                return await apiRequest('/auth/me');
+                return await apiRequest('/me');
             } catch (error) {
                 throw new Error('Failed to get current user: ' + error.message);
             }
