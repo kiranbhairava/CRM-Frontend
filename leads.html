@@ -228,6 +228,26 @@
         .clickable-row:hover {
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
+        
+        /* Sorting styles */
+        .sort-icon {
+            font-size: 18px;
+        }
+        
+        th.sort-asc .sort-icon {
+            transform: rotate(0deg);
+            opacity: 1 !important;
+        }
+        
+        th.sort-desc .sort-icon {
+            transform: rotate(180deg);
+            opacity: 1 !important;
+        }
+        
+        th.sorting-active {
+            color: #1173d4;
+            background-color: rgba(17, 115, 212, 0.05);
+        }
     </style>
 </head>
 <body class="font-display bg-background-light min-h-screen">
@@ -315,7 +335,7 @@
             <!-- Filter & Search Section -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-4 flex-wrap">
                         <div class="w-full sm:w-64">
                             <label for="statusFilter" class="form-label">Status</label>
                             <select id="statusFilter" class="form-input">
@@ -355,6 +375,15 @@
                                 <!-- Will be populated dynamically -->
                             </select>
                         </div>
+                        <!-- Date Range Filters -->
+                        <div class="w-full sm:w-64">
+                            <label for="dateFromFilter" class="form-label">Created From</label>
+                            <input type="date" id="dateFromFilter" class="form-input" />
+                        </div>
+                        <div class="w-full sm:w-64">
+                            <label for="dateToFilter" class="form-label">Created To</label>
+                            <input type="date" id="dateToFilter" class="form-input" />
+                        </div>
                     </div>
                     <div class="flex-grow lg:max-w-sm">
                         <label for="searchBox" class="form-label">Search</label>
@@ -381,11 +410,42 @@
                     <table class="w-full">
                         <thead class="bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             <tr>
-                                <th class="px-6 py-3">Name</th>
-                                <th class="px-6 py-3">Contact</th>
-                                <th class="px-6 py-3">Course Interest</th>
-                                <th class="px-6 py-3">Source</th>
-                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3 cursor-pointer group" onclick="sortLeads('name')">
+                                    <div class="flex items-center">
+                                        Name
+                                        <span class="material-symbols-outlined ml-1 opacity-0 group-hover:opacity-100 transition-opacity sort-icon">arrow_drop_down</span>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-3 cursor-pointer group" onclick="sortLeads('contact')">
+                                    <div class="flex items-center">
+                                        Contact
+                                        <span class="material-symbols-outlined ml-1 opacity-0 group-hover:opacity-100 transition-opacity sort-icon">arrow_drop_down</span>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-3 cursor-pointer group" onclick="sortLeads('course')">
+                                    <div class="flex items-center">
+                                        Course Interest
+                                        <span class="material-symbols-outlined ml-1 opacity-0 group-hover:opacity-100 transition-opacity sort-icon">arrow_drop_down</span>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-3 cursor-pointer group" onclick="sortLeads('source')">
+                                    <div class="flex items-center">
+                                        Source
+                                        <span class="material-symbols-outlined ml-1 opacity-0 group-hover:opacity-100 transition-opacity sort-icon">arrow_drop_down</span>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-3 cursor-pointer group" onclick="sortLeads('status')">
+                                    <div class="flex items-center">
+                                        Status
+                                        <span class="material-symbols-outlined ml-1 opacity-0 group-hover:opacity-100 transition-opacity sort-icon">arrow_drop_down</span>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-3 cursor-pointer group" onclick="sortLeads('created')">
+                                    <div class="flex items-center">
+                                        Created
+                                        <span class="material-symbols-outlined ml-1 opacity-0 group-hover:opacity-100 transition-opacity sort-icon">arrow_drop_down</span>
+                                    </div>
+                                </th>
                                 <th class="px-6 py-3 text-right">
                                     <div class="flex items-center justify-end">
                                         Actions
@@ -673,7 +733,11 @@
         let deletingLeadId = null;
         let isAdminUser = false;
         let usersList = [];
-
+        
+        // Sorting variables
+        let currentSort = 'created'; // Default sort by created date
+        let currentSortDir = 'desc';  // Default newest first
+        
         // API base URL - change this in production
         const API_BASE_URL = 'https://crm-1-ss55.onrender.com';
 
@@ -707,6 +771,11 @@
                 document.getElementById('sourceFilter').addEventListener('change', applyFilters);
                 document.getElementById('assignedToFilter').addEventListener('change', applyFilters);
                 document.getElementById('searchBox').addEventListener('input', applyFilters);
+                document.getElementById('dateFromFilter').addEventListener('change', applyFilters);
+                document.getElementById('dateToFilter').addEventListener('change', applyFilters);
+                
+                // Set default sort
+                updateSortDisplay();
 
                 // Check for pending website leads if admin
                 if (isAdminUser) {
@@ -736,21 +805,109 @@
             try {
                 allLeads = await apiRequest('/leads');
                 
-                // Sort leads by most recently updated
-                allLeads.sort((a, b) => {
-                    const dateA = new Date(a.updated_at || a.created_at || 0);
-                    const dateB = new Date(b.updated_at || b.created_at || 0);
-                    return dateB - dateA;
-                });
-                
                 filteredLeads = allLeads;
-                renderLeads(filteredLeads);
+                
+                // Apply the current sort
+                sortAndRender();
             } catch (error) {
                 console.error('Error loading leads:', error);
                 showError('Failed to load leads: ' + error.message);
             } finally {
                 showLoading(false);
             }
+        }
+        
+        // Format date for display
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            
+            const date = new Date(dateStr);
+            if (isNaN(date)) return '';
+            
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+        
+        // Sort leads by field
+        function sortLeads(field) {
+            // If already sorting by this field, toggle direction
+            if (currentSort === field) {
+                currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort = field;
+                // Default to descending for created date, ascending for others
+                currentSortDir = field === 'created' ? 'desc' : 'asc';
+            }
+            
+            // Update visual sort indicators
+            updateSortDisplay();
+            
+            // Apply the sort
+            sortAndRender();
+        }
+        
+        // Update sort indicator display
+        function updateSortDisplay() {
+            // Clear all headers
+            const headers = document.querySelectorAll('th.cursor-pointer');
+            headers.forEach(header => {
+                header.classList.remove('sort-asc', 'sort-desc', 'sorting-active');
+            });
+            
+            // Find the active header
+            const activeHeader = document.querySelector(`th[onclick="sortLeads('${currentSort}')"]`);
+            if (activeHeader) {
+                activeHeader.classList.add('sorting-active');
+                activeHeader.classList.add(currentSortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+            }
+        }
+        
+        // Sort and render the current filtered leads
+        function sortAndRender() {
+            filteredLeads.sort((a, b) => {
+                let valA, valB;
+                
+                // Extract the right values based on sort field
+                switch (currentSort) {
+                    case 'name':
+                        valA = `${a.first_name || ''} ${a.last_name || ''}`.trim().toLowerCase();
+                        valB = `${b.first_name || ''} ${b.last_name || ''}`.trim().toLowerCase();
+                        break;
+                    case 'contact':
+                        valA = (a.email_address || '').toLowerCase();
+                        valB = (b.email_address || '').toLowerCase();
+                        break;
+                    case 'course':
+                        valA = (a.course_interested_in || '').toLowerCase();
+                        valB = (b.course_interested_in || '').toLowerCase();
+                        break;
+                    case 'source':
+                        valA = (a.lead_source || '').toLowerCase();
+                        valB = (b.lead_source || '').toLowerCase();
+                        break;
+                    case 'status':
+                        valA = (a.status || '').toLowerCase();
+                        valB = (b.status || '').toLowerCase();
+                        break;
+                    case 'created':
+                    default:
+                        valA = new Date(a.created_at || 0);
+                        valB = new Date(b.created_at || 0);
+                        break;
+                }
+                
+                // Do the comparison
+                if (valA < valB) return currentSortDir === 'asc' ? -1 : 1;
+                if (valA > valB) return currentSortDir === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            // Reset to first page and render
+            currentPage = 1;
+            renderLeads(filteredLeads);
         }
 
         // Load sales managers for dropdown
@@ -1005,6 +1162,9 @@
                             ${lead.status || 'New'}
                         </span>
                     </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900">${formatDate(lead.created_at || '')}</div>
+                    </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-3">
                             <button onclick="event.stopPropagation(); viewLeadDetail(${lead.id})" class="p-2 text-gray-500 hover:text-primary hover:bg-blue-100 rounded transition-colors" title="View Details">
@@ -1080,6 +1240,8 @@
             const sourceFilter = document.getElementById('sourceFilter').value;
             const assignedToFilter = document.getElementById('assignedToFilter').value;
             const searchTerm = document.getElementById('searchBox').value.trim().toLowerCase();
+            const dateFromFilter = document.getElementById('dateFromFilter').value;
+            const dateToFilter = document.getElementById('dateToFilter').value;
             
             let filtered = [...allLeads];
             
@@ -1098,6 +1260,26 @@
                 filtered = filtered.filter(lead => lead.assigned_to === parseInt(assignedToFilter));
             }
             
+            // Apply date from filter
+            if (dateFromFilter) {
+                const fromDate = new Date(dateFromFilter);
+                fromDate.setHours(0, 0, 0, 0); // Start of day
+                filtered = filtered.filter(lead => {
+                    const leadDate = new Date(lead.created_at);
+                    return leadDate >= fromDate;
+                });
+            }
+            
+            // Apply date to filter
+            if (dateToFilter) {
+                const toDate = new Date(dateToFilter);
+                toDate.setHours(23, 59, 59, 999); // End of day
+                filtered = filtered.filter(lead => {
+                    const leadDate = new Date(lead.created_at);
+                    return leadDate <= toDate;
+                });
+            }
+            
             // Apply search filter
             if (searchTerm) {
                 filtered = filtered.filter(lead => 
@@ -1111,10 +1293,9 @@
             // Update filter badge count
             updateFilterBadgeCount();
             
-            // Reset to first page and render
-            currentPage = 1;
+            // Update filtered leads and sort/render
             filteredLeads = filtered;
-            renderLeads(filtered);
+            sortAndRender();
         }
 
         // Update filter badge count
@@ -1123,6 +1304,8 @@
             const sourceFilter = document.getElementById('sourceFilter').value;
             const assignedToFilter = document.getElementById('assignedToFilter').value;
             const searchTerm = document.getElementById('searchBox').value.trim();
+            const dateFromFilter = document.getElementById('dateFromFilter').value;
+            const dateToFilter = document.getElementById('dateToFilter').value;
             
             const filterBadges = document.getElementById('filterBadges');
             filterBadges.innerHTML = '';
@@ -1142,6 +1325,16 @@
             if (assignedToFilter !== 'all') {
                 const assignedName = document.getElementById('assignedToFilter').options[document.getElementById('assignedToFilter').selectedIndex].text;
                 addFilterBadge('Assigned to: ' + assignedName);
+                activeFilters++;
+            }
+            
+            if (dateFromFilter) {
+                addFilterBadge('From: ' + new Date(dateFromFilter).toLocaleDateString());
+                activeFilters++;
+            }
+            
+            if (dateToFilter) {
+                addFilterBadge('To: ' + new Date(dateToFilter).toLocaleDateString());
                 activeFilters++;
             }
             
@@ -1167,6 +1360,8 @@
             document.getElementById('sourceFilter').value = 'all';
             document.getElementById('assignedToFilter').value = 'all';
             document.getElementById('searchBox').value = '';
+            document.getElementById('dateFromFilter').value = '';
+            document.getElementById('dateToFilter').value = '';
             
             // Reset filter badges
             document.getElementById('filterBadges').innerHTML = '';
@@ -1175,7 +1370,7 @@
             // Apply empty filters
             currentPage = 1;
             filteredLeads = allLeads;
-            renderLeads(filteredLeads);
+            sortAndRender();
         }
 
         // Helper function to disable a button during a process
