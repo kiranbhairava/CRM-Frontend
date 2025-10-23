@@ -818,7 +818,7 @@
             syncBtn.innerHTML = `<span class="spinner"></span><span>Syncing Leads...</span>`;
             
             try {
-                const response = await apiRequest('/external-leads/sync-website-leads', {
+                const response = await apiRequest('api/external-leads/sync-website-leads', {
                     method: 'POST'
                 });
                 
