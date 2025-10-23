@@ -201,6 +201,27 @@
         .create-lead-page.active {
             display: block;
         }
+        /* Visual enhancement for clickable rows */
+        .clickable-row {
+            position: relative;
+            transition: all 0.2s;
+        }
+        .clickable-row::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: transparent;
+            transition: background-color 0.2s;
+        }
+        .clickable-row:hover::after {
+            background: #1173d4;
+        }
+        .clickable-row:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
     </style>
 </head>
 <body class="font-display bg-background-light min-h-screen">
@@ -359,7 +380,12 @@
                                 <th class="px-6 py-3">Course Interest</th>
                                 <th class="px-6 py-3">Source</th>
                                 <th class="px-6 py-3">Status</th>
-                                <th class="px-6 py-3 text-right">Actions</th>
+                                <th class="px-6 py-3 text-right">
+                                    <div class="flex items-center justify-end">
+                                        Actions
+                                        <span class="ml-1 text-gray-400 normal-case font-normal text-xs">(click row to view details)</span>
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="leadsTableBody" class="divide-y divide-gray-200">
@@ -643,7 +669,7 @@
         let usersList = [];
 
         // API base URL - change this in production
-        const API_BASE_URL = 'https://crm-1-ss55.onrender.com';
+        const API_BASE_URL = '/api';
 
         // Initialize the application
         async function init() {
@@ -689,7 +715,7 @@
         // Get current user information
         async function getCurrentUser() {
             try {
-                return await apiRequest('/me');
+                return await apiRequest('/auth/me');
             } catch (error) {
                 throw new Error('Failed to get current user: ' + error.message);
             }
@@ -916,7 +942,7 @@
                 }
                 
                 tableContent += `
-                <tr class="hover:bg-gray-50 cursor-pointer" onclick="viewLeadDetail(${lead.id})">
+                <tr class="hover:bg-gray-50 cursor-pointer group clickable-row" onclick="viewLeadDetail(${lead.id})">
                     <td class="px-6 py-4">
                         <div class="text-sm font-medium text-gray-900">${fullName}</div>
                         <div class="text-xs text-gray-500 mt-0.5">${lead.working_status || ''}</div>
@@ -939,6 +965,9 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
+                            <button onclick="event.stopPropagation(); viewLeadDetail(${lead.id})" class="p-1.5 text-gray-500 hover:text-primary hover:bg-blue-100 rounded transition-colors" title="View Details">
+                                <span class="material-symbols-outlined text-base">visibility</span>
+                            </button>
                             <button onclick="event.stopPropagation(); openEditLeadPage(${lead.id})" class="p-1.5 text-gray-500 hover:text-primary hover:bg-gray-100 rounded transition-colors" title="Edit">
                                 <span class="material-symbols-outlined text-base">edit</span>
                             </button>
@@ -946,6 +975,7 @@
                                 <span class="material-symbols-outlined text-base">delete</span>
                             </button>
                         </div>
+                        <div class="hidden group-hover:block text-xs text-blue-500 mt-1">Click to view details</div>
                     </td>
                 </tr>`;
             }
@@ -1138,7 +1168,15 @@
         }
 
         function viewLeadDetail(leadId) {
-            window.location.href = `lead-detail.html?id=${leadId}`;
+            // Store in browser history that we're viewing this lead
+            const currentUrl = new URL(window.location.href);
+            const baseUrl = currentUrl.origin + currentUrl.pathname.replace('leads.html', '');
+            
+            // Navigate to the lead detail page with the lead ID
+            window.location.href = `${baseUrl}lead-detail.html?id=${leadId}`;
+            
+            // You could also pass additional state if needed using sessionStorage
+            // sessionStorage.setItem('returnToLeadsPage', 'true');
         }
 
         function openCreateLeadPage() {
@@ -1339,6 +1377,19 @@
                 toast.remove();
             }, 5000);
         }
+
+        // Handle back navigation from lead detail page
+        window.addEventListener('load', () => {
+            // Check if we're returning from a lead detail page
+            const returnFromDetail = sessionStorage.getItem('returnToLeadsPage');
+            if (returnFromDetail) {
+                // Remove the flag
+                sessionStorage.removeItem('returnToLeadsPage');
+                
+                // Restore any active filters or pagination state if needed
+                // You could save these in sessionStorage before navigating away
+            }
+        });
 
         function logout() {
             localStorage.removeItem('authToken');
