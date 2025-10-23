@@ -669,7 +669,7 @@
         let usersList = [];
 
         // API base URL - change this in production
-        const API_BASE_URL = '/api';
+        const API_BASE_URL = 'https://crm-1-ss55.onrender.com';
 
         // Initialize the application
         async function init() {
@@ -715,7 +715,7 @@
         // Get current user information
         async function getCurrentUser() {
             try {
-                return await apiRequest('/auth/me');
+                return await apiRequest('/me');
             } catch (error) {
                 throw new Error('Failed to get current user: ' + error.message);
             }
