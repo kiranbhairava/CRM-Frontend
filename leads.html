@@ -793,7 +793,7 @@
         // Check for pending leads from the website
         async function checkSyncStatus() {
             try {
-                const response = await apiRequest('/external-leads/sync-status');
+                const response = await apiRequest('/api/external-leads/sync-status');
                 updateSyncBadge(response);
             } catch (error) {
                 console.error('Error checking sync status:', error);
@@ -849,7 +849,7 @@
             badge.style.pointerEvents = 'none'; // Disable clicking while syncing
             
             try {
-                const result = await apiRequest('/external-leads/sync-website-leads', {
+                const result = await apiRequest('/api/external-leads/sync-website-leads', {
                     method: 'POST'
                 });
                 
