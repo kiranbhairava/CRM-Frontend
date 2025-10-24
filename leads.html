@@ -862,7 +862,7 @@
         async function loadLeads() {
             showLoading(true);
             try {
-                allLeads = await apiRequest('/leads');
+                allLeads = await apiRequest('leads?sort_by=created_at&sort_order=desc');
                 
                 // Sort leads by most recently updated
                 allLeads.sort((a, b) => {
