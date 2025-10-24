@@ -711,68 +711,23 @@
 
     async function loadData() {
         try {
-            // Show loading indicators
-            document.getElementById('loading').classList.remove('hidden');
-            document.getElementById('emptyState').classList.add('hidden');
-            document.getElementById('errorMessage').classList.add('hidden');
-            document.getElementById('upcomingDemos').classList.add('hidden');
-            document.getElementById('pastDemos').classList.add('hidden');
+            // Get current user info first
+            await initializeNavigation();
+            currentUser = await apiRequest('/me');
             
-            // First get the current user
-            const currentUser = await apiRequest('/me');
+            // Load users for filter dropdown - single API call
+            const users = await apiRequest('/sales-managers');
+            allUsers = Array.isArray(users) ? users : [];
             
-            // Get all users for manager lookup
-            allUsers = await apiRequest('/sales-managers');
-            
-            // Check if google integration is active
-            if (currentUser.role === 'ADMIN' || currentUser.role === 'SALES_MANAGER') {
-                try {
-                    const googleStatus = await apiRequest('/google-workspace/status');
-                    if (googleStatus.connected) {
-                        document.getElementById('googleIntegrationBadge').classList.remove('hidden');
-                        
-                        if (googleStatus.needs_reauth) {
-                            document.getElementById('googleIntegrationBadge').className = 
-                                'inline-block px-3 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800';
-                            document.getElementById('googleIntegrationBadge').textContent = 'Google: Needs Reauthorization';
-                        } else {
-                            document.getElementById('googleIntegrationBadge').className = 
-                                'inline-block px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800';
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error checking Google integration:', error);
-                }
-            }
-            
-            // Load leads based on user role
+            // Load leads - filter based on user role
             let leads;
-            let leadsResponse;
-            
             if (currentUser.role === 'ADMIN') {
-                leadsResponse = await apiRequest('/leads');
+                // Admin sees all leads - single API call
+                leads = await apiRequest('/leads');
             } else {
-                // For non-admin users, we still need to get all leads first
-                leadsResponse = await apiRequest('/leads');
-            }
-            
-            // Handle the specific response format from the API
-            if (leadsResponse && typeof leadsResponse === 'object' && Array.isArray(leadsResponse.leads)) {
-                // The API returns an object with a 'leads' array property
-                leads = leadsResponse.leads;
-                console.log(`Successfully loaded ${leads.length} leads out of ${leadsResponse.total}`);
-            } else if (Array.isArray(leadsResponse)) {
-                // In case the API directly returns an array
-                leads = leadsResponse;
-            } else {
-                // Fallback for any other response format
-                console.error('API returned leads in unexpected format:', leadsResponse);
-                leads = [];
-            }
-            
-            // Filter leads for non-admin users
-            if (currentUser.role !== 'ADMIN') {
-                leads = leads.filter(lead => lead.assigned_to === currentUser.id);
+                // Sales manager sees only their assigned leads
+                const allLeadsData = await apiRequest('/leads');
+                leads = allLeadsData.filter(lead => lead.assigned_to === currentUser.id);
             }
             
             allLeads = leads;
@@ -813,30 +768,34 @@
             allDemos.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
             // Setup manager filter dropdown
-            populateManagerFilter();
+            const managerFilter = document.getElementById('managerFilter');
+            const managerFilterContainer = managerFilter.closest('.flex-1');
             
-            // Render all demos
-            renderDemos();
-            
-            // Update statistics
-            updateStats();
-            
-            // Hide loading indicator
-            document.getElementById('loading').classList.add('hidden');
-            
-            // Show appropriate content
-            if (allDemos.length === 0) {
-                document.getElementById('emptyState').classList.remove('hidden');
+            if (currentUser.role === 'ADMIN') {
+                managerFilter.innerHTML = '<option value="">All Sales Managers</option>';
+                allUsers.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = user.name;
+                    managerFilter.appendChild(option);
+                });
             } else {
-                // The renderDemos function will handle showing the appropriate containers
+                if (managerFilterContainer) {
+                    managerFilterContainer.style.display = 'none';
+                }
             }
+
+            updateStats();
+            renderDemos(allDemos);
         } catch (error) {
             console.error('Error loading data:', error);
+            showError('Failed to load data: ' + error.message);
+        } finally {
             document.getElementById('loading').classList.add('hidden');
-            document.getElementById('errorMessage').classList.remove('hidden');
-            document.getElementById('errorText').textContent = `Error loading data: ${error.message || error}`;
+            document.getElementById('demosContainer').classList.remove('hidden');
         }
     }
+
     function updateStats() {
         const scheduled = allDemos.filter(d => d.status === 'scheduled').length;
         const completed = allDemos.filter(d => d.status === 'completed').length;
