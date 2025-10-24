@@ -1402,6 +1402,24 @@
                 toast.remove();
             }, 5000);
         }
+
+        function formatDate(date) {
+            // Format: "MMM DD, YYYY"
+            const options = { month: 'short', day: 'numeric', year: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function formatDateTime(date) {
+            // Format date as "Month Day, Year at HH:MM AM/PM"
+            return date.toLocaleString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
         
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
