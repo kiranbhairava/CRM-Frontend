@@ -737,11 +737,11 @@
                 allLeads = await apiRequest('/leads');
                 
                 // Sort leads by most recently updated
-                allLeads.sort((a, b) => {
-                    const dateA = new Date(a.updated_at || a.created_at || 0);
-                    const dateB = new Date(b.updated_at || b.created_at || 0);
-                    return dateB - dateA;
-                });
+                // allLeads.sort((a, b) => {
+                //     const dateA = new Date(a.updated_at || a.created_at || 0);
+                //     const dateB = new Date(b.updated_at || b.created_at || 0);
+                //     return dateB - dateA;
+                // });
                 
                 filteredLeads = allLeads;
                 renderLeads(filteredLeads);
