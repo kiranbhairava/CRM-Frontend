@@ -228,6 +228,34 @@
         .clickable-row:hover {
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
+
+        /* Professional Filter Styles */
+        .filter-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .filter-tag-remove {
+            cursor: pointer;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .filter-tag-remove:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
     </style>
 </head>
 <body class="font-display bg-background-light min-h-screen">
@@ -313,106 +341,128 @@
             </div>
 
             <!-- Filter & Search Section -->
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                        <div class="w-full sm:w-64">
-                            <label for="statusFilter" class="form-label">Status</label>
-                            <select id="statusFilter" class="form-input">
-                                <option value="all">All Statuses</option>
-                                <option value="New">New</option>
-                                <option value="Assigned">Assigned</option>
-                                <option value="In Process">In Process</option>
-                                <option value="Converted">Converted</option>
-                                <option value="Recycled">Recycled</option>
-                                <option value="Dead">Dead</option>
-                            </select>
-                        </div>
-                        <div class="w-full sm:w-64">
-                            <label for="sourceFilter" class="form-label">Source</label>
-                            <select id="sourceFilter" class="form-input">
-                                <option value="all">All Sources</option>
-                                <option value="Cold Call">Cold Call</option>
-                                <option value="Existing Customer">Existing Customer</option>
-                                <option value="Self Generated">Self Generated</option>
-                                <option value="Employee">Employee</option>
-                                <option value="Partner">Partner</option>
-                                <option value="Public Relations">Public Relations</option>
-                                <option value="Direct Mail">Direct Mail</option>
-                                <option value="Conference">Conference</option>
-                                <option value="Trade Show">Trade Show</option>
-                                <option value="Website">Website</option>
-                                <option value="Word of Mouth">Word of Mouth</option>
-                                <option value="Email">Email</option>
-                                <option value="Campaign">Campaign</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="w-full sm:w-64">
-                            <label for="assignedToFilter" class="form-label">Assigned To</label>
-                            <select id="assignedToFilter" class="form-input">
-                                <option value="all">All Users</option>
-                                <!-- Will be populated dynamically -->
-                            </select>
-                        </div>
+            <!-- Professional Filter Section -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+                <div class="border-b border-gray-200 px-6 py-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Filter Leads</h3>
+                    <p class="text-sm text-gray-500 mt-1">Refine your leads list using the filters below</p>
+                </div>
+                
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Status Filter -->
+                    <div>
+                        <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <select id="statusFilter" class="w-full form-input">
+                            <option value="all">All Statuses</option>
+                            <option value="New">New</option>
+                            <option value="Assigned">Assigned</option>
+                            <option value="In Process">In Process</option>
+                            <option value="Converted">Converted</option>
+                            <option value="Recycled">Recycled</option>
+                            <option value="Dead">Dead</option>
+                        </select>
                     </div>
-                    <div class="flex-grow lg:max-w-sm">
-                        <label for="searchBox" class="form-label">Search</label>
+                    
+                    <!-- Source Filter -->
+                    <div>
+                        <label for="sourceFilter" class="block text-sm font-medium text-gray-700 mb-2">Source</label>
+                        <select id="sourceFilter" class="w-full form-input">
+                            <option value="all">All Sources</option>
+                            <option value="Cold Call">Cold Call</option>
+                            <option value="Existing Customer">Existing Customer</option>
+                            <option value="Self Generated">Self Generated</option>
+                            <option value="Employee">Employee</option>
+                            <option value="Partner">Partner</option>
+                            <option value="Public Relations">Public Relations</option>
+                            <option value="Direct Mail">Direct Mail</option>
+                            <option value="Conference">Conference</option>
+                            <option value="Trade Show">Trade Show</option>
+                            <option value="Website">Website</option>
+                            <option value="Word of Mouth">Word of Mouth</option>
+                            <option value="Email">Email</option>
+                            <option value="Campaign">Campaign</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Assigned To Filter -->
+                    <div>
+                        <label for="assignedToFilter" class="block text-sm font-medium text-gray-700 mb-2">Assigned To</label>
+                        <select id="assignedToFilter" class="w-full form-input">
+                            <option value="all">All Users</option>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                    </div>
+                    
+                    <!-- Search Box -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
                         <div class="relative">
-                            <input type="text" id="searchBox" placeholder="Search by name, email or phone" class="form-input pl-10 pr-4">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">search</span>
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg">search</span>
+                            <input type="text" id="searchBox" placeholder="Search by name, email or phone" class="w-full form-input pl-10 pr-10">
+                            <span id="clearSearch" class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg cursor-pointer hover:text-gray-600 hidden">close</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Date Range Filters -->
-                <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-4">
-                    <div class="w-full sm:w-48">
-                        <label for="createdAfter" class="form-label">Created After</label>
-                        <input type="date" id="createdAfter" class="form-input">
-                    </div>
-                    <div class="w-full sm:w-48">
-                        <label for="createdBefore" class="form-label">Created Before</label>
-                        <input type="date" id="createdBefore" class="form-input">
-                    </div>
-                    <div class="w-full sm:w-48">
-                        <label for="updatedAfter" class="form-label">Updated After</label>
-                        <input type="date" id="updatedAfter" class="form-input">
-                    </div>
-                    <div class="w-full sm:w-48">
-                        <label for="updatedBefore" class="form-label">Updated Before</label>
-                        <input type="date" id="updatedBefore" class="form-input">
+                <!-- Date & Sort Section -->
+                <div class="border-t border-gray-200 px-6 py-4 bg-gray-50">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Date Range Filters -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Date Created</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="date" id="createdAfter" class="form-input text-sm" placeholder="From">
+                                    <input type="date" id="createdBefore" class="form-input text-sm" placeholder="To">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Date Updated</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="date" id="updatedAfter" class="form-input text-sm" placeholder="From">
+                                    <input type="date" id="updatedBefore" class="form-input text-sm" placeholder="To">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sorting Controls -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="sortBy" class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                                <select id="sortBy" class="w-full form-input text-sm">
+                                    <option value="created_at">Created Date</option>
+                                    <option value="updated_at">Updated Date</option>
+                                    <option value="name">Name</option>
+                                    <option value="status">Status</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="sortOrder" class="block text-sm font-medium text-gray-700 mb-2">Sort Order</label>
+                                <select id="sortOrder" class="w-full form-input text-sm">
+                                    <option value="desc">Newest First</option>
+                                    <option value="asc">Oldest First</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Sorting Controls -->
-                <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-4">
-                    <div class="w-full sm:w-48">
-                        <label for="sortBy" class="form-label">Sort By</label>
-                        <select id="sortBy" class="form-input">
-                            <option value="created_at">Created Date</option>
-                            <option value="updated_at">Updated Date</option>
-                            <option value="name">Name</option>
-                            <option value="status">Status</option>
-                        </select>
-                    </div>
-                    <div class="w-full sm:w-48">
-                        <label for="sortOrder" class="form-label">Sort Order</label>
-                        <select id="sortOrder" class="form-input">
-                            <option value="desc">Newest First</option>
-                            <option value="asc">Oldest First</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between mt-4">
-                    <div class="text-sm text-gray-500">
-                        <span id="filteredCount">0</span> leads found
-                        <span id="filterBadges" class="ml-2 hidden">
-                            <!-- Filter badges will be added dynamically here -->
+                <!-- Results & Actions -->
+                <div class="border-t border-gray-200 px-6 py-4 bg-gray-50 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm text-gray-700">
+                            <span id="filteredCount" class="font-semibold">0</span> leads found
                         </span>
+                        <div id="activeFilters" class="flex flex-wrap gap-2">
+                            <!-- Active filter tags will appear here -->
+                        </div>
                     </div>
-                    <button onclick="clearFilters()" class="text-sm text-primary hover:text-primary-dark font-medium">Clear filters</button>
+                    
+                    <button onclick="clearFilters()" class="text-sm text-primary hover:text-primary-dark font-medium flex items-center gap-1">
+                        <span class="material-symbols-outlined text-base">refresh</span>
+                        Clear All
+                    </button>
                 </div>
             </div>
 
@@ -762,7 +812,9 @@
             document.getElementById('statusFilter').addEventListener('change', applyFilters);
             document.getElementById('sourceFilter').addEventListener('change', applyFilters);
             document.getElementById('assignedToFilter').addEventListener('change', applyFilters);
-            document.getElementById('searchBox').addEventListener('input', applyFilters);
+            // document.getElementById('searchBox').addEventListener('input', applyFilters);
+            document.getElementById('clearSearch').addEventListener('click', clearSearch);
+            document.getElementById('searchBox').addEventListener('input', toggleClearSearch);
             
             // Setup event listeners for new filters
             document.getElementById('createdAfter').addEventListener('change', applyFilters);
@@ -877,6 +929,146 @@
             console.error('Error loading sales managers:', error);
             showError('Failed to load sales managers: ' + error.message);
         }
+    }
+
+    // Toggle clear search button visibility
+    function toggleClearSearch() {
+        const searchValue = document.getElementById('searchBox').value;
+        const clearButton = document.getElementById('clearSearch');
+        clearButton.style.display = searchValue ? 'block' : 'none';
+    }
+
+    // Clear search input
+    function clearSearch() {
+        document.getElementById('searchBox').value = '';
+        document.getElementById('clearSearch').style.display = 'none';
+        applyFilters();
+    }
+
+    // Update active filter tags
+    function updateActiveFilterTags() {
+        const activeFiltersContainer = document.getElementById('activeFilters');
+        activeFiltersContainer.innerHTML = '';
+        
+        // Helper function to add filter tag
+        const addFilterTag = (label, value, filterType) => {
+            if (value && value !== 'all') {
+                const tag = document.createElement('div');
+                tag.className = 'filter-tag';
+                tag.innerHTML = `
+                    ${label}: ${value}
+                    <span class="filter-tag-remove" onclick="removeFilter('${filterType}')">
+                        <span class="material-symbols-outlined" style="font-size: 14px;">close</span>
+                    </span>
+                `;
+                activeFiltersContainer.appendChild(tag);
+            }
+        };
+        
+        // Add filter tags for each active filter
+        if (currentFilters.status !== 'all') {
+            addFilterTag('Status', currentFilters.status, 'status');
+        }
+        
+        if (currentFilters.source !== 'all') {
+            addFilterTag('Source', currentFilters.source, 'source');
+        }
+        
+        if (currentFilters.assignedTo !== 'all') {
+            const assignedName = document.getElementById('assignedToFilter').options[document.getElementById('assignedToFilter').selectedIndex].text;
+            addFilterTag('Assigned To', assignedName, 'assignedTo');
+        }
+        
+        if (currentFilters.search) {
+            addFilterTag('Search', currentFilters.search, 'search');
+        }
+        
+        if (currentFilters.createdAfter) {
+            addFilterTag('Created After', formatDateForDisplay(currentFilters.createdAfter), 'createdAfter');
+        }
+        
+        if (currentFilters.createdBefore) {
+            addFilterTag('Created Before', formatDateForDisplay(currentFilters.createdBefore), 'createdBefore');
+        }
+        
+        if (currentFilters.updatedAfter) {
+            addFilterTag('Updated After', formatDateForDisplay(currentFilters.updatedAfter), 'updatedAfter');
+        }
+        
+        if (currentFilters.updatedBefore) {
+            addFilterTag('Updated Before', formatDateForDisplay(currentFilters.updatedBefore), 'updatedBefore');
+        }
+        
+        // Add sorting tag
+        const sortOptions = {
+            'created_at': 'Created Date',
+            'updated_at': 'Updated Date', 
+            'name': 'Name',
+            'status': 'Status'
+        };
+        
+        const orderText = currentFilters.sortOrder === 'desc' ? 'Descending' : 'Ascending';
+        if (currentFilters.sortBy !== 'created_at' || currentFilters.sortOrder !== 'desc') {
+            const tag = document.createElement('div');
+            tag.className = 'filter-tag';
+            tag.innerHTML = `
+                Sorted by: ${sortOptions[currentFilters.sortBy]} (${orderText})
+                <span class="filter-tag-remove" onclick="removeFilter('sort')">
+                    <span class="material-symbols-outlined" style="font-size: 14px;">close</span>
+                </span>
+            `;
+            activeFiltersContainer.appendChild(tag);
+        }
+        
+        // Toggle clear search button
+        toggleClearSearch();
+    }
+
+    // Remove specific filter
+    function removeFilter(filterType) {
+        switch (filterType) {
+            case 'status':
+                document.getElementById('statusFilter').value = 'all';
+                currentFilters.status = 'all';
+                break;
+            case 'source':
+                document.getElementById('sourceFilter').value = 'all';
+                currentFilters.source = 'all';
+                break;
+            case 'assignedTo':
+                document.getElementById('assignedToFilter').value = 'all';
+                currentFilters.assignedTo = 'all';
+                break;
+            case 'search':
+                document.getElementById('searchBox').value = '';
+                currentFilters.search = '';
+                toggleClearSearch();
+                break;
+            case 'createdAfter':
+                document.getElementById('createdAfter').value = '';
+                currentFilters.createdAfter = '';
+                break;
+            case 'createdBefore':
+                document.getElementById('createdBefore').value = '';
+                currentFilters.createdBefore = '';
+                break;
+            case 'updatedAfter':
+                document.getElementById('updatedAfter').value = '';
+                currentFilters.updatedAfter = '';
+                break;
+            case 'updatedBefore':
+                document.getElementById('updatedBefore').value = '';
+                currentFilters.updatedBefore = '';
+                break;
+            case 'sort':
+                document.getElementById('sortBy').value = 'created_at';
+                document.getElementById('sortOrder').value = 'desc';
+                currentFilters.sortBy = 'created_at';
+                currentFilters.sortOrder = 'desc';
+                break;
+        }
+        
+        applyFilters();
     }
 
     // Check for pending leads from the website
@@ -1244,9 +1436,9 @@
         
         // Apply sorting
         filtered = sortLeads(filtered, currentFilters.sortBy, currentFilters.sortOrder);
-        
-        // Update filter badge count
-        updateFilterBadgeCount();
+
+        // Update active filter tags
+        updateActiveFilterTags();
         
         // Reset to first page and render
         currentPage = 1;
