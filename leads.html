@@ -201,700 +201,716 @@
         .pagination-btn:not(.active):not(:disabled):hover {
             background: #f1f5f9;
         }
-        .create-lead-page {
-            display: none;
+        
+        /* Create/Edit Form Animation */
+        #createLeadPage {
+            visibility: hidden;
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+            transition: visibility 0s, opacity 0.5s, height 0.5s;
         }
-        .create-lead-page.active {
-            display: block;
+        
+        #createLeadPage.active {
+            visibility: visible;
+            opacity: 1;
+            height: auto;
         }
-        /* Visual enhancement for clickable rows */
-        .clickable-row {
+
+        /* Active filter indicator */
+        .filter-indicator {
             position: relative;
-            transition: all 0.2s;
         }
-        .clickable-row::after {
-            content: "";
+
+        .filter-badge {
             position: absolute;
-            left: 0;
-            top: 0;
-            width: 4px;
-            height: 100%;
-            background: transparent;
-            transition: background-color 0.2s;
-        }
-        .clickable-row:hover::after {
-            background: #1173d4;
-        }
-        .clickable-row:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            top: -6px;
+            right: -6px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            min-width: 1.25rem;
+            height: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
         }
     </style>
 </head>
-<body class="font-display bg-background-light min-h-screen">
-
-    <!-- LEADS LIST PAGE -->
-    <div id="leadsPage">
-        <!-- Header -->
-        <header class="bg-white/80 border-b border-gray-200 shadow-sm sticky top-0 z-10 backdrop-blur-lg">
-            <div class="container mx-auto px-6 lg:px-8">
-                <div class="flex items-center justify-between h-16">
-                    <!-- Left side: Logo + Nav -->
-                    <div class="flex items-center space-x-8">
-                        <div class="flex items-center space-x-3">
-                            <span class="material-symbols-outlined text-primary text-3xl">school</span>
-                            <h1 class="text-xl font-bold text-gray-900">Gigaversity</h1>
-                        </div>
-                        <nav class="hidden md:flex items-center space-x-6">
-                            <a href="dashboard.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Dashboard</a>
-                            <a href="leads.html" class="text-sm font-medium text-primary border-b-2 border-primary pb-1" style="color:#1173d4;">Leads</a>
-                            <a href="calls.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Calls</a>
-                            <a href="demos.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Demos</a>
-                            <a href="emails.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Emails</a>
-                            <a href="sales-managers.html" id="salesTeamLink" class="text-sm font-medium text-gray-500 hover:text-gray-700 hidden">Sales Team</a> 
-                            <a href="reports.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Reports</a>
-                            <a href="timeline.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Timeline</a>
-                        </nav>
-                    </div>
-
-                    <!-- Right side: Logout -->
-                    <div class="flex items-center space-x-4">
-                        <button onclick="logout()" class="text-sm font-medium text-gray-600 hover:text-gray-900">Logout</button>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Main Content -->
-        <main class="container mx-auto px-6 lg:px-8 py-8 page-transition">
-            <!-- Page Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-900">Leads Management</h2>
-                    <p class="text-gray-500 mt-1">Manage and track all your leads</p>
-                </div>
-
-                <!-- Right-aligned action buttons -->
-                <div class="flex items-center gap-3 sm:ml-auto">
-                    <!-- Website Leads Sync Badge -->
-                    <button id="websiteLeadsBadge" class="sync-badge has-pending" onclick="checkAndSyncWebsiteLeads()" title="Click to sync website leads">
-                        <span class="material-symbols-outlined badge-icon">sync</span>
-                        <span id="syncBadgeText">Website Leads</span>
-                        <span class="pending-count" id="pendingCountBadge">0</span>
-                    </button>
-
-                    <!-- Import Leads Button -->
-                    <a href="import-leads.html" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        <span class="material-symbols-outlined text-gray-500 text-base">file_upload</span>
-                        Import
-                    </a>
-                    
-                    <!-- Create Lead Button -->
-                    <button onclick="openCreateLeadPage()" class="flex items-center gap-2 px-4 py-2 text-sm font-semibold btn-primary text-white rounded-lg transition-all">
-                        <span class="material-symbols-outlined text-base">add</span>
-                        Create Lead
-                    </button>
-                </div>
-            </div>
-
-            <!-- Error Message -->
-            <div id="errorMessage" class="bg-red-50 text-red-700 p-4 rounded-lg mb-6 hidden">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined">error</span>
-                    <span id="errorText">Error message goes here</span>
-                </div>
-                <button onclick="hideError()" class="absolute right-2 top-2 text-red-700 hover:text-red-900">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-
-            <!-- Loading Indicator -->
-            <div id="loadingIndicator" class="flex justify-center items-center py-10 hidden">
-                <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary"></div>
-            </div>
-
-            <!-- Filter & Search Section -->
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                        <div class="w-full sm:w-64">
-                            <label for="statusFilter" class="form-label">Status</label>
-                            <select id="statusFilter" class="form-input">
-                                <option value="all">All Statuses</option>
-                                <option value="New">New</option>
-                                <option value="Assigned">Assigned</option>
-                                <option value="In Process">In Process</option>
-                                <option value="Converted">Converted</option>
-                                <option value="Recycled">Recycled</option>
-                                <option value="Dead">Dead</option>
-                            </select>
-                        </div>
-                        <div class="w-full sm:w-64">
-                            <label for="sourceFilter" class="form-label">Source</label>
-                            <select id="sourceFilter" class="form-input">
-                                <option value="all">All Sources</option>
-                                <option value="Cold Call">Cold Call</option>
-                                <option value="Existing Customer">Existing Customer</option>
-                                <option value="Self Generated">Self Generated</option>
-                                <option value="Employee">Employee</option>
-                                <option value="Partner">Partner</option>
-                                <option value="Public Relations">Public Relations</option>
-                                <option value="Direct Mail">Direct Mail</option>
-                                <option value="Conference">Conference</option>
-                                <option value="Trade Show">Trade Show</option>
-                                <option value="Website">Website</option>
-                                <option value="Word of Mouth">Word of Mouth</option>
-                                <option value="Email">Email</option>
-                                <option value="Campaign">Campaign</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="w-full sm:w-64">
-                            <label for="assignedToFilter" class="form-label">Assigned To</label>
-                            <select id="assignedToFilter" class="form-input">
-                                <option value="all">All Users</option>
-                                <!-- Will be populated dynamically -->
-                            </select>
-                        </div>
-                    </div>
-                    <div class="flex-grow lg:max-w-sm">
-                        <label for="searchBox" class="form-label">Search</label>
-                        <div class="relative">
-                            <input type="text" id="searchBox" placeholder="Search by name, email or phone" class="form-input pl-10 pr-4">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">search</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex items-center justify-between">
-                    <div class="text-sm text-gray-500">
-                        <span id="filteredCount">0</span> leads found
-                        <span id="filterBadges" class="ml-2 hidden">
-                            <!-- Filter badges will be added dynamically here -->
-                        </span>
-                    </div>
-                    <button onclick="clearFilters()" class="text-sm text-primary hover:text-primary-dark font-medium">Clear filters</button>
-                </div>
-            </div>
-
-            <!-- Date Filter Panel -->
-            <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-                <div class="flex flex-col lg:flex-row lg:items-end gap-4">
-                    <!-- Created Date Filter -->
-                    <div class="w-full lg:w-1/3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Created Date</label>
-                        <div class="flex space-x-2">
-                            <div class="w-1/2">
-                                <input type="date" id="createdAfter" 
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-sm"
-                                    placeholder="From">
-                            </div>
-                            <div class="w-1/2">
-                                <input type="date" id="createdBefore" 
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-sm"
-                                    placeholder="To">
-                            </div>
-                        </div>
+<body class="font-sans bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <!-- Left side: Logo and nav -->
+                <div class="flex items-center">
+                    <div class="flex items-center space-x-3 mr-8">
+                        <span class="material-symbols-outlined text-primary text-3xl">school</span>
+                        <h1 class="text-xl font-bold text-gray-900">Gigaversity CRM</h1>
                     </div>
                     
-                    <!-- Updated Date Filter -->
-                    <div class="w-full lg:w-1/3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Updated Date</label>
-                        <div class="flex space-x-2">
-                            <div class="w-1/2">
-                                <input type="date" id="updatedAfter" 
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-sm"
-                                    placeholder="From">
-                            </div>
-                            <div class="w-1/2">
-                                <input type="date" id="updatedBefore" 
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-sm"
-                                    placeholder="To">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Quick Filters & Apply Button -->
-                    <div class="w-full lg:w-1/3 flex flex-wrap gap-2 items-end">
-                        <button type="button" onclick="applyQuickFilter('today')" 
-                            class="px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200">
-                            Today
-                        </button>
-                        <button type="button" onclick="applyQuickFilter('last7days')" 
-                            class="px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200">
-                            Last 7 Days
-                        </button>
-                        <button type="button" onclick="applyQuickFilter('thisMonth')" 
-                            class="px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200">
-                            This Month
-                        </button>
-                        <button type="button" onclick="clearFilters()" 
-                            class="px-3 py-1 text-xs font-medium rounded-md bg-red-100 text-red-800 hover:bg-red-200">
-                            Clear
-                        </button>
-                        <button type="button" onclick="applyFilters()" 
-                            class="ml-auto px-4 py-2 text-sm font-medium rounded-md bg-primary text-white hover:bg-primary-dark">
-                            Apply Filters
-                        </button>
-                    </div>
+                    <nav class="flex space-x-6">
+                        <a href="dashboard.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Dashboard</a>
+                        <a href="leads.html" class="text-sm font-medium text-primary border-b-2 border-primary pb-1" style="color:#1173d4;">Leads</a>
+                        <a href="calls.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Calls</a>
+                        <a href="demos.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Demos</a>
+                        <a href="emails.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Emails</a>
+                        <a href="sales-managers.html" id="salesTeamLink" class="text-sm font-medium text-gray-500 hover:text-gray-700 hidden">Sales Team</a> 
+                        <a href="reports.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Reports</a>
+                        <a href="timeline.html" class="text-sm font-medium text-gray-500 hover:text-gray-700">Timeline</a>
+                    </nav>
+                </div>
+
+                <!-- Right side: Logout -->
+                <div class="flex items-center space-x-4">
+                    <button onclick="logout()" class="text-sm font-medium text-gray-600 hover:text-gray-900">Logout</button>
                 </div>
             </div>
+        </div>
+    </header>
 
-            <thead class="bg-gray-50">
-            <tr>
-                <!-- Checkbox column -->
-                <th scope="col" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900 w-8">
-                    <input type="checkbox" id="selectAllLeads" class="rounded text-primary">
-                </th>
-                
-                <!-- Name column (sortable) -->
-                <th scope="col" class="py-3.5 pl-3 pr-3 text-left text-sm font-semibold text-gray-900">
-                    <button type="button" onclick="sortLeads('name')" class="group inline-flex items-center">
-                        Name
-                        <span id="sort-name" class="invisible group-hover:visible ml-1">
-                            <span class="material-symbols-outlined text-gray-400 text-xs">sort</span>
-                        </span>
-                    </button>
-                </th>
-                
-                <!-- Other non-sortable columns -->
-                <th scope="col" class="hidden md:table-cell py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-                    Email
-                </th>
-                <th scope="col" class="hidden md:table-cell py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-                    Phone
-                </th>
-                <th scope="col" class="hidden lg:table-cell py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-                    Course Interest
-                </th>
-                
-                <!-- Status column (sortable) -->
-                <th scope="col" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-                    <button type="button" onclick="sortLeads('status')" class="group inline-flex items-center">
-                        Status
-                        <span id="sort-status" class="invisible group-hover:visible ml-1">
-                            <span class="material-symbols-outlined text-gray-400 text-xs">sort</span>
-                        </span>
-                    </button>
-                </th>
-                
-                <!-- Created date column (sortable) -->
-                <th scope="col" class="hidden lg:table-cell py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-                    <button type="button" onclick="sortLeads('created_at')" class="group inline-flex items-center">
-                        Created
-                        <span id="sort-created_at" class="invisible group-hover:visible ml-1">
-                            <span class="material-symbols-outlined text-gray-400 text-xs">sort</span>
-                        </span>
-                    </button>
-                </th>
-                
-                <!-- Updated date column (sortable) -->
-                <th scope="col" class="hidden lg:table-cell py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
-                    <button type="button" onclick="sortLeads('updated_at')" class="group inline-flex items-center">
-                        Updated
-                        <span id="sort-updated_at" class="invisible group-hover:visible ml-1">
-                            <span class="material-symbols-outlined text-gray-400 text-xs">sort</span>
-                        </span>
-                    </button>
-                </th>
-                
-                <!-- Actions column -->
-                <th scope="col" class="py-3.5 px-3 text-right text-sm font-semibold text-gray-900 w-20">
-                    Actions
-                </th>
-            </tr>
-        </thead>
-
-            <!-- Leads Table -->
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            <tr>
-                                <th class="px-6 py-3">Name</th>
-                                <th class="px-6 py-3">Contact</th>
-                                <th class="px-6 py-3">Course Interest</th>
-                                <th class="px-6 py-3">Source</th>
-                                <th class="px-6 py-3">Status</th>
-                                <th class="px-6 py-3 text-right">
-                                    <div class="flex items-center justify-end">
-                                        Actions
-                                        <span class="ml-1 text-gray-400 normal-case font-normal text-xs">(click row to view details)</span>
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody id="leadsTableBody" class="divide-y divide-gray-200">
-                            <!-- Table rows will be populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
-                    <div class="text-sm text-gray-500">
-                        Showing <span id="startIndex">0</span> to <span id="endIndex">0</span> of <span id="totalItems">0</span> leads
-                    </div>
-                    <div class="flex items-center space-x-1">
-                        <button onclick="goToPage(1)" id="firstBtn" class="pagination-btn px-3 text-gray-700 border border-gray-300">
-                            <span class="material-symbols-outlined text-base">first_page</span>
-                        </button>
-                        <button onclick="goToPage(currentPage - 1)" id="prevBtn" class="pagination-btn px-3 text-gray-700 border border-gray-300">
-                            <span class="material-symbols-outlined text-base">chevron_left</span>
-                        </button>
-                        <div id="pageButtons" class="flex items-center space-x-1">
-                            <!-- Page buttons will be added dynamically -->
-                        </div>
-                        <button onclick="goToPage(currentPage + 1)" id="nextBtn" class="pagination-btn px-3 text-gray-700 border border-gray-300">
-                            <span class="material-symbols-outlined text-base">chevron_right</span>
-                        </button>
-                        <button onclick="goToPage(totalPages)" id="lastBtn" class="pagination-btn px-3 text-gray-700 border border-gray-300">
-                            <span class="material-symbols-outlined text-base">last_page</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </main>
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="fixed inset-0 flex items-center justify-center z-50 bg-white bg-opacity-75 hidden">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
     </div>
 
-    <!-- CREATE/EDIT LEAD PAGE -->
-    <div id="createLeadPage" class="create-lead-page min-h-screen bg-gray-100">
-        <header class="bg-white/80 border-b border-gray-200 shadow-sm sticky top-0 z-10 backdrop-blur-lg">
-            <div class="container mx-auto px-6 lg:px-8">
-                <div class="flex items-center justify-between h-16">
-                    <div class="flex items-center gap-4">
-                        <button onclick="closeCreateLeadPage()" class="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-                            <span class="material-symbols-outlined">arrow_back</span>
-                        </button>
-                        <div>
-                            <h1 class="text-xl font-bold text-gray-900" id="createPageTitle">Create New Lead</h1>
-                            <p class="text-xs text-gray-500">Fill in the details below</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <button type="button" onclick="closeCreateLeadPage()" class="px-5 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                            Cancel
-                        </button>
-                        <button type="submit" form="addLeadForm" class="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold btn-primary text-white rounded-lg transition-all">
-                            <span class="material-symbols-outlined text-base">save</span>
-                            <span id="saveButtonText">Save Lead</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <main class="container mx-auto max-w-5xl px-6 lg:px-8 py-8">
-            <form id="addLeadForm" class="page-transition">
-                <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
-                    <h3 class="text-lg font-semibold mb-4">Contact Information</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="col-span-1">
-                            <label for="salutation" class="form-label">Salutation</label>
-                            <select id="salutation" class="form-input">
-                                <option value="">Select</option>
-                                <option value="Mr.">Mr.</option>
-                                <option value="Ms.">Ms.</option>
-                                <option value="Mrs.">Mrs.</option>
-                                <option value="Dr.">Dr.</option>
-                                <option value="Prof.">Prof.</option>
-                            </select>
-                        </div>
-                        <div class="col-span-1">
-                            <label for="firstName" class="form-label">First Name <span class="text-red-500">*</span></label>
-                            <input type="text" id="firstName" class="form-input" required>
-                        </div>
-                        <div class="col-span-1">
-                            <label for="lastName" class="form-label">Last Name <span class="text-red-500">*</span></label>
-                            <input type="text" id="lastName" class="form-input" required>
-                        </div>
-                        <div class="col-span-1">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" id="email" class="form-input">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="mobileNumber" class="form-label">Mobile Number <span class="text-red-500">*</span></label>
-                            <input type="tel" id="mobileNumber" class="form-input" required>
-                        </div>
-                        <div class="col-span-1">
-                            <label for="alternateMobile" class="form-label">Alternate Number</label>
-                            <input type="tel" id="alternateMobile" class="form-input">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="workingStatus" class="form-label">Working Status</label>
-                            <select id="workingStatus" class="form-input">
-                                <option value="">Select</option>
-                                <option value="Student">Student</option>
-                                <option value="Employed">Employed</option>
-                                <option value="Self-Employed">Self-Employed</option>
-                                <option value="Unemployed">Unemployed</option>
-                                <option value="Retired">Retired</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <hr class="my-6 border-gray-200" />
-
-                    <h3 class="text-lg font-semibold mb-4">Address Information</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="col-span-full lg:col-span-1">
-                            <label for="street" class="form-label">Street</label>
-                            <input type="text" id="street" class="form-input">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="city" class="form-label">City</label>
-                            <input type="text" id="city" class="form-input">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="state" class="form-label">State</label>
-                            <input type="text" id="state" class="form-input">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="postalCode" class="form-label">Postal Code</label>
-                            <input type="text" id="postalCode" class="form-input">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="country" class="form-label">Country</label>
-                            <input type="text" id="country" class="form-input">
-                        </div>
-                    </div>
-
-                    <hr class="my-6 border-gray-200" />
-
-                    <h3 class="text-lg font-semibold mb-4">Education & Interest</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="col-span-1">
-                            <label for="instituteName" class="form-label">Institute Name</label>
-                            <input type="text" id="instituteName" class="form-input">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="qualification" class="form-label">Highest Qualification</label>
-                            <select id="qualification" class="form-input">
-                                <option value="">Select</option>
-                                <option value="High School">High School</option>
-                                <option value="Bachelor's Degree">Bachelor's Degree</option>
-                                <option value="Master's Degree">Master's Degree</option>
-                                <option value="Doctorate">Doctorate</option>
-                                <option value="Diploma">Diploma</option>
-                                <option value="Certificate">Certificate</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="col-span-1">
-                            <label for="courseInterest" class="form-label">Course Interested In</label>
-                            <select id="courseInterest" class="form-input">
-                                <option value="">Select</option>
-                                <option value="Data Science">Data Science</option>
-                                <option value="Web Development">Web Development</option>
-                                <option value="Mobile App Development">Mobile App Development</option>
-                                <option value="Cloud Computing">Cloud Computing</option>
-                                <option value="Artificial Intelligence">Artificial Intelligence</option>
-                                <option value="Digital Marketing">Digital Marketing</option>
-                                <option value="UX/UI Design">UX/UI Design</option>
-                                <option value="Business Management">Business Management</option>
-                                <option value="Project Management">Project Management</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="col-span-1">
-                            <label for="opportunityAmount" class="form-label">Opportunity Amount ($)</label>
-                            <input type="number" id="opportunityAmount" class="form-input" min="0" step="0.01">
-                        </div>
-                    </div>
-
-                    <hr class="my-6 border-gray-200" />
-
-                    <h3 class="text-lg font-semibold mb-4">Lead Details</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="col-span-1">
-                            <label for="leadSource" class="form-label">Lead Source</label>
-                            <select id="leadSource" class="form-input">
-                                <option value="">Select</option>
-                                <option value="Cold Call">Cold Call</option>
-                                <option value="Existing Customer">Existing Customer</option>
-                                <option value="Self Generated">Self Generated</option>
-                                <option value="Employee">Employee</option>
-                                <option value="Partner">Partner</option>
-                                <option value="Public Relations">Public Relations</option>
-                                <option value="Direct Mail">Direct Mail</option>
-                                <option value="Conference">Conference</option>
-                                <option value="Trade Show">Trade Show</option>
-                                <option value="Website">Website</option>
-                                <option value="Word of Mouth">Word of Mouth</option>
-                                <option value="Email">Email</option>
-                                <option value="Campaign">Campaign</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="col-span-1">
-                            <label for="referredBy" class="form-label">Referred By</label>
-                            <input type="text" id="referredBy" class="form-input">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="status" class="form-label">Status</label>
-                            <select id="status" class="form-input">
-                                <option value="New">New</option>
-                                <option value="Assigned">Assigned</option>
-                                <option value="In Process">In Process</option>
-                                <option value="Converted">Converted</option>
-                                <option value="Recycled">Recycled</option>
-                                <option value="Dead">Dead</option>
-                            </select>
-                        </div>
-                        <div class="col-span-1">
-                            <label for="statusDescription" class="form-label">Status Description</label>
-                            <input type="text" id="statusDescription" class="form-input">
-                        </div>
-                        <div class="col-span-1">
-                            <label for="assignedTo" class="form-label">Assigned To</label>
-                            <select id="assignedTo" class="form-input">
-                                <option value="">Unassigned</option>
-                                <!-- Will be populated dynamically -->
-                            </select>
-                        </div>
-                        <div class="col-span-full">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea id="description" rows="4" class="form-input"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </main>
-    </div>
-
-    <!-- Delete Modal -->
-    <div id="deleteModal" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-6 p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Delete Lead</h3>
-            <p class="text-gray-600 mb-6">Are you sure you want to delete this lead? This action cannot be undone.</p>
-            <div class="flex items-center justify-end gap-3 mt-6">
-                <button onclick="closeDeleteModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-                    Cancel
-                </button>
-                <button onclick="confirmDelete()" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
-                    Delete
-                </button>
-            </div>
+    <!-- Error Message -->
+    <div id="errorMessage" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50 hidden max-w-lg shadow-lg">
+        <div class="flex items-center">
+            <span class="material-symbols-outlined mr-2">error</span>
+            <span id="errorText" class="block sm:inline"></span>
         </div>
     </div>
 
-    <!-- Success Toast Template -->
+    <!-- Toast Template (hidden) -->
     <div id="toastTemplate" class="hidden">
         <div class="sync-toast success">
             <span class="material-symbols-outlined text-green-500">check_circle</span>
             <div>
-                <div class="font-semibold text-gray-900">Success</div>
-                <div class="text-sm text-gray-600" id="toastMessage"></div>
+                <div class="font-semibold">Success</div>
+                <div id="toastMessage" class="text-gray-600 text-sm">Lead created successfully</div>
             </div>
-            <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600 ml-auto">
+            <button onclick="this.parentNode.remove()" class="ml-4 text-gray-400 hover:text-gray-600">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-40 flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div class="text-center">
+                <span class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
+                    <span class="material-symbols-outlined text-red-600 text-3xl">delete</span>
+                </span>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Confirm Deletion</h3>
+                <p class="text-gray-600 mb-6">Are you sure you want to delete this lead? This action cannot be undone.</p>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                    Cancel
+                </button>
+                <button onclick="confirmDelete()" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
+                    Delete Lead
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Leads Page -->
+    <div id="leadsPage" class="container mx-auto px-6 lg:px-8 py-8 page-transition">
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">Leads Management</h2>
+                <p class="text-gray-500 mt-1">Manage and track all your leads</p>
+            </div>
+
+            <!-- Right-aligned action buttons -->
+            <div class="flex items-center gap-3 sm:ml-auto">
+                <!-- Website Leads Sync Badge - NEW! -->
+                <div id="websiteSyncBadge" class="sync-badge up-to-date" onclick="syncWebsiteLeads()">
+                    <span class="badge-icon material-symbols-outlined">sync</span>
+                    <span>Website Leads</span>
+                </div>
+
+                <!-- Import Leads Button -->
+                <a href="import-leads.html" class="flex items-center space-x-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-gray-500 text-base">upload_file</span>
+                    <span>Import</span>
+                </a>
+                
+                <!-- Add Lead Button -->
+                <button onclick="openCreateLeadPage()" class="flex items-center space-x-1.5 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-base">add</span>
+                    <span>Add Lead</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Timestamp Filter Panel - NEW! -->
+        <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+            <div class="mb-3">
+                <h3 class="text-lg font-bold text-gray-900">Filter Leads</h3>
+                <p class="text-sm text-gray-500">Filter leads by creation and update dates</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Created Date (From) -->
+                <div>
+                    <label for="createdAfter" class="block text-sm font-medium text-gray-700 mb-1">Created From</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-gray-400">calendar_today</span>
+                        </div>
+                        <input type="date" id="createdAfter" 
+                            class="block w-full pl-10 pr-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-sm">
+                    </div>
+                </div>
+
+                <!-- Created Date (To) -->
+                <div>
+                    <label for="createdBefore" class="block text-sm font-medium text-gray-700 mb-1">Created To</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-gray-400">calendar_today</span>
+                        </div>
+                        <input type="date" id="createdBefore" 
+                            class="block w-full pl-10 pr-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-sm">
+                    </div>
+                </div>
+
+                <!-- Updated Date (From) -->
+                <div>
+                    <label for="updatedAfter" class="block text-sm font-medium text-gray-700 mb-1">Updated From</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-gray-400">calendar_today</span>
+                        </div>
+                        <input type="date" id="updatedAfter" 
+                            class="block w-full pl-10 pr-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-sm">
+                    </div>
+                </div>
+
+                <!-- Updated Date (To) -->
+                <div>
+                    <label for="updatedBefore" class="block text-sm font-medium text-gray-700 mb-1">Updated To</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-gray-400">calendar_today</span>
+                        </div>
+                        <input type="date" id="updatedBefore" 
+                            class="block w-full pl-10 pr-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 mt-4 items-center">
+                <!-- Quick Filters -->
+                <div class="mr-2">
+                    <span class="text-sm text-gray-500">Quick filters:</span>
+                </div>
+                <button type="button" onclick="applyQuickFilter('today')" 
+                    class="px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors">
+                    Today
+                </button>
+                <button type="button" onclick="applyQuickFilter('yesterday')" 
+                    class="px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors">
+                    Yesterday
+                </button>
+                <button type="button" onclick="applyQuickFilter('last7days')" 
+                    class="px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors">
+                    Last 7 Days
+                </button>
+                <button type="button" onclick="applyQuickFilter('thisMonth')" 
+                    class="px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors">
+                    This Month
+                </button>
+                <button type="button" onclick="applyQuickFilter('lastMonth')" 
+                    class="px-3 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors">
+                    Last Month
+                </button>
+
+                <div class="flex ml-auto gap-2">
+                    <button type="button" onclick="clearFilters()" 
+                        class="px-4 py-2 text-sm font-medium rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
+                        Clear
+                    </button>
+                    <button type="button" onclick="applyFilters()" 
+                        class="px-4 py-2 text-sm font-medium rounded-md bg-primary text-white hover:bg-primary-dark transition-colors">
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search, Filter, and Lead List Card -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <!-- Card Header with Search and Filters -->
+            <div class="p-4 sm:p-6 border-b border-gray-200">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <!-- Search Box -->
+                    <div class="relative max-w-sm w-full">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-gray-400">search</span>
+                        </div>
+                        <input type="text" id="searchInput" placeholder="Search leads..." 
+                            class="block w-full pl-10 pr-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-sm">
+                    </div>
+
+                    <!-- Filter Options (placeholder) -->
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-500">Filter by:</span>
+                        <select id="statusFilter" onchange="applyStatusFilter()" class="rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-sm">
+                            <option value="">All Statuses</option>
+                            <option value="New">New</option>
+                            <option value="Assigned">Assigned</option>
+                            <option value="In Process">In Process</option>
+                            <option value="Converted">Converted</option>
+                            <option value="Recycled">Recycled</option>
+                            <option value="Dead">Dead</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leads Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900 w-8">
+                                <input type="checkbox" id="selectAllLeads" class="rounded text-primary">
+                            </th>
+                            <!-- Name column (sortable) -->
+                            <th scope="col" class="py-3.5 pl-3 pr-3 text-left text-sm font-semibold text-gray-900">
+                                <button type="button" onclick="sortLeads('name')" class="group inline-flex items-center">
+                                    Name
+                                    <span id="sort-name" class="invisible group-hover:visible ml-1">
+                                        <span class="material-symbols-outlined text-gray-400 text-xs">sort</span>
+                                    </span>
+                                </button>
+                            </th>
+                            <th scope="col" class="hidden md:table-cell py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+                                Email
+                            </th>
+                            <th scope="col" class="hidden md:table-cell py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+                                Phone
+                            </th>
+                            <th scope="col" class="hidden lg:table-cell py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+                                Course Interest
+                            </th>
+                            <!-- Status column (sortable) -->
+                            <th scope="col" class="py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+                                <button type="button" onclick="sortLeads('status')" class="group inline-flex items-center">
+                                    Status
+                                    <span id="sort-status" class="invisible group-hover:visible ml-1">
+                                        <span class="material-symbols-outlined text-gray-400 text-xs">sort</span>
+                                    </span>
+                                </button>
+                            </th>
+                            <!-- Created date column (sortable) -->
+                            <th scope="col" class="hidden lg:table-cell py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+                                <button type="button" onclick="sortLeads('created_at')" class="group inline-flex items-center">
+                                    Created
+                                    <span id="sort-created_at" class="visible ml-1">
+                                        <span class="material-symbols-outlined text-primary text-xs">arrow_downward</span>
+                                    </span>
+                                </button>
+                            </th>
+                            <!-- Updated date column (sortable) -->
+                            <th scope="col" class="hidden lg:table-cell py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
+                                <button type="button" onclick="sortLeads('updated_at')" class="group inline-flex items-center">
+                                    Updated
+                                    <span id="sort-updated_at" class="invisible group-hover:visible ml-1">
+                                        <span class="material-symbols-outlined text-gray-400 text-xs">sort</span>
+                                    </span>
+                                </button>
+                            </th>
+                            <th scope="col" class="py-3.5 px-3 text-right text-sm font-semibold text-gray-900 w-20">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsTableBody" class="divide-y divide-gray-200 bg-white">
+                        <!-- Leads will be populated here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700" id="paginationInfo">
+                            Showing <span class="font-medium" id="showingStart">1</span> to 
+                            <span class="font-medium" id="showingEnd">10</span> of 
+                            <span class="font-medium" id="totalLeads">20</span> leads
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination" id="pagination">
+                            <!-- Pagination buttons will be populated here by JavaScript -->
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Lead Page -->
+    <div id="createLeadPage" class="container mx-auto px-6 lg:px-8 py-8">
+        <!-- Create Form Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-4">
+                <button onclick="closeCreateLeadPage()" class="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+                <div>
+                    <h2 id="createPageTitle" class="text-2xl font-bold text-gray-900">Create New Lead</h2>
+                    <p class="text-sm text-gray-500">Enter lead information below</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lead Form -->
+        <form id="addLeadForm" class="max-w-5xl">
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Personal Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Salutation -->
+                    <div>
+                        <label for="salutation" class="form-label">Salutation</label>
+                        <select id="salutation" class="form-input">
+                            <option value="">Select</option>
+                            <option value="Mr.">Mr.</option>
+                            <option value="Mrs.">Mrs.</option>
+                            <option value="Ms.">Ms.</option>
+                            <option value="Dr.">Dr.</option>
+                            <option value="Prof.">Prof.</option>
+                        </select>
+                    </div>
+
+                    <!-- First Name -->
+                    <div>
+                        <label for="firstName" class="form-label">First Name*</label>
+                        <input type="text" id="firstName" class="form-input" required>
+                    </div>
+
+                    <!-- Last Name -->
+                    <div>
+                        <label for="lastName" class="form-label">Last Name*</label>
+                        <input type="text" id="lastName" class="form-input" required>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="form-label">Email Address*</label>
+                        <input type="email" id="email" class="form-input" required>
+                    </div>
+
+                    <!-- Mobile Number -->
+                    <div>
+                        <label for="mobileNumber" class="form-label">Mobile Number*</label>
+                        <input type="tel" id="mobileNumber" class="form-input" required>
+                    </div>
+
+                    <!-- Alternate Mobile Number -->
+                    <div>
+                        <label for="alternateMobile" class="form-label">Alternate Mobile</label>
+                        <input type="tel" id="alternateMobile" class="form-input">
+                    </div>
+
+                    <!-- Working Status -->
+                    <div>
+                        <label for="workingStatus" class="form-label">Working Status</label>
+                        <select id="workingStatus" class="form-input">
+                            <option value="">Select</option>
+                            <option value="Student">Student</option>
+                            <option value="Employed">Employed</option>
+                            <option value="Self-Employed">Self-Employed</option>
+                            <option value="Unemployed">Unemployed</option>
+                            <option value="Retired">Retired</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Address Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Street -->
+                    <div>
+                        <label for="street" class="form-label">Street Address</label>
+                        <input type="text" id="street" class="form-input">
+                    </div>
+
+                    <!-- City -->
+                    <div>
+                        <label for="city" class="form-label">City</label>
+                        <input type="text" id="city" class="form-input">
+                    </div>
+
+                    <!-- State/Province -->
+                    <div>
+                        <label for="state" class="form-label">State/Province</label>
+                        <input type="text" id="state" class="form-input">
+                    </div>
+
+                    <!-- Postal Code -->
+                    <div>
+                        <label for="postalCode" class="form-label">Postal/ZIP Code</label>
+                        <input type="text" id="postalCode" class="form-input">
+                    </div>
+
+                    <!-- Country -->
+                    <div>
+                        <label for="country" class="form-label">Country</label>
+                        <input type="text" id="country" class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Educational Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Institute Name -->
+                    <div>
+                        <label for="instituteName" class="form-label">Institute Name</label>
+                        <input type="text" id="instituteName" class="form-input">
+                    </div>
+
+                    <!-- Qualification -->
+                    <div>
+                        <label for="qualification" class="form-label">Highest Qualification</label>
+                        <input type="text" id="qualification" class="form-input">
+                    </div>
+
+                    <!-- Course Interested In -->
+                    <div>
+                        <label for="courseInterest" class="form-label">Course Interested In</label>
+                        <input type="text" id="courseInterest" class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Lead Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Opportunity Amount -->
+                    <div>
+                        <label for="opportunityAmount" class="form-label">Opportunity Amount</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500">$</span>
+                            </div>
+                            <input type="number" id="opportunityAmount" class="form-input pl-6" min="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <!-- Lead Source -->
+                    <div>
+                        <label for="leadSource" class="form-label">Lead Source</label>
+                        <select id="leadSource" class="form-input">
+                            <option value="">Select</option>
+                            <option value="Cold Call">Cold Call</option>
+                            <option value="Website">Website</option>
+                            <option value="Email">Email</option>
+                            <option value="Referral">Referral</option>
+                            <option value="Social Media">Social Media</option>
+                            <option value="Campaign">Campaign</option>
+                            <option value="Event">Event</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Referred By -->
+                    <div>
+                        <label for="referredBy" class="form-label">Referred By</label>
+                        <input type="text" id="referredBy" class="form-input">
+                    </div>
+
+                    <!-- Lead Status -->
+                    <div>
+                        <label for="status" class="form-label">Lead Status</label>
+                        <select id="status" class="form-input">
+                            <option value="New">New</option>
+                            <option value="Assigned">Assigned</option>
+                            <option value="In Process">In Process</option>
+                            <option value="Converted">Converted</option>
+                            <option value="Recycled">Recycled</option>
+                            <option value="Dead">Dead</option>
+                        </select>
+                    </div>
+
+                    <!-- Status Description -->
+                    <div>
+                        <label for="statusDescription" class="form-label">Status Description</label>
+                        <input type="text" id="statusDescription" class="form-input">
+                    </div>
+
+                    <!-- Assigned To -->
+                    <div>
+                        <label for="assignedTo" class="form-label">Assigned To</label>
+                        <select id="assignedTo" class="form-input">
+                            <option value="">Select</option>
+                            <!-- Sales managers will be populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="mt-5">
+                    <label for="description" class="form-label">Description/Notes</label>
+                    <textarea id="description" rows="4" class="form-input"></textarea>
+                </div>
+            </div>
+
+            <!-- Form Buttons -->
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeCreateLeadPage()" class="px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-3 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark transition-colors btn-primary">
+                    <span id="saveButtonText">Save Lead</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- JavaScript Code -->
     <script>
         // Global variables
         let allLeads = [];
         let filteredLeads = [];
         let currentPage = 1;
-        let leadsPerPage = 10;
-        let totalPages = 1;
+        const leadsPerPage = 10;
         let editingLeadId = null;
         let deletingLeadId = null;
-        let isAdminUser = false;
-        let usersList = [];
 
-        // API base URL - change this in production
-        const API_BASE_URL = 'https://crm-1-ss55.onrender.com';
-
-        // Initialize the application
-        async function init() {
-            try {
-                // Check authentication
-                const token = localStorage.getItem('authToken');
-                if (!token) {
-                    window.location.href = './login.html';
-                    return;
-                }
-
-                // Get current user info
-                const currentUser = await getCurrentUser();
-                isAdminUser = currentUser.role === 'ADMIN';
-
-                // Show admin-only links
-                if (isAdminUser) {
-                    document.getElementById('salesTeamLink').classList.remove('hidden');
-                }
-
-                // Load leads data
-                await loadLeads();
-
-                // Load sales managers for the assignee dropdown
-                await loadSalesManagers();
-
-                // Setup event listeners
-                document.getElementById('statusFilter').addEventListener('change', applyFilters);
-                document.getElementById('sourceFilter').addEventListener('change', applyFilters);
-                document.getElementById('assignedToFilter').addEventListener('change', applyFilters);
-                document.getElementById('searchBox').addEventListener('input', applyFilters);
-
-                // Check for pending website leads if admin
-                if (isAdminUser) {
-                    checkSyncStatus();
-                    
-                    // Periodically check for new leads
-                    setInterval(checkSyncStatus, 5 * 60 * 1000); // Check every 5 minutes
-                }
-            } catch (error) {
-                console.error('Initialization error:', error);
-                showError('Failed to initialize application: ' + error.message);
-            }
-        }
-
-        // Get current user information
-        async function getCurrentUser() {
-            try {
-                return await apiRequest('/me');
-            } catch (error) {
-                throw new Error('Failed to get current user: ' + error.message);
-            }
-        }
-
-        // Load leads data from API
-        async function loadLeads() {
-            showLoading(true);
-            try {
-                allLeads = await apiRequest('/leads');
-                
-                // Sort leads by most recently updated
-                allLeads.sort((a, b) => {
-                    const dateA = new Date(a.updated_at || a.created_at || 0);
-                    const dateB = new Date(b.updated_at || b.created_at || 0);
-                    return dateB - dateA;
-                });
-                
-                filteredLeads = allLeads;
-                renderLeads(filteredLeads);
-            } catch (error) {
-                console.error('Error loading leads:', error);
-                showError('Failed to load leads: ' + error.message);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        // State variables for filtering and sorting
+        // State management for filters and sort
         let currentFilters = {
             createdAfter: null,
             createdBefore: null,
             updatedAfter: null,
-            updatedBefore: null
+            updatedBefore: null,
+            status: null,
+            search: null
         };
 
         let currentSort = {
-            column: 'created_at',
-            order: 'desc'
+            column: 'created_at', // Default sort column
+            order: 'desc'         // Default sort order (newest first)
         };
 
-        // Function to load leads with filters and sorting
+        // Initialize
+        async function init() {
+            try {
+                // Check authentication
+                if (!localStorage.getItem('authToken')) {
+                    window.location.href = './login.html';
+                    return;
+                }
+
+                // Check if current user is admin to show Sales Team link
+                const userInfo = await apiRequest('/user');
+                if (userInfo.role === 'ADMIN') {
+                    document.getElementById('salesTeamLink').classList.remove('hidden');
+                }
+
+                // Set up search input
+                document.getElementById('searchInput').addEventListener('keyup', function(e) {
+                    if (e.key === 'Enter') {
+                        applySearchFilter();
+                    }
+                });
+
+                // Load sales managers for assignment dropdown
+                const managers = await apiRequest('/sales-managers');
+                const assignedToSelect = document.getElementById('assignedTo');
+                
+                managers.forEach(manager => {
+                    if (manager.is_active) {
+                        const option = document.createElement('option');
+                        option.value = manager.id;
+                        option.textContent = manager.name;
+                        assignedToSelect.appendChild(option);
+                    }
+                });
+
+                // Initial load of leads
+                loadLeads();
+
+                // Check website leads sync status
+                checkSyncStatus();
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                if (error.message === 'Unauthorized') {
+                    localStorage.removeItem('authToken');
+                    window.location.href = './login.html';
+                } else {
+                    showError('Failed to initialize: ' + error.message);
+                }
+            }
+        }
+
+        // API Request Helper
+        async function apiRequest(endpoint, options = {}) {
+            const token = localStorage.getItem('authToken');
+            
+            if (!options.headers) {
+                options.headers = {};
+            }
+            
+            options.headers['Authorization'] = `Bearer ${token}`;
+            options.headers['Content-Type'] = 'application/json';
+            
+            try {
+                const response = await fetch(endpoint.startsWith('http') ? endpoint : `${window.location.origin}${endpoint}`, options);
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Unauthorized');
+                    }
+                    
+                    const errorText = await response.text();
+                    throw new Error(errorText || `API Error: ${response.status}`);
+                }
+                
+                // Check if the response is empty
+                const contentLength = response.headers.get('Content-Length');
+                if (contentLength === '0') {
+                    return null;
+                }
+                
+                try {
+                    return await response.json();
+                } catch (e) {
+                    return null; // For endpoints that don't return JSON
+                }
+            } catch (error) {
+                console.error('API Request Error:', error);
+                throw error;
+            }
+        }
+
+        // Disable button during process
+        function disableDuringProcess(button, asyncFunction) {
+            const originalText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<div class="inline-block animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div> Processing...';
+            
+            return asyncFunction()
+                .finally(() => {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                });
+        }
+
+        // Load leads with current filters and sorting
         async function loadLeads() {
             showLoading(true);
             
@@ -902,7 +918,7 @@
                 // Build query parameters
                 const params = new URLSearchParams();
                 
-                // Add filter parameters
+                // Add filter parameters if they exist
                 if (currentFilters.createdAfter) {
                     params.append('created_after', currentFilters.createdAfter);
                 }
@@ -915,33 +931,204 @@
                 if (currentFilters.updatedBefore) {
                     params.append('updated_before', currentFilters.updatedBefore);
                 }
+                if (currentFilters.status) {
+                    params.append('status', currentFilters.status);
+                }
+                if (currentFilters.search) {
+                    params.append('search', currentFilters.search);
+                }
                 
                 // Add sort parameters
                 params.append('sort_by', currentSort.column);
                 params.append('sort_order', currentSort.order);
                 
-                // Fetch leads with parameters
-                const leads = await apiRequest(`/leads?${params.toString()}`);
-                allLeads = leads;
+                // Fetch leads with parameters - using your API endpoint format
+                const url = `/leads?${params.toString()}`;
+                console.log("Fetching leads from:", url);
                 
-                // Render the leads
-                renderLeads(leads);
+                const leads = await apiRequest(url);
+                allLeads = leads; // Update the global leads array
                 
-                // Update sort indicators
+                // Render leads and update UI
+                filteredLeads = allLeads;
+                renderLeads(filteredLeads);
                 updateSortIndicators();
+                updateFilterIndicators();
                 
             } catch (error) {
                 console.error('Error loading leads:', error);
-                showError('Failed to load leads');
+                showError('Failed to load leads: ' + error.message);
             } finally {
                 showLoading(false);
             }
         }
 
-        // Function to apply date filters
+        // Function to render the leads table
+        function renderLeads(leads) {
+            const leadsTable = document.getElementById('leadsTableBody');
+            leadsTable.innerHTML = '';
+            
+            // Calculate pagination
+            const totalPages = Math.ceil(leads.length / leadsPerPage);
+            const startIndex = (currentPage - 1) * leadsPerPage;
+            const endIndex = startIndex + leadsPerPage;
+            const currentLeads = leads.slice(startIndex, endIndex);
+            
+            if (currentLeads.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `
+                    <td colspan="9" class="py-6 px-3 text-center text-gray-500">
+                        No leads found. Create a new lead to get started.
+                    </td>
+                `;
+                leadsTable.appendChild(emptyRow);
+            } else {
+                currentLeads.forEach(lead => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50 cursor-pointer';
+                    row.setAttribute('data-id', lead.id);
+                    
+                    // Format dates
+                    const createdAt = lead.created_at ? formatDate(new Date(lead.created_at)) : 'N/A';
+                    const updatedAt = lead.updated_at ? formatDate(new Date(lead.updated_at)) : 'N/A';
+                    
+                    row.innerHTML = `
+                        <td class="py-4 px-3 text-sm text-gray-500" onclick="event.stopPropagation()">
+                            <input type="checkbox" class="lead-checkbox rounded text-primary" 
+                                   data-id="${lead.id}">
+                        </td>
+                        <td class="py-4 pl-3 pr-3 text-sm">
+                            <div class="font-medium text-gray-900">
+                                ${lead.first_name} ${lead.last_name}
+                            </div>
+                        </td>
+                        <td class="hidden md:table-cell py-4 px-3 text-sm text-gray-500 max-w-xs truncate">
+                            ${lead.email_address}
+                        </td>
+                        <td class="hidden md:table-cell py-4 px-3 text-sm text-gray-500">
+                            ${lead.mobile_number}
+                        </td>
+                        <td class="hidden lg:table-cell py-4 px-3 text-sm text-gray-500 max-w-xs truncate">
+                            ${lead.course_interested_in || 'Not specified'}
+                        </td>
+                        <td class="py-4 px-3">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClasses(lead.status)}">
+                                ${lead.status || 'New'}
+                            </span>
+                        </td>
+                        <td class="hidden lg:table-cell py-4 px-3 text-sm text-gray-500">
+                            ${createdAt}
+                        </td>
+                        <td class="hidden lg:table-cell py-4 px-3 text-sm text-gray-500">
+                            ${updatedAt}
+                        </td>
+                        <td class="py-4 px-3 text-right text-sm font-medium">
+                            <div class="flex justify-end items-center space-x-2">
+                                <button class="edit-button text-gray-400 hover:text-gray-500" onclick="event.stopPropagation(); openEditLeadPage(${lead.id})">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </button>
+                                <button class="delete-button text-gray-400 hover:text-red-500" onclick="event.stopPropagation(); showDeleteModal(${lead.id})">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    
+                    // Add click event to view lead details
+                    row.addEventListener('click', () => viewLeadDetail(lead.id));
+                    
+                    leadsTable.appendChild(row);
+                });
+            }
+            
+            // Update pagination info
+            document.getElementById('showingStart').textContent = leads.length ? startIndex + 1 : 0;
+            document.getElementById('showingEnd').textContent = Math.min(endIndex, leads.length);
+            document.getElementById('totalLeads').textContent = leads.length;
+            
+            // Update pagination controls
+            updatePagination(totalPages);
+        }
+
+        // Get status badge classes
+        function getStatusClasses(status) {
+            switch(status) {
+                case 'New': return 'bg-blue-100 text-blue-800';
+                case 'Assigned': return 'bg-purple-100 text-purple-800';
+                case 'In Process': return 'bg-amber-100 text-amber-800';
+                case 'Converted': return 'bg-green-100 text-green-800';
+                case 'Recycled': return 'bg-orange-100 text-orange-800';
+                case 'Dead': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+        
+        // Update pagination controls
+        function updatePagination(totalPages) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.className = `pagination-btn ${currentPage === 1 ? 'text-gray-300' : 'text-gray-500 hover:bg-gray-50'}`;
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.innerHTML = '<span class="material-symbols-outlined">chevron_left</span>';
+            prevBtn.onclick = () => goToPage(currentPage - 1);
+            pagination.appendChild(prevBtn);
+            
+            // Page numbers
+            const maxPages = 5; // Show max 5 page buttons
+            let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+            let endPage = Math.min(totalPages, startPage + maxPages - 1);
+            
+            if (endPage - startPage + 1 < maxPages && startPage > 1) {
+                startPage = Math.max(1, endPage - maxPages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `pagination-btn ${currentPage === i ? 'active' : 'text-gray-500 hover:bg-gray-50'}`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => goToPage(i);
+                pagination.appendChild(pageBtn);
+            }
+            
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.className = `pagination-btn ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-500 hover:bg-gray-50'}`;
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.innerHTML = '<span class="material-symbols-outlined">chevron_right</span>';
+            nextBtn.onclick = () => goToPage(currentPage + 1);
+            pagination.appendChild(nextBtn);
+        }
+        
+        // Go to specific page
+        function goToPage(page) {
+            currentPage = page;
+            renderLeads(filteredLeads);
+        }
+        
+        // Apply search filter
+        function applySearchFilter() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            currentFilters.search = searchTerm || null;
+            currentPage = 1;
+            loadLeads();
+        }
+        
+        // Apply status filter
+        function applyStatusFilter() {
+            const status = document.getElementById('statusFilter').value;
+            currentFilters.status = status || null;
+            currentPage = 1;
+            loadLeads();
+        }
+
+        // Function to apply date filters from the form
         function applyFilters() {
-            // Get filter values
+            // Get values from filter inputs
             currentFilters = {
+                ...currentFilters, // Preserve other filters like status and search
                 createdAfter: document.getElementById('createdAfter').value || null,
                 createdBefore: document.getElementById('createdBefore').value || null,
                 updatedAfter: document.getElementById('updatedAfter').value || null,
@@ -957,14 +1144,15 @@
 
         // Function to clear all filters
         function clearFilters() {
-            // Reset filter inputs
+            // Reset filter form inputs
             document.getElementById('createdAfter').value = '';
             document.getElementById('createdBefore').value = '';
             document.getElementById('updatedAfter').value = '';
             document.getElementById('updatedBefore').value = '';
             
-            // Clear filter state
+            // Reset date filter state (keep other filters)
             currentFilters = {
+                ...currentFilters,
                 createdAfter: null,
                 createdBefore: null,
                 updatedAfter: null,
@@ -978,7 +1166,7 @@
             loadLeads();
         }
 
-        // Function to apply quick filters
+        // Function to apply quick filter presets
         function applyQuickFilter(preset) {
             const now = new Date();
             let startDate = null;
@@ -1004,20 +1192,26 @@
                     startDate = new Date(now.getFullYear(), now.getMonth(), 1);
                     endDate = now;
                     break;
+                    
+                case 'lastMonth':
+                    startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+                    break;
             }
             
             if (startDate && endDate) {
                 // Format dates as YYYY-MM-DD
                 const formatDate = (date) => date.toISOString().split('T')[0];
                 
-                // Update filter inputs
+                // Update filter inputs for visibility
                 document.getElementById('createdAfter').value = formatDate(startDate);
                 document.getElementById('createdBefore').value = formatDate(endDate);
                 document.getElementById('updatedAfter').value = '';
                 document.getElementById('updatedBefore').value = '';
                 
-                // Update filter state
+                // Update filter state (keep other filters)
                 currentFilters = {
+                    ...currentFilters,
                     createdAfter: formatDate(startDate),
                     createdBefore: formatDate(endDate),
                     updatedAfter: null,
@@ -1050,497 +1244,126 @@
             loadLeads();
         }
 
-        // Function to update sort indicators
+        // Function to update sort indicators in the UI
         function updateSortIndicators() {
-            // Hide all indicators
+            // Hide all indicators first
             document.querySelectorAll('[id^="sort-"]').forEach(el => {
                 el.classList.add('invisible');
                 el.classList.remove('visible');
-                el.querySelector('.material-symbols-outlined').textContent = 'sort';
-                el.querySelector('.material-symbols-outlined').classList.remove('text-primary');
-                el.querySelector('.material-symbols-outlined').classList.add('text-gray-400');
+                
+                const icon = el.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    icon.textContent = 'sort';
+                    icon.classList.remove('text-primary');
+                    icon.classList.add('text-gray-400');
+                }
             });
             
-            // Show current sort indicator
+            // Show indicator for current sort column
             const indicator = document.getElementById(`sort-${currentSort.column}`);
             if (indicator) {
                 indicator.classList.remove('invisible');
                 indicator.classList.add('visible');
                 
-                // Set appropriate icon and color
+                // Set appropriate icon and color based on sort order
                 const icon = indicator.querySelector('.material-symbols-outlined');
-                icon.textContent = currentSort.order === 'asc' ? 'arrow_upward' : 'arrow_downward';
-                icon.classList.remove('text-gray-400');
-                icon.classList.add('text-primary');
+                if (icon) {
+                    icon.textContent = currentSort.order === 'asc' ? 'arrow_upward' : 'arrow_downward';
+                    icon.classList.remove('text-gray-400');
+                    icon.classList.add('text-primary');
+                }
             }
         }
 
-        // Load sales managers for dropdown
-        async function loadSalesManagers() {
-            try {
-                const salesManagers = await apiRequest('/sales-managers');
-                
-                // Store for later use
-                usersList = salesManagers;
-                
-                // Populate assigned to filters
-                const assignedToFilter = document.getElementById('assignedToFilter');
-                const assignedToSelect = document.getElementById('assignedTo');
-                
-                // Clear existing options except the first one
-                while (assignedToFilter.options.length > 1) {
-                    assignedToFilter.remove(1);
-                }
-                
-                while (assignedToSelect.options.length > 1) {
-                    assignedToSelect.remove(1);
-                }
-                
-                // Add sales managers to dropdowns
-                for (const manager of salesManagers) {
-                    if (manager.is_active) {
-                        // For filter dropdown
-                        const filterOption = document.createElement('option');
-                        filterOption.value = manager.id;
-                        filterOption.textContent = manager.name;
-                        assignedToFilter.appendChild(filterOption);
-                        
-                        // For form dropdown
-                        const formOption = document.createElement('option');
-                        formOption.value = manager.id;
-                        formOption.textContent = manager.name;
-                        assignedToSelect.appendChild(formOption);
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading sales managers:', error);
-                showError('Failed to load sales managers: ' + error.message);
-            }
+        // Function to update filter indicators in the UI
+        function updateFilterIndicators() {
+            // Count active filters
+            const dateFiltersActive = [
+                currentFilters.createdAfter, 
+                currentFilters.createdBefore,
+                currentFilters.updatedAfter,
+                currentFilters.updatedBefore
+            ].filter(Boolean).length;
+            
+            // Update visual indicators if needed
         }
 
-        // Check for pending leads from the website
+        // Check website leads sync status
         async function checkSyncStatus() {
             try {
-                const response = await apiRequest('/api/external-leads/sync-status');
-                updateSyncBadge(response);
+                const syncStatus = await apiRequest('/external-leads/status');
+                updateSyncBadge(syncStatus);
             } catch (error) {
-                console.error('Error checking sync status:', error);
+                console.error('Failed to check sync status:', error);
             }
         }
-
-        // Update the sync badge UI based on status
-        function updateSyncBadge(statusData) {
-            const badge = document.getElementById('websiteLeadsBadge');
-            const badgeText = document.getElementById('syncBadgeText');
-            const pendingCount = document.getElementById('pendingCountBadge');
+        
+        // Update sync badge based on status
+        function updateSyncBadge(status) {
+            const badge = document.getElementById('websiteSyncBadge');
             
-            const pending = statusData.pending_leads || 0;
-            
-            // Remove all status classes
-            badge.classList.remove('has-pending', 'up-to-date', 'syncing');
-            
-            if (pending > 0) {
-                // Has pending leads - show orange badge with count
-                badge.classList.add('has-pending');
-                badgeText.textContent = `${pending} New Lead${pending > 1 ? 's' : ''}`;
-                pendingCount.textContent = pending;
-                pendingCount.classList.remove('hidden');
-                badge.title = `Click to sync ${pending} new website lead${pending > 1 ? 's' : ''}`;
-                badge.classList.remove('hidden');
-            } else if (pending === 0) {
-                // Up to date - show green badge
-                badge.classList.add('up-to-date');
-                badgeText.textContent = 'Website Leads Synced';
-                pendingCount.classList.add('hidden');
-                badge.title = 'All website leads are synced. Click to check again.';
-                // Hide the badge after a few seconds if there are no pending leads
-                setTimeout(() => {
-                    badge.classList.add('hidden');
-                }, 3000);
+            if (status.syncing) {
+                badge.className = 'sync-badge syncing';
+                badge.innerHTML = `
+                    <div class="spinner"></div>
+                    <span>Syncing...</span>
+                `;
+            } else if (status.pending_count > 0) {
+                badge.className = 'sync-badge has-pending';
+                badge.innerHTML = `
+                    <span class="badge-icon material-symbols-outlined">sync</span>
+                    <span>Website Leads</span>
+                    <span class="pending-count">${status.pending_count}</span>
+                `;
             } else {
-                // No data or error - hide badge
-                badge.classList.add('hidden');
+                badge.className = 'sync-badge up-to-date';
+                badge.innerHTML = `
+                    <span class="badge-icon material-symbols-outlined">sync</span>
+                    <span>Website Leads</span>
+                `;
             }
         }
-
-        // Main function to check and sync website leads
-        async function checkAndSyncWebsiteLeads() {
-            const badge = document.getElementById('websiteLeadsBadge');
-            const badgeText = document.getElementById('syncBadgeText');
-            const pendingCount = document.getElementById('pendingCountBadge');
-            
-            // Show syncing state
-            badge.classList.remove('has-pending', 'up-to-date');
-            badge.classList.add('syncing');
-            badgeText.innerHTML = '<span class="spinner"></span> Syncing...';
-            pendingCount.classList.add('hidden');
-            badge.style.pointerEvents = 'none'; // Disable clicking while syncing
-            
+        
+        // Sync website leads
+        async function syncWebsiteLeads() {
             try {
-                const result = await apiRequest('/api/external-leads/sync-website-leads', {
+                // Update badge to show syncing
+                const badge = document.getElementById('websiteSyncBadge');
+                badge.className = 'sync-badge syncing';
+                badge.innerHTML = `
+                    <div class="spinner"></div>
+                    <span>Syncing...</span>
+                `;
+                
+                // Call the sync endpoint
+                const result = await apiRequest('/external-leads/sync-website-leads', {
                     method: 'POST'
                 });
                 
-                // Show success toast
-                showToast(
-                    result.synced_count > 0 
-                        ? `Synced ${result.synced_count} new lead${result.synced_count > 1 ? 's' : ''} from website!`
-                        : 'No new leads to sync', 
-                    'success'
-                );
-                
-                // Reload leads list if any were synced
-                if (result.synced_count > 0) {
-                    setTimeout(() => {
-                        loadLeads(); // Reload leads with the new data
-                    }, 1000);
-                }
-                
-                // Update badge to show up-to-date
-                badge.classList.remove('syncing');
-                badge.classList.add('up-to-date');
-                badgeText.textContent = 'Website Leads Synced';
-                
-                // Check status again after 2 seconds
-                setTimeout(checkSyncStatus, 2000);
-                
-            } catch (error) {
-                console.error('Error syncing leads:', error);
-                
-                // Show error toast
-                showToast('Failed to sync leads. Please try again.', 'error');
-                
-                // Revert badge state
-                badge.classList.remove('syncing');
-                checkSyncStatus(); // Check status to restore proper state
-                
-            } finally {
-                badge.style.pointerEvents = 'auto'; // Re-enable clicking
-            }
-        }
-
-        // Make API request with authentication
-        async function apiRequest(endpoint, options = {}) {
-            const token = localStorage.getItem('authToken');
-            
-            if (!token) {
-                throw new Error('Not authenticated');
-            }
-            
-            const url = API_BASE_URL + endpoint;
-            
-            const headers = {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                ...options.headers
-            };
-            
-            try {
-                const response = await fetch(url, {
-                    ...options,
-                    headers
-                });
-                
-                if (response.status === 401) {
-                    localStorage.removeItem('authToken');
-                    window.location.href = './login.html';
-                    return null;
-                }
-                
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.detail || `Server returned ${response.status}`);
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error(`API request error (${endpoint}):`, error);
-                throw error;
-            }
-        }
-
-        // Render leads table
-        function renderLeads(leads) {
-            const tbody = document.getElementById('leadsTableBody');
-            const startIndex = (currentPage - 1) * leadsPerPage;
-            const endIndex = Math.min(startIndex + leadsPerPage, leads.length);
-            const paginatedLeads = leads.slice(startIndex, endIndex);
-            
-            if (leads.length === 0) {
-                tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="px-6 py-12 text-center">
-                        <span class="material-symbols-outlined text-gray-300 text-6xl">folder_open</span>
-                        <p class="text-gray-500 font-medium mt-2">No leads found</p>
-                        <p class="text-gray-400 text-sm mt-1">Create your first lead to get started</p>
-                    </td>
-                </tr>`;
-                
-                updatePaginationUI(0, 0, 0);
-                return;
-            }
-            
-            let tableContent = '';
-            
-            for (const lead of paginatedLeads) {
-                // Get status color class
-                const statusColorMap = {
-                    'New': 'bg-blue-100 text-blue-800',
-                    'Assigned': 'bg-yellow-100 text-yellow-800',
-                    'In Process': 'bg-orange-100 text-orange-800',
-                    'Converted': 'bg-green-100 text-green-800',
-                    'Recycled': 'bg-purple-100 text-purple-800',
-                    'Dead': 'bg-gray-100 text-gray-800'
-                };
-                
-                const statusClass = statusColorMap[lead.status] || 'bg-gray-100 text-gray-800';
-                const fullName = [lead.salutation, lead.first_name, lead.last_name].filter(Boolean).join(' ');
-                
-                // Get assigned user name
-                let assignedToName = 'Unassigned';
-                if (lead.assigned_to) {
-                    const assignedUser = usersList.find(user => user.id === lead.assigned_to);
-                    if (assignedUser) {
-                        assignedToName = assignedUser.name;
-                    }
-                }
-                
-                tableContent += `
-                <tr class="hover:bg-gray-50 cursor-pointer group clickable-row" onclick="viewLeadDetail(${lead.id})">
-                    <td class="px-6 py-4">
-                        <div class="text-sm font-medium text-gray-900">${fullName}</div>
-                        <div class="text-xs text-gray-500 mt-0.5">${lead.working_status || ''}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">${lead.email_address || ''}</div>
-                        <div class="text-xs text-gray-500 mt-0.5">${lead.mobile_number || ''}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">${lead.course_interested_in || 'Not specified'}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="text-sm text-gray-900">${lead.lead_source || 'Unknown'}</div>
-                        <div class="text-xs text-gray-500 mt-0.5">${assignedToName}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-medium ${statusClass}">
-                            ${lead.status || 'New'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <div class="flex items-center justify-end gap-3">
-                            <button onclick="event.stopPropagation(); viewLeadDetail(${lead.id})" class="p-2 text-gray-500 hover:text-primary hover:bg-blue-100 rounded transition-colors" title="View Details">
-                                <span class="material-symbols-outlined action-icon">visibility</span>
-                            </button>
-                            <button onclick="event.stopPropagation(); openEditLeadPage(${lead.id})" class="p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded transition-colors" title="Edit">
-                                <span class="material-symbols-outlined action-icon">edit</span>
-                            </button>
-                            <button onclick="event.stopPropagation(); showDeleteModal(${lead.id})" class="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded transition-colors" title="Delete">
-                                <span class="material-symbols-outlined action-icon">delete</span>
-                            </button>
-                        </div>
-                        <div class="hidden group-hover:block text-xs text-blue-500 mt-1">Click to view details</div>
-                    </td>
-                </tr>`;
-            }
-            
-            tbody.innerHTML = tableContent;
-            updatePaginationUI(startIndex, endIndex, leads.length);
-        }
-
-        // Update pagination UI
-        function updatePaginationUI(startIndex, endIndex, totalItems) {
-            document.getElementById('startIndex').textContent = totalItems > 0 ? startIndex + 1 : 0;
-            document.getElementById('endIndex').textContent = endIndex;
-            document.getElementById('totalItems').textContent = totalItems;
-            document.getElementById('filteredCount').textContent = totalItems;
-            
-            // Update pagination buttons
-            totalPages = Math.ceil(totalItems / leadsPerPage);
-            const pageButtons = document.getElementById('pageButtons');
-            pageButtons.innerHTML = '';
-            
-            // Calculate visible page range
-            let startPage = Math.max(1, currentPage - 2);
-            let endPage = Math.min(totalPages, startPage + 4);
-            
-            // Adjust if we're near the end
-            if (endPage - startPage < 4) {
-                startPage = Math.max(1, endPage - 4);
-            }
-            
-            // Create page buttons
-            for (let i = startPage; i <= endPage; i++) {
-                const button = document.createElement('button');
-                button.textContent = i;
-                button.className = `pagination-btn ${i === currentPage ? 'active' : 'text-gray-700 border border-gray-300'}`;
-                button.addEventListener('click', () => goToPage(i));
-                pageButtons.appendChild(button);
-            }
-            
-            // Disable/enable prev/next buttons
-            document.getElementById('firstBtn').disabled = currentPage === 1;
-            document.getElementById('prevBtn').disabled = currentPage === 1;
-            document.getElementById('nextBtn').disabled = currentPage === totalPages || totalPages === 0;
-            document.getElementById('lastBtn').disabled = currentPage === totalPages || totalPages === 0;
-        }
-
-        // Go to specific page
-        function goToPage(page) {
-            if (page < 1 || page > totalPages || page === currentPage) {
-                return;
-            }
-            
-            currentPage = page;
-            renderLeads(filteredLeads);
-            window.scrollTo(0, 0);
-        }
-
-        // Apply filters
-        function applyFilters() {
-            const statusFilter = document.getElementById('statusFilter').value;
-            const sourceFilter = document.getElementById('sourceFilter').value;
-            const assignedToFilter = document.getElementById('assignedToFilter').value;
-            const searchTerm = document.getElementById('searchBox').value.trim().toLowerCase();
-            
-            let filtered = [...allLeads];
-            
-            // Apply status filter
-            if (statusFilter !== 'all') {
-                filtered = filtered.filter(lead => lead.status === statusFilter);
-            }
-            
-            // Apply source filter
-            if (sourceFilter !== 'all') {
-                filtered = filtered.filter(lead => lead.lead_source === sourceFilter);
-            }
-            
-            // Apply assigned to filter
-            if (assignedToFilter !== 'all') {
-                filtered = filtered.filter(lead => lead.assigned_to === parseInt(assignedToFilter));
-            }
-            
-            // Apply search filter
-            if (searchTerm) {
-                filtered = filtered.filter(lead => 
-                    (lead.first_name && lead.first_name.toLowerCase().includes(searchTerm)) ||
-                    (lead.last_name && lead.last_name.toLowerCase().includes(searchTerm)) ||
-                    (lead.email_address && lead.email_address.toLowerCase().includes(searchTerm)) ||
-                    (lead.mobile_number && lead.mobile_number.includes(searchTerm))
-                );
-            }
-            
-            // Update filter badge count
-            updateFilterBadgeCount();
-            
-            // Reset to first page and render
-            currentPage = 1;
-            filteredLeads = filtered;
-            renderLeads(filtered);
-        }
-
-        // Update filter badge count
-        function updateFilterBadgeCount() {
-            const statusFilter = document.getElementById('statusFilter').value;
-            const sourceFilter = document.getElementById('sourceFilter').value;
-            const assignedToFilter = document.getElementById('assignedToFilter').value;
-            const searchTerm = document.getElementById('searchBox').value.trim();
-            
-            const filterBadges = document.getElementById('filterBadges');
-            filterBadges.innerHTML = '';
-            
-            let activeFilters = 0;
-            
-            if (statusFilter !== 'all') {
-                addFilterBadge('Status: ' + statusFilter);
-                activeFilters++;
-            }
-            
-            if (sourceFilter !== 'all') {
-                addFilterBadge('Source: ' + sourceFilter);
-                activeFilters++;
-            }
-            
-            if (assignedToFilter !== 'all') {
-                const assignedName = document.getElementById('assignedToFilter').options[document.getElementById('assignedToFilter').selectedIndex].text;
-                addFilterBadge('Assigned to: ' + assignedName);
-                activeFilters++;
-            }
-            
-            if (searchTerm) {
-                addFilterBadge('Search: ' + searchTerm);
-                activeFilters++;
-            }
-            
-            filterBadges.classList.toggle('hidden', activeFilters === 0);
-        }
-
-        // Add filter badge
-        function addFilterBadge(text) {
-            const badge = document.createElement('span');
-            badge.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800';
-            badge.textContent = text;
-            document.getElementById('filterBadges').appendChild(badge);
-        }
-
-        // Clear all filters
-        function clearFilters() {
-            document.getElementById('statusFilter').value = 'all';
-            document.getElementById('sourceFilter').value = 'all';
-            document.getElementById('assignedToFilter').value = 'all';
-            document.getElementById('searchBox').value = '';
-            
-            // Reset filter badges
-            document.getElementById('filterBadges').innerHTML = '';
-            document.getElementById('filterBadges').classList.add('hidden');
-            
-            // Apply empty filters
-            currentPage = 1;
-            filteredLeads = allLeads;
-            renderLeads(filteredLeads);
-        }
-
-        // Helper function to disable a button during a process
-        function disableDuringProcess(button, processFunction) {
-            if (button.disabled) return;
-            
-            const originalText = button.innerHTML;
-            button.disabled = true;
-            button.innerHTML = '<div class="inline-block animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div> Processing...';
-            
-            try {
-                const result = processFunction();
-                
-                if (result instanceof Promise) {
-                    result.finally(() => {
-                        button.disabled = false;
-                        button.innerHTML = originalText;
-                    });
+                // Show success message
+                if (result && result.synced_count) {
+                    showSuccess(`Synced ${result.synced_count} leads from website`);
+                    
+                    // Refresh the leads list
+                    loadLeads();
                 } else {
-                    // If not a promise, re-enable immediately
-                    button.disabled = false;
-                    button.innerHTML = originalText;
+                    showSuccess('Website leads are up to date');
                 }
                 
-                return result;
+                // Check sync status again
+                checkSyncStatus();
+                
             } catch (error) {
-                // In case of error, re-enable the button
-                button.disabled = false;
-                button.innerHTML = originalText;
-                throw error;
+                console.error('Sync failed:', error);
+                showError('Failed to sync website leads: ' + error.message);
+                
+                // Reset badge
+                checkSyncStatus();
             }
         }
 
         function viewLeadDetail(leadId) {
-            // Store in browser history that we're viewing this lead
-            const currentUrl = new URL(window.location.href);
-            const baseUrl = currentUrl.origin + currentUrl.pathname.replace('leads.html', '');
-            
-            // Navigate to the lead detail page with the lead ID
-            window.location.href = `${baseUrl}lead-detail.html?id=${leadId}`;
-            
-            // You could also pass additional state if needed using sessionStorage
-            // sessionStorage.setItem('returnToLeadsPage', 'true');
+            window.location.href = `lead-detail.html?id=${leadId}`;
         }
 
         function openCreateLeadPage() {
@@ -1657,8 +1480,7 @@
                 }
 
                 closeCreateLeadPage();
-                renderLeads(allLeads);
-                applyFilters();
+                loadLeads(); // Load with current filters and sorting
             } catch (error) {
                 showError((editingLeadId ? 'Failed to update' : 'Failed to create') + ' lead: ' + error.message);
             }
