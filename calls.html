@@ -494,39 +494,66 @@
         }
     async function loadData() {
         try {
-            // Get current user info first
-            await initializeNavigation();
-            currentUser = await apiRequest('/me');
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('callsContainer').classList.add('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('errorMessage').classList.add('hidden');
             
-            // Load users for filter dropdown - single API call
-            const users = await apiRequest('/sales-managers');
-            allUsers = Array.isArray(users) ? users : [];
+            // First get the current user
+            const currentUser = await apiRequest('/me');
             
-            // Setup manager filter dropdown
-            const managerFilter = document.getElementById('managerFilter');
-            const managerFilterContainer = managerFilter.closest('.flex-1');
+            // Get all users to lookup names
+            const allUsers = await apiRequest('/sales-managers');
             
-            if (currentUser.role === 'ADMIN') {
-                managerFilter.innerHTML = '<option value="">All Sales Managers</option>';
-                allUsers.forEach(user => {
-                    const option = document.createElement('option');
-                    option.value = user.id;
-                    option.textContent = user.name;
-                    managerFilter.appendChild(option);
-                });
-            } else {
-                if (managerFilterContainer) {
-                    managerFilterContainer.style.display = 'none';
+            // Check if google integration is active
+            if (currentUser.role === 'ADMIN' || currentUser.role === 'SALES_MANAGER') {
+                try {
+                    const googleStatus = await apiRequest('/google-workspace/status');
+                    if (googleStatus.connected) {
+                        document.getElementById('googleIntegrationBadge').classList.remove('hidden');
+                        
+                        if (googleStatus.needs_reauth) {
+                            document.getElementById('googleIntegrationBadge').className = 
+                                'inline-block px-3 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800';
+                            document.getElementById('googleIntegrationBadge').textContent = 'Google: Needs Reauthorization';
+                        } else {
+                            document.getElementById('googleIntegrationBadge').className = 
+                                'inline-block px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking Google integration:', error);
                 }
             }
             
             // Load leads based on user role
             let leads;
+            let leadsResponse;
+            
             if (currentUser.role === 'ADMIN') {
-                leads = await apiRequest('/leads');
+                leadsResponse = await apiRequest('/leads');
             } else {
-                const allLeadsData = await apiRequest('/leads');
-                leads = allLeadsData.filter(lead => lead.assigned_to === currentUser.id);
+                // For non-admin users, we still need to get all leads first
+                leadsResponse = await apiRequest('/leads');
+            }
+            
+            // Handle the specific response format from the API
+            if (leadsResponse && typeof leadsResponse === 'object' && Array.isArray(leadsResponse.leads)) {
+                // The API returns an object with a 'leads' array property
+                leads = leadsResponse.leads;
+                console.log(`Successfully loaded ${leads.length} leads out of ${leadsResponse.total}`);
+            } else if (Array.isArray(leadsResponse)) {
+                // In case the API directly returns an array
+                leads = leadsResponse;
+            } else {
+                // Fallback for any other response format
+                console.error('API returned leads in unexpected format:', leadsResponse);
+                leads = [];
+            }
+            
+            // Filter leads for non-admin users
+            if (currentUser.role !== 'ADMIN') {
+                leads = leads.filter(lead => lead.assigned_to === currentUser.id);
             }
             
             allLeads = leads;
@@ -569,14 +596,14 @@
             } else {
                 document.getElementById('callsContainer').classList.remove('hidden');
             }
-        } catch (err) {
-            console.error(err);
-            document.getElementById('loading').innerHTML = `
-                <span class="material-symbols-outlined text-red-500 text-6xl">error</span>
-                <p class="text-red-600 mt-4">Failed to load calls.</p>
-            `;
+        } catch (error) {
+            console.error('Error loading data:', error);
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('errorMessage').classList.remove('hidden');
+            document.getElementById('errorText').textContent = `Error loading data: ${error.message || error}`;
         }
     }
+
     function renderCalls(calls) {
         const tbody = document.getElementById('callsTableBody');
         tbody.innerHTML = '';

@@ -268,22 +268,67 @@
 
     async function loadData() {
         try {
-            await initializeNavigation();
+            // Show loading indicators
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('errorMessage').classList.add('hidden');
+            document.getElementById('emailsContainer').classList.add('hidden');
             
-            // Get current user info first
-            currentUser = await apiRequest('/me');
+            // First get the current user
+            const currentUser = await apiRequest('/me');
             
-            // Load users for filter dropdown - single API call
-            const users = await apiRequest('/sales-managers');
-            allUsers = users || [];
+            // Get all users for manager filter
+            allUsers = await apiRequest('/sales-managers');
+            
+            // Check if google integration is active
+            if (currentUser.role === 'ADMIN' || currentUser.role === 'SALES_MANAGER') {
+                try {
+                    const googleStatus = await apiRequest('/google-workspace/status');
+                    if (googleStatus.connected) {
+                        document.getElementById('googleIntegrationBadge').classList.remove('hidden');
+                        
+                        if (googleStatus.needs_reauth) {
+                            document.getElementById('googleIntegrationBadge').className = 
+                                'inline-block px-3 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800';
+                            document.getElementById('googleIntegrationBadge').textContent = 'Google: Needs Reauthorization';
+                        } else {
+                            document.getElementById('googleIntegrationBadge').className = 
+                                'inline-block px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking Google integration:', error);
+                }
+            }
             
             // Load leads based on user role
             let leads;
+            let leadsResponse;
+            
             if (currentUser.role === 'ADMIN') {
-                leads = await apiRequest('/leads');
+                leadsResponse = await apiRequest('/leads');
             } else {
-                const allLeadsData = await apiRequest('/leads');
-                leads = allLeadsData.filter(lead => lead.assigned_to === currentUser.id);
+                // For non-admin users, we still need to get all leads first
+                leadsResponse = await apiRequest('/leads');
+            }
+            
+            // Handle the specific response format from the API
+            if (leadsResponse && typeof leadsResponse === 'object' && Array.isArray(leadsResponse.leads)) {
+                // The API returns an object with a 'leads' array property
+                leads = leadsResponse.leads;
+                console.log(`Successfully loaded ${leads.length} leads out of ${leadsResponse.total}`);
+            } else if (Array.isArray(leadsResponse)) {
+                // In case the API directly returns an array
+                leads = leadsResponse;
+            } else {
+                // Fallback for any other response format
+                console.error('API returned leads in unexpected format:', leadsResponse);
+                leads = [];
+            }
+            
+            // Filter leads for non-admin users
+            if (currentUser.role !== 'ADMIN') {
+                leads = leads.filter(lead => lead.assigned_to === currentUser.id);
             }
             
             allLeads = leads;
@@ -319,29 +364,51 @@
             const managerFilter = document.getElementById('managerFilter');
             const managerFilterContainer = managerFilter.closest('.flex-1');
             
+            // Only show manager filter for admin users
             if (currentUser.role === 'ADMIN') {
-                users.forEach(user => {
-                    const option = document.createElement('option');
-                    option.value = user.id;
-                    option.textContent = user.name;
-                    managerFilter.appendChild(option);
-                });
-            } else {
-                // Hide the manager filter for non-admins
-                if (managerFilterContainer) {
-                    managerFilterContainer.style.display = 'none';
+                managerFilterContainer.classList.remove('hidden');
+                
+                // Clear existing options except the first one
+                while (managerFilter.options.length > 1) {
+                    managerFilter.remove(1);
                 }
+                
+                // Add all managers to dropdown
+                for (const user of allUsers) {
+                    if (user.role === 'SALES_MANAGER') {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = user.name;
+                        managerFilter.appendChild(option);
+                    }
+                }
+            } else {
+                managerFilterContainer.classList.add('hidden');
             }
-
-            updateStats();
-            renderEmails(allEmails);
+            
+            // Sort emails by date (newest first by default)
+            allEmails.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            
+            // Apply filters and render
+            filterEmails();
+            
+            // Hide loading indicator
+            document.getElementById('loading').classList.add('hidden');
+            
+            // Show appropriate content
+            if (allEmails.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+            } else {
+                document.getElementById('emailsContainer').classList.remove('hidden');
+            }
         } catch (error) {
             console.error('Error loading data:', error);
-        } finally {
             document.getElementById('loading').classList.add('hidden');
-            document.getElementById('emailsContainer').classList.remove('hidden');
+            document.getElementById('errorMessage').classList.remove('hidden');
+            document.getElementById('errorText').textContent = `Error loading data: ${error.message || error}`;
         }
     }
+
     function updateStats() {
         const totalSent = allEmails.length;
         const withAttachments = allEmails.filter(e => e.attachments > 0).length;
