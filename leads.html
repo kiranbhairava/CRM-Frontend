@@ -737,19 +737,17 @@
                 hideError();
                 const response = await apiRequest('/leads');
                 
-                // Make sure allLeads is always an array to prevent "sort is not a function" error
-                if (Array.isArray(response)) {
+                // Handle the specific response format from the API
+                if (response && typeof response === 'object' && Array.isArray(response.leads)) {
+                    // The API returns an object with a 'leads' array property
+                    console.log(`Successfully loaded ${response.leads.length} leads out of ${response.total}`);
+                    allLeads = response.leads;
+                } else if (Array.isArray(response)) {
+                    // In case the API directly returns an array
                     allLeads = response;
-                } else if (response && typeof response === 'object') {
-                    // If response is an object but not an array, try to convert to array if possible
-                    if (response.data && Array.isArray(response.data)) {
-                        allLeads = response.data;
-                    } else {
-                        console.error('API returned leads in unexpected format:', response);
-                        allLeads = []; // Fallback to empty array
-                    }
                 } else {
-                    // Handle null, undefined, or other non-array responses
+                    // Fallback for any other response format
+                    console.error('API returned leads in unexpected format:', response);
                     allLeads = [];
                 }
                 
@@ -762,6 +760,7 @@
                 showLoading(false);
             }
         }
+
         // Load sales managers for dropdown
         async function loadSalesManagers() {
             try {
