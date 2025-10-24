@@ -732,27 +732,36 @@
 
         // Load leads data from API
         async function loadLeads() {
-            showLoading(true);
             try {
-                allLeads = await apiRequest('/leads');
+                showLoading(true);
+                hideError();
+                const response = await apiRequest('/leads');
                 
-                // Sort leads by most recently updated
-                allLeads.sort((a, b) => {
-                    const dateA = new Date(a.updated_at || a.created_at || 0);
-                    const dateB = new Date(b.updated_at || b.created_at || 0);
-                    return dateB - dateA;
-                });
+                // Make sure allLeads is always an array to prevent "sort is not a function" error
+                if (Array.isArray(response)) {
+                    allLeads = response;
+                } else if (response && typeof response === 'object') {
+                    // If response is an object but not an array, try to convert to array if possible
+                    if (response.data && Array.isArray(response.data)) {
+                        allLeads = response.data;
+                    } else {
+                        console.error('API returned leads in unexpected format:', response);
+                        allLeads = []; // Fallback to empty array
+                    }
+                } else {
+                    // Handle null, undefined, or other non-array responses
+                    allLeads = [];
+                }
                 
-                filteredLeads = allLeads;
-                renderLeads(filteredLeads);
+                filteredLeads = [...allLeads];
+                renderLeads(allLeads);
             } catch (error) {
-                console.error('Error loading leads:', error);
                 showError('Failed to load leads: ' + error.message);
+                console.error('Error loading leads:', error);
             } finally {
                 showLoading(false);
             }
         }
-
         // Load sales managers for dropdown
         async function loadSalesManagers() {
             try {
