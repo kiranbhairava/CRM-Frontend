@@ -63,7 +63,7 @@
         .sync-badge.up-to-date {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3); /* Add subtle shadow */
         }
 
         .sync-badge .badge-icon {
@@ -137,13 +137,7 @@
         }
 
         .material-symbols-outlined {
-            font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
-        }
-        
-        /* Action icons in table rows */
-        .action-icon {
-            font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
-            font-size: 20px;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
         .btn-primary { 
             background: linear-gradient(135deg,#1173d4 0%,#0d5bb5 100%); 
@@ -282,6 +276,9 @@
             <span class="material-symbols-outlined mr-2">error</span>
             <span id="errorText" class="block sm:inline"></span>
         </div>
+        <button type="button" class="absolute top-0 bottom-0 right-0 p-3" onclick="hideError()">
+            <span class="material-symbols-outlined text-red-400">close</span>
+        </button>
     </div>
 
     <!-- Toast Template (hidden) -->
@@ -350,7 +347,7 @@
             </div>
         </div>
 
-        <!-- Timestamp Filter Panel - NEW! -->
+        <!-- NEW: Timestamp Filter Panel -->
         <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
             <div class="mb-3">
                 <h3 class="text-lg font-bold text-gray-900">Filter Leads</h3>
@@ -436,7 +433,7 @@
                 <div class="flex ml-auto gap-2">
                     <button type="button" onclick="clearFilters()" 
                         class="px-4 py-2 text-sm font-medium rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors">
-                        Clear
+                        Clear Filters
                     </button>
                     <button type="button" onclick="applyFilters()" 
                         class="px-4 py-2 text-sm font-medium rounded-md bg-primary text-white hover:bg-primary-dark transition-colors">
@@ -460,9 +457,9 @@
                             class="block w-full pl-10 pr-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-sm">
                     </div>
 
-                    <!-- Filter Options (placeholder) -->
+                    <!-- Filter Options -->
                     <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-500">Filter by:</span>
+                        <span class="text-sm text-gray-500">Filter by status:</span>
                         <select id="statusFilter" onchange="applyStatusFilter()" class="rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary text-sm">
                             <option value="">All Statuses</option>
                             <option value="New">New</option>
@@ -511,7 +508,7 @@
                                     </span>
                                 </button>
                             </th>
-                            <!-- Created date column (sortable) -->
+                            <!-- Created date column (sortable) - NEW! -->
                             <th scope="col" class="hidden lg:table-cell py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
                                 <button type="button" onclick="sortLeads('created_at')" class="group inline-flex items-center">
                                     Created
@@ -520,7 +517,7 @@
                                     </span>
                                 </button>
                             </th>
-                            <!-- Updated date column (sortable) -->
+                            <!-- Updated date column (sortable) - NEW! -->
                             <th scope="col" class="hidden lg:table-cell py-3.5 px-3 text-left text-sm font-semibold text-gray-900">
                                 <button type="button" onclick="sortLeads('updated_at')" class="group inline-flex items-center">
                                     Updated
@@ -789,8 +786,9 @@
         const leadsPerPage = 10;
         let editingLeadId = null;
         let deletingLeadId = null;
+        const BASE_URL = 'https://crm-1-ss55.onrender.com'; // Base URL
 
-        // State management for filters and sort
+        // NEW: State management for filters and sort
         let currentFilters = {
             createdAfter: null,
             createdBefore: null,
@@ -815,7 +813,7 @@
                 }
 
                 // Check if current user is admin to show Sales Team link
-                const userInfo = await apiRequest('/user');
+                const userInfo = await apiRequest('/me');
                 if (userInfo.role === 'ADMIN') {
                     document.getElementById('salesTeamLink').classList.remove('hidden');
                 }
@@ -840,6 +838,14 @@
                     }
                 });
 
+                // Set up Select All checkbox
+                document.getElementById('selectAllLeads').addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    document.querySelectorAll('.lead-checkbox').forEach(checkbox => {
+                        checkbox.checked = isChecked;
+                    });
+                });
+
                 // Initial load of leads
                 loadLeads();
 
@@ -857,7 +863,7 @@
             }
         }
 
-        // API Request Helper
+        // API Request Helper with BASE_URL
         async function apiRequest(endpoint, options = {}) {
             const token = localStorage.getItem('authToken');
             
@@ -869,7 +875,11 @@
             options.headers['Content-Type'] = 'application/json';
             
             try {
-                const response = await fetch(endpoint.startsWith('http') ? endpoint : `${window.location.origin}${endpoint}`, options);
+                // Use BASE_URL for all requests
+                const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
+                console.log("API Request to:", url);
+                
+                const response = await fetch(url, options);
                 
                 if (!response.ok) {
                     if (response.status === 401) {
@@ -897,20 +907,37 @@
             }
         }
 
-        // Disable button during process
-        function disableDuringProcess(button, asyncFunction) {
+        // Disable button during async process
+        function disableDuringProcess(button, process) {
             const originalText = button.innerHTML;
             button.disabled = true;
             button.innerHTML = '<div class="inline-block animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div> Processing...';
             
-            return asyncFunction()
-                .finally(() => {
+            try {
+                const result = process();
+                
+                if (result instanceof Promise) {
+                    // If it's a promise, wait for it to resolve
+                    return result.finally(() => {
+                        button.disabled = false;
+                        button.innerHTML = originalText;
+                    });
+                } else {
+                    // If not a promise, re-enable immediately
                     button.disabled = false;
                     button.innerHTML = originalText;
-                });
+                }
+                
+                return result;
+            } catch (error) {
+                // In case of error, re-enable the button
+                button.disabled = false;
+                button.innerHTML = originalText;
+                throw error;
+            }
         }
 
-        // Load leads with current filters and sorting
+        // NEW: Load leads with filters and sorting
         async function loadLeads() {
             showLoading(true);
             
@@ -942,18 +969,13 @@
                 params.append('sort_by', currentSort.column);
                 params.append('sort_order', currentSort.order);
                 
-                // Fetch leads with parameters - using your API endpoint format
-                const url = `/leads?${params.toString()}`;
-                console.log("Fetching leads from:", url);
+                // Fetch leads with parameters
+                console.log("Fetching leads with params:", params.toString());
+                const leads = await apiRequest(`/leads?${params.toString()}`);
                 
-                const leads = await apiRequest(url);
-                allLeads = leads; // Update the global leads array
-                
-                // Render leads and update UI
-                filteredLeads = allLeads;
-                renderLeads(filteredLeads);
+                allLeads = leads;
+                renderLeads(allLeads);
                 updateSortIndicators();
-                updateFilterIndicators();
                 
             } catch (error) {
                 console.error('Error loading leads:', error);
@@ -963,177 +985,160 @@
             }
         }
 
-        // Function to render the leads table
         function renderLeads(leads) {
-            const leadsTable = document.getElementById('leadsTableBody');
-            leadsTable.innerHTML = '';
+            filteredLeads = leads;
+            const totalPages = Math.ceil(filteredLeads.length / leadsPerPage);
             
-            // Calculate pagination
-            const totalPages = Math.ceil(leads.length / leadsPerPage);
+            if (currentPage > totalPages && totalPages > 0) {
+                currentPage = 1;
+            }
+            
             const startIndex = (currentPage - 1) * leadsPerPage;
-            const endIndex = startIndex + leadsPerPage;
-            const currentLeads = leads.slice(startIndex, endIndex);
+            const endIndex = Math.min(startIndex + leadsPerPage, filteredLeads.length);
+            const paginatedLeads = filteredLeads.slice(startIndex, endIndex);
             
-            if (currentLeads.length === 0) {
-                const emptyRow = document.createElement('tr');
-                emptyRow.innerHTML = `
-                    <td colspan="9" class="py-6 px-3 text-center text-gray-500">
-                        No leads found. Create a new lead to get started.
+            const tbody = document.getElementById('leadsTableBody');
+            tbody.innerHTML = '';
+            
+            if (!paginatedLeads || paginatedLeads.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="px-6 py-12 text-center">
+                            <span class="material-symbols-outlined text-gray-300 text-6xl">folder_open</span>
+                            <p class="text-gray-500 font-medium mt-2">No leads found</p>
+                            <p class="text-gray-400 text-sm mt-1">Create your first lead to get started</p>
+                        </td>
+                    </tr>`;
+                updatePaginationUI(0, 0, 0);
+                return;
+            }
+
+            const statusColors = {
+                'New': 'bg-blue-100 text-blue-800',
+                'Assigned': 'bg-yellow-100 text-yellow-800',
+                'In Process': 'bg-orange-100 text-orange-800',
+                'Converted': 'bg-green-100 text-green-800',
+                'Recycled': 'bg-indigo-100 text-indigo-800',
+                'Dead': 'bg-red-100 text-red-800'
+            };
+            
+            paginatedLeads.forEach(lead => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.onclick = () => viewLeadDetail(lead.id);
+                
+                const name = `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'Unnamed Lead';
+                const statusClass = statusColors[lead.status || 'New'] || 'bg-gray-100 text-gray-800';
+                
+                // Format dates for display
+                const createdAt = lead.created_at ? formatDate(new Date(lead.created_at)) : 'N/A';
+                const updatedAt = lead.updated_at ? formatDate(new Date(lead.updated_at)) : 'N/A';
+                
+                row.innerHTML = `
+                    <td class="py-4 px-3 whitespace-nowrap" onclick="event.stopPropagation()">
+                        <input type="checkbox" class="lead-checkbox rounded text-primary" data-id="${lead.id}">
+                    </td>
+                    <td class="py-4 px-3 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${name}</div>
+                    </td>
+                    <td class="hidden md:table-cell py-4 px-3 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">${lead.email_address || 'N/A'}</div>
+                    </td>
+                    <td class="hidden md:table-cell py-4 px-3 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">${lead.mobile_number || 'N/A'}</div>
+                    </td>
+                    <td class="hidden lg:table-cell py-4 px-3 whitespace-nowrap">
+                        <div class="text-sm text-gray-500 max-w-xs truncate">${lead.course_interested_in || 'N/A'}</div>
+                    </td>
+                    <td class="py-4 px-3 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                            ${lead.status || 'New'}
+                        </span>
+                    </td>
+                    <td class="hidden lg:table-cell py-4 px-3 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">${createdAt}</div>
+                    </td>
+                    <td class="hidden lg:table-cell py-4 px-3 whitespace-nowrap">
+                        <div class="text-sm text-gray-500">${updatedAt}</div>
+                    </td>
+                    <td class="py-4 px-3 whitespace-nowrap text-right" onclick="event.stopPropagation()">
+                        <div class="flex items-center justify-end space-x-3">
+                            <button class="p-1 text-gray-400 hover:text-primary" onclick="event.stopPropagation(); openEditLeadPage(${lead.id})">
+                                <span class="material-symbols-outlined">edit</span>
+                            </button>
+                            <button class="p-1 text-gray-400 hover:text-red-600" onclick="event.stopPropagation(); showDeleteModal(${lead.id})">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </div>
                     </td>
                 `;
-                leadsTable.appendChild(emptyRow);
-            } else {
-                currentLeads.forEach(lead => {
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50 cursor-pointer';
-                    row.setAttribute('data-id', lead.id);
-                    
-                    // Format dates
-                    const createdAt = lead.created_at ? formatDate(new Date(lead.created_at)) : 'N/A';
-                    const updatedAt = lead.updated_at ? formatDate(new Date(lead.updated_at)) : 'N/A';
-                    
-                    row.innerHTML = `
-                        <td class="py-4 px-3 text-sm text-gray-500" onclick="event.stopPropagation()">
-                            <input type="checkbox" class="lead-checkbox rounded text-primary" 
-                                   data-id="${lead.id}">
-                        </td>
-                        <td class="py-4 pl-3 pr-3 text-sm">
-                            <div class="font-medium text-gray-900">
-                                ${lead.first_name} ${lead.last_name}
-                            </div>
-                        </td>
-                        <td class="hidden md:table-cell py-4 px-3 text-sm text-gray-500 max-w-xs truncate">
-                            ${lead.email_address}
-                        </td>
-                        <td class="hidden md:table-cell py-4 px-3 text-sm text-gray-500">
-                            ${lead.mobile_number}
-                        </td>
-                        <td class="hidden lg:table-cell py-4 px-3 text-sm text-gray-500 max-w-xs truncate">
-                            ${lead.course_interested_in || 'Not specified'}
-                        </td>
-                        <td class="py-4 px-3">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClasses(lead.status)}">
-                                ${lead.status || 'New'}
-                            </span>
-                        </td>
-                        <td class="hidden lg:table-cell py-4 px-3 text-sm text-gray-500">
-                            ${createdAt}
-                        </td>
-                        <td class="hidden lg:table-cell py-4 px-3 text-sm text-gray-500">
-                            ${updatedAt}
-                        </td>
-                        <td class="py-4 px-3 text-right text-sm font-medium">
-                            <div class="flex justify-end items-center space-x-2">
-                                <button class="edit-button text-gray-400 hover:text-gray-500" onclick="event.stopPropagation(); openEditLeadPage(${lead.id})">
-                                    <span class="material-symbols-outlined">edit</span>
-                                </button>
-                                <button class="delete-button text-gray-400 hover:text-red-500" onclick="event.stopPropagation(); showDeleteModal(${lead.id})">
-                                    <span class="material-symbols-outlined">delete</span>
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                    
-                    // Add click event to view lead details
-                    row.addEventListener('click', () => viewLeadDetail(lead.id));
-                    
-                    leadsTable.appendChild(row);
-                });
-            }
+                
+                tbody.appendChild(row);
+            });
             
-            // Update pagination info
-            document.getElementById('showingStart').textContent = leads.length ? startIndex + 1 : 0;
-            document.getElementById('showingEnd').textContent = Math.min(endIndex, leads.length);
-            document.getElementById('totalLeads').textContent = leads.length;
-            
-            // Update pagination controls
-            updatePagination(totalPages);
+            updatePaginationUI(startIndex + 1, endIndex, filteredLeads.length, totalPages);
         }
 
-        // Get status badge classes
-        function getStatusClasses(status) {
-            switch(status) {
-                case 'New': return 'bg-blue-100 text-blue-800';
-                case 'Assigned': return 'bg-purple-100 text-purple-800';
-                case 'In Process': return 'bg-amber-100 text-amber-800';
-                case 'Converted': return 'bg-green-100 text-green-800';
-                case 'Recycled': return 'bg-orange-100 text-orange-800';
-                case 'Dead': return 'bg-red-100 text-red-800';
-                default: return 'bg-gray-100 text-gray-800';
-            }
-        }
-        
-        // Update pagination controls
-        function updatePagination(totalPages) {
+        function updatePaginationUI(start, end, total, totalPages = 0) {
+            document.getElementById('showingStart').textContent = start;
+            document.getElementById('showingEnd').textContent = end;
+            document.getElementById('totalLeads').textContent = total;
+            
             const pagination = document.getElementById('pagination');
             pagination.innerHTML = '';
             
-            // Previous button
-            const prevBtn = document.createElement('button');
-            prevBtn.className = `pagination-btn ${currentPage === 1 ? 'text-gray-300' : 'text-gray-500 hover:bg-gray-50'}`;
-            prevBtn.disabled = currentPage === 1;
-            prevBtn.innerHTML = '<span class="material-symbols-outlined">chevron_left</span>';
-            prevBtn.onclick = () => goToPage(currentPage - 1);
-            pagination.appendChild(prevBtn);
+            if (totalPages <= 1) return;
             
-            // Page numbers
-            const maxPages = 5; // Show max 5 page buttons
-            let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
-            let endPage = Math.min(totalPages, startPage + maxPages - 1);
+            // Previous page button
+            const prevButton = document.createElement('button');
+            prevButton.type = 'button';
+            prevButton.className = `pagination-btn ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`;
+            prevButton.disabled = currentPage === 1;
+            prevButton.innerHTML = '<span class="material-symbols-outlined text-sm">chevron_left</span>';
+            prevButton.onclick = () => goToPage(currentPage - 1);
+            pagination.appendChild(prevButton);
             
-            if (endPage - startPage + 1 < maxPages && startPage > 1) {
-                startPage = Math.max(1, endPage - maxPages + 1);
+            // Page buttons
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
             }
             
             for (let i = startPage; i <= endPage; i++) {
-                const pageBtn = document.createElement('button');
-                pageBtn.className = `pagination-btn ${currentPage === i ? 'active' : 'text-gray-500 hover:bg-gray-50'}`;
-                pageBtn.textContent = i;
-                pageBtn.onclick = () => goToPage(i);
-                pagination.appendChild(pageBtn);
+                const pageButton = document.createElement('button');
+                pageButton.type = 'button';
+                pageButton.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+                pageButton.textContent = i;
+                pageButton.onclick = () => goToPage(i);
+                pagination.appendChild(pageButton);
             }
             
-            // Next button
-            const nextBtn = document.createElement('button');
-            nextBtn.className = `pagination-btn ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-500 hover:bg-gray-50'}`;
-            nextBtn.disabled = currentPage === totalPages;
-            nextBtn.innerHTML = '<span class="material-symbols-outlined">chevron_right</span>';
-            nextBtn.onclick = () => goToPage(currentPage + 1);
-            pagination.appendChild(nextBtn);
+            // Next page button
+            const nextButton = document.createElement('button');
+            nextButton.type = 'button';
+            nextButton.className = `pagination-btn ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`;
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.innerHTML = '<span class="material-symbols-outlined text-sm">chevron_right</span>';
+            nextButton.onclick = () => goToPage(currentPage + 1);
+            pagination.appendChild(nextButton);
         }
         
-        // Go to specific page
         function goToPage(page) {
+            if (page < 1) page = 1;
             currentPage = page;
             renderLeads(filteredLeads);
         }
-        
-        // Apply search filter
-        function applySearchFilter() {
-            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-            currentFilters.search = searchTerm || null;
-            currentPage = 1;
-            loadLeads();
-        }
-        
-        // Apply status filter
-        function applyStatusFilter() {
-            const status = document.getElementById('statusFilter').value;
-            currentFilters.status = status || null;
-            currentPage = 1;
-            loadLeads();
-        }
 
-        // Function to apply date filters from the form
+        // NEW: Function to apply date filters
         function applyFilters() {
             // Get values from filter inputs
-            currentFilters = {
-                ...currentFilters, // Preserve other filters like status and search
-                createdAfter: document.getElementById('createdAfter').value || null,
-                createdBefore: document.getElementById('createdBefore').value || null,
-                updatedAfter: document.getElementById('updatedAfter').value || null,
-                updatedBefore: document.getElementById('updatedBefore').value || null
-            };
+            currentFilters.createdAfter = document.getElementById('createdAfter').value || null;
+            currentFilters.createdBefore = document.getElementById('createdBefore').value || null;
+            currentFilters.updatedAfter = document.getElementById('updatedAfter').value || null;
+            currentFilters.updatedBefore = document.getElementById('updatedBefore').value || null;
             
             // Reset to first page
             currentPage = 1;
@@ -1142,7 +1147,7 @@
             loadLeads();
         }
 
-        // Function to clear all filters
+        // NEW: Function to clear date filters
         function clearFilters() {
             // Reset filter form inputs
             document.getElementById('createdAfter').value = '';
@@ -1150,23 +1155,20 @@
             document.getElementById('updatedAfter').value = '';
             document.getElementById('updatedBefore').value = '';
             
-            // Reset date filter state (keep other filters)
-            currentFilters = {
-                ...currentFilters,
-                createdAfter: null,
-                createdBefore: null,
-                updatedAfter: null,
-                updatedBefore: null
-            };
+            // Reset date filter state
+            currentFilters.createdAfter = null;
+            currentFilters.createdBefore = null;
+            currentFilters.updatedAfter = null;
+            currentFilters.updatedBefore = null;
             
             // Reset to first page
             currentPage = 1;
             
-            // Load leads without filters
+            // Load leads without date filters
             loadLeads();
         }
 
-        // Function to apply quick filter presets
+        // NEW: Function to apply quick filter presets
         function applyQuickFilter(preset) {
             const now = new Date();
             let startDate = null;
@@ -1209,14 +1211,11 @@
                 document.getElementById('updatedAfter').value = '';
                 document.getElementById('updatedBefore').value = '';
                 
-                // Update filter state (keep other filters)
-                currentFilters = {
-                    ...currentFilters,
-                    createdAfter: formatDate(startDate),
-                    createdBefore: formatDate(endDate),
-                    updatedAfter: null,
-                    updatedBefore: null
-                };
+                // Update filter state
+                currentFilters.createdAfter = formatDate(startDate);
+                currentFilters.createdBefore = formatDate(endDate);
+                currentFilters.updatedAfter = null;
+                currentFilters.updatedBefore = null;
                 
                 // Reset to first page
                 currentPage = 1;
@@ -1226,7 +1225,7 @@
             }
         }
 
-        // Function to handle sorting
+        // NEW: Function to handle sorting
         function sortLeads(column) {
             // If clicking the same column, toggle sort order
             if (currentSort.column === column) {
@@ -1244,7 +1243,7 @@
             loadLeads();
         }
 
-        // Function to update sort indicators in the UI
+        // NEW: Function to update sort indicators in the UI
         function updateSortIndicators() {
             // Hide all indicators first
             document.querySelectorAll('[id^="sort-"]').forEach(el => {
@@ -1275,30 +1274,30 @@
             }
         }
 
-        // Function to update filter indicators in the UI
-        function updateFilterIndicators() {
-            // Count active filters
-            const dateFiltersActive = [
-                currentFilters.createdAfter, 
-                currentFilters.createdBefore,
-                currentFilters.updatedAfter,
-                currentFilters.updatedBefore
-            ].filter(Boolean).length;
-            
-            // Update visual indicators if needed
+        function applyStatusFilter() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            currentFilters.status = statusFilter || null;
+            currentPage = 1;
+            loadLeads();
         }
 
-        // Check website leads sync status
-        async function checkSyncStatus() {
-            try {
-                const syncStatus = await apiRequest('/external-leads/status');
-                updateSyncBadge(syncStatus);
-            } catch (error) {
-                console.error('Failed to check sync status:', error);
-            }
+        function applySearchFilter() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            currentFilters.search = searchTerm || null;
+            currentPage = 1;
+            loadLeads();
+        }
+
+        function checkSyncStatus() {
+            apiRequest('/external-leads/status')
+                .then(status => {
+                    updateSyncBadge(status);
+                })
+                .catch(error => {
+                    console.error('Error checking sync status:', error);
+                });
         }
         
-        // Update sync badge based on status
         function updateSyncBadge(status) {
             const badge = document.getElementById('websiteSyncBadge');
             
@@ -1324,42 +1323,29 @@
             }
         }
         
-        // Sync website leads
-        async function syncWebsiteLeads() {
-            try {
-                // Update badge to show syncing
-                const badge = document.getElementById('websiteSyncBadge');
-                badge.className = 'sync-badge syncing';
-                badge.innerHTML = `
-                    <div class="spinner"></div>
-                    <span>Syncing...</span>
-                `;
-                
-                // Call the sync endpoint
-                const result = await apiRequest('/external-leads/sync-website-leads', {
-                    method: 'POST'
+        function syncWebsiteLeads() {
+            const badge = document.getElementById('websiteSyncBadge');
+            badge.className = 'sync-badge syncing';
+            badge.innerHTML = `
+                <div class="spinner"></div>
+                <span>Syncing...</span>
+            `;
+            
+            apiRequest('/external-leads/sync-website-leads', { method: 'POST' })
+                .then(result => {
+                    if (result && result.synced_count > 0) {
+                        showToast(`Synced ${result.synced_count} leads from website`, 'success');
+                        loadLeads();
+                    } else {
+                        showToast('Website leads are up to date', 'success');
+                    }
+                    checkSyncStatus();
+                })
+                .catch(error => {
+                    console.error('Error syncing leads:', error);
+                    showError('Failed to sync website leads: ' + error.message);
+                    checkSyncStatus();
                 });
-                
-                // Show success message
-                if (result && result.synced_count) {
-                    showSuccess(`Synced ${result.synced_count} leads from website`);
-                    
-                    // Refresh the leads list
-                    loadLeads();
-                } else {
-                    showSuccess('Website leads are up to date');
-                }
-                
-                // Check sync status again
-                checkSyncStatus();
-                
-            } catch (error) {
-                console.error('Sync failed:', error);
-                showError('Failed to sync website leads: ' + error.message);
-                
-                // Reset badge
-                checkSyncStatus();
-            }
         }
 
         function viewLeadDetail(leadId) {
@@ -1480,7 +1466,7 @@
                 }
 
                 closeCreateLeadPage();
-                loadLeads(); // Load with current filters and sorting
+                loadLeads();
             } catch (error) {
                 showError((editingLeadId ? 'Failed to update' : 'Failed to create') + ' lead: ' + error.message);
             }
@@ -1552,18 +1538,6 @@
             const options = { month: 'short', day: 'numeric', year: 'numeric' };
             return date.toLocaleDateString('en-US', options);
         }
-
-        function formatDateTime(date) {
-            // Format date as "Month Day, Year at HH:MM AM/PM"
-            return date.toLocaleString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
-            });
-        }
         
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
@@ -1581,19 +1555,6 @@
         function showSuccess(message) {
             showToast(message, 'success');
         }
-
-        // Handle back navigation from lead detail page
-        window.addEventListener('load', () => {
-            // Check if we're returning from a lead detail page
-            const returnFromDetail = sessionStorage.getItem('returnToLeadsPage');
-            if (returnFromDetail) {
-                // Remove the flag
-                sessionStorage.removeItem('returnToLeadsPage');
-                
-                // Restore any active filters or pagination state if needed
-                // You could save these in sessionStorage before navigating away
-            }
-        });
 
         function logout() {
             localStorage.removeItem('authToken');
